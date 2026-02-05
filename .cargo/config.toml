@@ -1,0 +1,11 @@
+[target.x86_64-unknown-linux-gnu]
+# 使用 clang 驱动以正确传递 mold 参数
+linker = "clang"
+rustflags = [
+    "-C", "link-arg=-fuse-ld=mold", 
+    "-Zthreads=16",                 
+    "-Zshare-generics=y",           
+]
+
+[build]
+incremental = true

@@ -1,0 +1,35 @@
+[package]
+name = "list-of-me"
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["woruo03"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "list_of_me_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[profile.dev]
+incremental = true # 增量编译，改一点编一点，速度快
+
+[profile.release]
+codegen-units = 1 # 减少分块，让编译器能全局优化代码
+lto = true        # 启用全量链接时优化，虽然打包变慢，但程序运行极快且体积更小
+opt-level = "s"   # 优先考虑二进制体积（Small），适合桌面软件
+panic = "abort"   # 出错时直接中止，不包含回溯信息，能显著减小程序体积
+strip = "debuginfo"     # 自动剥离符号表，进一步缩小体积
+
