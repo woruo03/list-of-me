@@ -321,7 +321,10 @@ impl Database {
 
     pub fn delete_task(&self, id: i64) -> Result<()> {
         let conn = self.conn.lock().unwrap();
-        conn.execute(SQL_DELETE_TASK, [id])?;
+        let affected = conn.execute(SQL_DELETE_TASK, [id])?;
+        if affected == 0 {
+            return Err(anyhow!("Task not found"));
+        }
         Ok(())
     }
 
