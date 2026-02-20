@@ -81,6 +81,7 @@ pub struct TaskFilter {
     pub status: Option<Status>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Summary {
     pub inbox_count: i64,
     pub today_count: i64,
