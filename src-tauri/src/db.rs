@@ -11,9 +11,7 @@ use crate::models::{Project, Status, Task};
 const SQL_CREATE_PROJECTS_TABLE: &str = "
     CREATE TABLE IF NOT EXISTS projects (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        name TEXT NOT NULL
     );";
 
 const SQL_CREATE_TASKS_TABLE: &str = "
@@ -41,14 +39,11 @@ const SQL_CREATE_TASKS_DUE_AT_INDEX: &str =
 
 const SQL_INSERT_PROJECT: &str = "INSERT INTO projects (name) VALUES (?)";
 
-const SQL_SELECT_PROJECTS: &str =
-    "SELECT id, name, created_at, updated_at FROM projects ORDER BY name ASC";
+const SQL_SELECT_PROJECTS: &str = "SELECT id, name FROM projects ORDER BY name ASC";
 
-const SQL_SELECT_PROJECT_BY_ID: &str =
-    "SELECT id, name, created_at, updated_at FROM projects WHERE id = ?";
+const SQL_SELECT_PROJECT_BY_ID: &str = "SELECT id, name FROM projects WHERE id = ?";
 
-const SQL_UPDATE_PROJECT: &str =
-    "UPDATE projects SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+const SQL_UPDATE_PROJECT: &str = "UPDATE projects SET name = ? WHERE id = ?";
 
 const SQL_DELETE_PROJECT: &str = "DELETE FROM projects WHERE id = ?";
 
