@@ -99,6 +99,22 @@ pub struct Summary {
 }
 
 impl Database {
+    fn task_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<Task> {
+        let status_str: String = row.get(4)?;
+
+        Ok(Task {
+            id: row.get(0)?,
+            project_id: row.get(1)?,
+            title: row.get(2)?,
+            description: row.get(3)?,
+            status: Status::from(status_str.as_str()),
+            due_at: row.get(5)?,
+            notes: row.get(6)?,
+            created_at: row.get(7)?,
+            updated_at: row.get(8)?,
+        })
+    }
+
     pub fn new(app_handle: &AppHandle) -> Result<Self> {
         let app_dir = app_handle
             .path()
@@ -240,19 +256,7 @@ impl Database {
 
         let mut stmt = conn.prepare(&query)?;
         let task_iter = stmt.query_map(rusqlite::params_from_iter(params), |row| {
-            let status_str: String = row.get(4)?;
-
-            Ok(Task {
-                id: row.get(0)?,
-                project_id: row.get(1)?,
-                title: row.get(2)?,
-                description: row.get(3)?,
-                status: Status::from(status_str.as_str()),
-                due_at: row.get(5)?,
-                notes: row.get(6)?,
-                created_at: row.get(7)?,
-                updated_at: row.get(8)?,
-            })
+            Self::task_from_row(row)
         })?;
 
         let mut tasks = Vec::new();
@@ -268,22 +272,8 @@ impl Database {
     }
 
     fn get_task_with_conn(&self, conn: &Connection, id: i64) -> Result<Task> {
-        conn.query_row(SQL_SELECT_TASK_BY_ID, [id], |row| {
-            let status_str: String = row.get(4)?;
-
-            Ok(Task {
-                id: row.get(0)?,
-                project_id: row.get(1)?,
-                title: row.get(2)?,
-                description: row.get(3)?,
-                status: Status::from(status_str.as_str()),
-                due_at: row.get(5)?,
-                notes: row.get(6)?,
-                created_at: row.get(7)?,
-                updated_at: row.get(8)?,
-            })
-        })
-        .context("Task not found")
+        conn.query_row(SQL_SELECT_TASK_BY_ID, [id], Self::task_from_row)
+            .context("Task not found")
     }
 
     pub fn update_task(&self, id: i64, update: TaskUpdate) -> Result<Task> {
