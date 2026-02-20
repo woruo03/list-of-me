@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, anyhow};
 use chrono::{DateTime, Utc};
 use rusqlite::{Connection, params};
 use std::fs;
@@ -187,7 +187,10 @@ impl Database {
 
     pub fn delete_project(&self, id: i64) -> Result<()> {
         let conn = self.conn.lock().unwrap();
-        conn.execute(SQL_DELETE_PROJECT, [id])?;
+        let affected = conn.execute(SQL_DELETE_PROJECT, [id])?;
+        if affected == 0 {
+            return Err(anyhow!("Project not found"));
+        }
         Ok(())
     }
 
