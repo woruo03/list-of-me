@@ -31,6 +31,12 @@ const SQL_CREATE_TASKS_TABLE: &str = "
         FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
     );";
 
+const SQL_CREATE_TASKS_PROJECT_ID_INDEX: &str =
+    "CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON tasks(project_id);";
+
+const SQL_CREATE_TASKS_STATUS_INDEX: &str =
+    "CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);";
+
 const SQL_INSERT_PROJECT: &str = "INSERT INTO projects (name, is_system) VALUES (?, ?)";
 
 const SQL_SELECT_PROJECTS: &str = "SELECT id, name, is_system, created_at, updated_at FROM projects ORDER BY is_system DESC, name ASC";
@@ -119,6 +125,8 @@ impl Database {
 
         conn.execute(SQL_CREATE_PROJECTS_TABLE, [])?;
         conn.execute(SQL_CREATE_TASKS_TABLE, [])?;
+        conn.execute(SQL_CREATE_TASKS_PROJECT_ID_INDEX, [])?;
+        conn.execute(SQL_CREATE_TASKS_STATUS_INDEX, [])?;
 
         Ok(())
     }
