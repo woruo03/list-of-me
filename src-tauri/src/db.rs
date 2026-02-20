@@ -73,7 +73,7 @@ pub struct TaskCreate {
 
 #[derive(serde::Deserialize)]
 pub struct TaskUpdate {
-    pub project_id: Option<i64>,
+    pub project_id: Option<Option<i64>>,
     pub title: Option<String>,
     pub description: Option<String>,
     pub status: Option<Status>,
