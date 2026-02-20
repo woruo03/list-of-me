@@ -129,6 +129,10 @@ impl Database {
         }
 
         let db_path = app_dir.join("list-of-me.db");
+        // Dev-only: drop existing DB to simplify schema changes.
+        // if db_path.exists() {
+        //     fs::remove_file(&db_path).context("Failed to remove existing database")?;
+        // }
         let conn = Connection::open(db_path).context("Failed to open database")?;
 
         let db = Self {
