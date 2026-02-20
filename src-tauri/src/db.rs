@@ -1,5 +1,5 @@
 use anyhow::{Context, Result, anyhow};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Local, TimeZone, Utc};
 use rusqlite::{Connection, params};
 use std::fs;
 use std::sync::Mutex;
@@ -64,7 +64,7 @@ const SQL_COUNT_INBOX_TASKS: &str =
     "SELECT COUNT(*) FROM tasks WHERE project_id IS NULL AND status != 'done'";
 
 const SQL_COUNT_TODAY_TASKS: &str =
-    "SELECT COUNT(*) FROM tasks WHERE date(due_at) <= date('now') AND status != 'done'";
+    "SELECT COUNT(*) FROM tasks WHERE due_at < ? AND status != 'done'";
 
 pub struct Database {
     pub conn: Mutex<Connection>,
@@ -331,7 +331,16 @@ impl Database {
 
     pub fn get_today_count(&self) -> Result<i64> {
         let conn = self.conn.lock().unwrap();
-        let count: i64 = conn.query_row(SQL_COUNT_TODAY_TASKS, [], |row| row.get(0))?;
+        let local_now = Local::now();
+        let local_tomorrow = (local_now.date_naive() + chrono::Duration::days(1))
+            .and_hms_opt(0, 0, 0)
+            .expect("valid local midnight");
+        let local_tomorrow_dt = Local
+            .from_local_datetime(&local_tomorrow)
+            .single()
+            .expect("unique local datetime for midnight");
+        let cutoff_utc = local_tomorrow_dt.with_timezone(&Utc);
+        let count: i64 = conn.query_row(SQL_COUNT_TODAY_TASKS, [cutoff_utc], |row| row.get(0))?;
         Ok(count)
     }
 
