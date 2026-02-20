@@ -123,27 +123,6 @@ impl Database {
         Ok(())
     }
 
-    // --- Helper for parsing dates ---
-    fn parse_date(date_str: String) -> DateTime<Utc> {
-        DateTime::parse_from_rfc3339(&date_str)
-            .or_else(|_| {
-                DateTime::parse_from_str(&format!("{} +0000", date_str), "%Y-%m-%d %H:%M:%S %z")
-            })
-            .map(|dt| dt.with_timezone(&Utc))
-            .unwrap_or_else(|_| Utc::now())
-    }
-
-    fn parse_opt_date(date_str: Option<String>) -> Option<DateTime<Utc>> {
-        date_str.and_then(|s| {
-            DateTime::parse_from_rfc3339(&s)
-                .or_else(|_| {
-                    DateTime::parse_from_str(&format!("{} +0000", s), "%Y-%m-%d %H:%M:%S %z")
-                })
-                .ok()
-                .map(|dt| dt.with_timezone(&Utc))
-        })
-    }
-
     // --- Project Management ---
 
     pub fn create_project(&self, name: &str, is_system: bool) -> Result<Project> {
@@ -162,8 +141,8 @@ impl Database {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 is_system: row.get(2)?,
-                created_at: Self::parse_date(row.get(3)?),
-                updated_at: Self::parse_date(row.get(4)?),
+                created_at: row.get(3)?,
+                updated_at: row.get(4)?,
             })
         })?;
 
@@ -185,8 +164,8 @@ impl Database {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 is_system: row.get(2)?,
-                created_at: Self::parse_date(row.get(3)?),
-                updated_at: Self::parse_date(row.get(4)?),
+                created_at: row.get(3)?,
+                updated_at: row.get(4)?,
             })
         })
         .context("Project not found")
@@ -215,7 +194,7 @@ impl Database {
                 task.title,
                 task.description,
                 task.status.as_str(),
-                task.due_at.map(|d| d.to_rfc3339()),
+                task.due_at,
                 task.notes
             ],
         )?;
@@ -258,10 +237,10 @@ impl Database {
                 title: row.get(2)?,
                 description: row.get(3)?,
                 status: Status::from(status_str.as_str()),
-                due_at: Self::parse_opt_date(row.get(5)?),
+                due_at: row.get(5)?,
                 notes: row.get(6)?,
-                created_at: Self::parse_date(row.get(7)?),
-                updated_at: Self::parse_date(row.get(8)?),
+                created_at: row.get(7)?,
+                updated_at: row.get(8)?,
             })
         })?;
 
@@ -287,10 +266,10 @@ impl Database {
                 title: row.get(2)?,
                 description: row.get(3)?,
                 status: Status::from(status_str.as_str()),
-                due_at: Self::parse_opt_date(row.get(5)?),
+                due_at: row.get(5)?,
                 notes: row.get(6)?,
-                created_at: Self::parse_date(row.get(7)?),
-                updated_at: Self::parse_date(row.get(8)?),
+                created_at: row.get(7)?,
+                updated_at: row.get(8)?,
             })
         })
         .context("Task not found")
@@ -316,7 +295,7 @@ impl Database {
         }
         if let Some(due_at) = update.due_at {
             sets.push("due_at = ?");
-            params.push(Box::new(due_at.to_rfc3339()));
+            params.push(Box::new(due_at));
         }
         if let Some(notes) = update.notes {
             sets.push("notes = ?");
