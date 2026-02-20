@@ -161,12 +161,20 @@ impl Database {
                 name: row.get(1)?,
             })
         })
-        .context("Project not found")
+        .map_err(|e| match e {
+            rusqlite::Error::QueryReturnedNoRows => {
+                CommandError::NotFound(format!("Project {id} not found"))
+            }
+            other => CommandError::Database(other),
+        })
     }
 
     pub fn update_project(&self, id: i64, name: &str) -> Result<Project> {
         let conn = self.conn.lock().unwrap();
-        conn.execute(SQL_UPDATE_PROJECT, params![name, id])?;
+        let affected = conn.execute(SQL_UPDATE_PROJECT, params![name, id])?;
+        if affected == 0 {
+            return Err(CommandError::NotFound(format!("Project {id} not found")));
+        }
         self.get_project_with_conn(&conn, id)
     }
 
@@ -174,7 +182,7 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         let affected = conn.execute(SQL_DELETE_PROJECT, [id])?;
         if affected == 0 {
-            return Err(anyhow!("Project not found"));
+            return Err(CommandError::NotFound(format!("Project {id} not found")));
         }
         Ok(())
     }
