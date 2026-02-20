@@ -250,7 +250,12 @@ impl Database {
 
     fn get_task_with_conn(&self, conn: &Connection, id: i64) -> Result<Task> {
         conn.query_row(SQL_SELECT_TASK_BY_ID, [id], Self::task_from_row)
-            .context("Task not found")
+            .map_err(|e| match e {
+                rusqlite::Error::QueryReturnedNoRows => {
+                    CommandError::NotFound(format!("Task {id} not found"))
+                }
+                other => CommandError::Database(other),
+            })
     }
 
     pub fn update_task(&self, id: i64, update: TaskUpdate) -> Result<Task> {
@@ -288,7 +293,10 @@ impl Database {
             sets.push("updated_at = CURRENT_TIMESTAMP");
             let query = format!("UPDATE tasks SET {} WHERE id = ?", sets.join(", "));
             params.push(Box::new(id));
-            conn.execute(&query, rusqlite::params_from_iter(params))?;
+            let affected = conn.execute(&query, rusqlite::params_from_iter(params))?;
+            if affected == 0 {
+                return Err(CommandError::NotFound(format!("Task {id} not found")));
+            }
         }
 
         self.get_task_with_conn(&conn, id)
@@ -298,7 +306,7 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         let affected = conn.execute(SQL_DELETE_TASK, [id])?;
         if affected == 0 {
-            return Err(anyhow!("Task not found"));
+            return Err(CommandError::NotFound(format!("Task {id} not found")));
         }
         Ok(())
     }
