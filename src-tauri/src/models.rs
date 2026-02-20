@@ -54,3 +54,34 @@ pub struct Project {
     pub id: i64,
     pub name: String,
 }
+
+#[derive(serde::Deserialize)]
+pub struct TaskCreate {
+    pub project_id: Option<i64>,
+    pub title: String,
+    pub description: Option<String>,
+    pub status: Status,
+    pub due_at: Option<DateTime<Utc>>,
+    pub notes: Option<String>,
+}
+
+#[derive(serde::Deserialize)]
+pub struct TaskUpdate {
+    pub project_id: Option<Option<i64>>,
+    pub title: Option<String>,
+    pub description: Option<Option<String>>,
+    pub status: Option<Status>,
+    pub due_at: Option<Option<DateTime<Utc>>>,
+    pub notes: Option<Option<String>>,
+}
+
+#[derive(serde::Deserialize, Default)]
+pub struct TaskFilter {
+    pub project_id: Option<Option<i64>>, // Some(None) means Inbox (NULL)
+    pub status: Option<Status>,
+}
+
+pub struct Summary {
+    pub inbox_count: i64,
+    pub today_count: i64,
+}

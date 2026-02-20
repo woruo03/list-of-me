@@ -1,11 +1,11 @@
 use anyhow::{Context, Result, anyhow};
-use chrono::{DateTime, Local, TimeZone, Utc};
+use chrono::{Local, TimeZone, Utc};
 use rusqlite::{Connection, params};
 use std::fs;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 
-use crate::models::{Project, Status, Task};
+use crate::models::{Project, Status, Task, TaskCreate, TaskFilter, TaskUpdate, Summary};
 
 // SQL Constants
 const SQL_CREATE_PROJECTS_TABLE: &str = "
@@ -63,37 +63,6 @@ const SQL_COUNT_TODAY_TASKS: &str =
 
 pub struct Database {
     pub conn: Mutex<Connection>,
-}
-
-#[derive(serde::Deserialize)]
-pub struct TaskCreate {
-    pub project_id: Option<i64>,
-    pub title: String,
-    pub description: Option<String>,
-    pub status: Status,
-    pub due_at: Option<DateTime<Utc>>,
-    pub notes: Option<String>,
-}
-
-#[derive(serde::Deserialize)]
-pub struct TaskUpdate {
-    pub project_id: Option<Option<i64>>,
-    pub title: Option<String>,
-    pub description: Option<Option<String>>,
-    pub status: Option<Status>,
-    pub due_at: Option<Option<DateTime<Utc>>>,
-    pub notes: Option<Option<String>>,
-}
-
-#[derive(serde::Deserialize, Default)]
-pub struct TaskFilter {
-    pub project_id: Option<Option<i64>>, // Some(None) means Inbox (NULL)
-    pub status: Option<Status>,
-}
-
-pub struct Summary {
-    pub inbox_count: i64,
-    pub today_count: i64,
 }
 
 impl Database {
