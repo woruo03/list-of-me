@@ -1,10 +1,10 @@
-use anyhow::{Context, Result, anyhow};
 use chrono::{Local, TimeZone, Utc};
 use rusqlite::{Connection, params};
 use std::fs;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 
+use crate::error::{CommandError, Result};
 use crate::models::{Project, Status, Task, TaskCreate, TaskFilter, TaskUpdate, Summary};
 
 // SQL Constants
@@ -86,10 +86,11 @@ impl Database {
         let app_dir = app_handle
             .path()
             .app_data_dir()
-            .context("Failed to get app data directory")?;
+            .map_err(|e| CommandError::Internal(format!("Failed to get app data directory: {e}")))?;
 
         if !app_dir.exists() {
-            fs::create_dir_all(&app_dir).context("Failed to create app data directory")?;
+            fs::create_dir_all(&app_dir)
+                .map_err(|e| CommandError::Internal(format!("Failed to create app data directory: {e}")))?;
         }
 
         let db_path = app_dir.join("list-of-me.db");
@@ -97,7 +98,9 @@ impl Database {
         // if db_path.exists() {
         //     fs::remove_file(&db_path).context("Failed to remove existing database")?;
         // }
-        let conn = Connection::open(db_path).context("Failed to open database")?;
+        let conn = Connection::open(db_path)
+            .map_err(|e| CommandError::Internal(format!("Failed to open database: {e}")))?;
+        conn.execute_batch("PRAGMA foreign_keys = ON;")?;
 
         let db = Self {
             conn: Mutex::new(conn),
