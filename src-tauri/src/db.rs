@@ -12,7 +12,6 @@ const SQL_CREATE_PROJECTS_TABLE: &str = "
     CREATE TABLE IF NOT EXISTS projects (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        is_system BOOLEAN DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );";
@@ -37,17 +36,21 @@ const SQL_CREATE_TASKS_PROJECT_ID_INDEX: &str =
 const SQL_CREATE_TASKS_STATUS_INDEX: &str =
     "CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);";
 
-const SQL_INSERT_PROJECT: &str = "INSERT INTO projects (name, is_system) VALUES (?, ?)";
+const SQL_CREATE_TASKS_DUE_AT_INDEX: &str =
+    "CREATE INDEX IF NOT EXISTS idx_tasks_due_at ON tasks(due_at);";
 
-const SQL_SELECT_PROJECTS: &str = "SELECT id, name, is_system, created_at, updated_at FROM projects ORDER BY is_system DESC, name ASC";
+const SQL_INSERT_PROJECT: &str = "INSERT INTO projects (name) VALUES (?)";
+
+const SQL_SELECT_PROJECTS: &str =
+    "SELECT id, name, created_at, updated_at FROM projects ORDER BY name ASC";
 
 const SQL_SELECT_PROJECT_BY_ID: &str =
-    "SELECT id, name, is_system, created_at, updated_at FROM projects WHERE id = ?";
+    "SELECT id, name, created_at, updated_at FROM projects WHERE id = ?";
 
 const SQL_UPDATE_PROJECT: &str =
     "UPDATE projects SET name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
 
-const SQL_DELETE_PROJECT: &str = "DELETE FROM projects WHERE id = ? AND is_system = 0";
+const SQL_DELETE_PROJECT: &str = "DELETE FROM projects WHERE id = ?";
 
 const SQL_INSERT_TASK: &str = "INSERT INTO tasks (project_id, title, description, status, due_at, notes) VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -143,15 +146,16 @@ impl Database {
         conn.execute(SQL_CREATE_TASKS_TABLE, [])?;
         conn.execute(SQL_CREATE_TASKS_PROJECT_ID_INDEX, [])?;
         conn.execute(SQL_CREATE_TASKS_STATUS_INDEX, [])?;
+        conn.execute(SQL_CREATE_TASKS_DUE_AT_INDEX, [])?;
 
         Ok(())
     }
 
     // --- Project Management ---
 
-    pub fn create_project(&self, name: &str, is_system: bool) -> Result<Project> {
+    pub fn create_project(&self, name: &str) -> Result<Project> {
         let conn = self.conn.lock().unwrap();
-        conn.execute(SQL_INSERT_PROJECT, params![name, is_system])?;
+        conn.execute(SQL_INSERT_PROJECT, params![name])?;
 
         let id = conn.last_insert_rowid();
         self.get_project_with_conn(&conn, id)
@@ -164,9 +168,6 @@ impl Database {
             Ok(Project {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                is_system: row.get(2)?,
-                created_at: row.get(3)?,
-                updated_at: row.get(4)?,
             })
         })?;
 
@@ -187,9 +188,6 @@ impl Database {
             Ok(Project {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                is_system: row.get(2)?,
-                created_at: row.get(3)?,
-                updated_at: row.get(4)?,
             })
         })
         .context("Project not found")
