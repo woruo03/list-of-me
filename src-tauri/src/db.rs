@@ -79,10 +79,10 @@ pub struct TaskCreate {
 pub struct TaskUpdate {
     pub project_id: Option<Option<i64>>,
     pub title: Option<String>,
-    pub description: Option<String>,
+    pub description: Option<Option<String>>,
     pub status: Option<Status>,
     pub due_at: Option<Option<DateTime<Utc>>>,
-    pub notes: Option<String>,
+    pub notes: Option<Option<String>>,
 }
 
 #[derive(serde::Deserialize, Default)]
