@@ -77,7 +77,7 @@ pub struct TaskUpdate {
     pub title: Option<String>,
     pub description: Option<String>,
     pub status: Option<Status>,
-    pub due_at: Option<DateTime<Utc>>,
+    pub due_at: Option<Option<DateTime<Utc>>>,
     pub notes: Option<String>,
 }
 
