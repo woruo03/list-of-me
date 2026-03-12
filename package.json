@@ -12,15 +12,15 @@
   "dependencies": {
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-opener": "^2.5.3",
-    "vue": "^3.5.28"
+    "vue": "^3.5.30"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.10.0",
+    "@tauri-apps/cli": "^2.10.1",
     "@vitejs/plugin-vue": "^5.2.4",
-    "autoprefixer": "^10.4.24",
+    "autoprefixer": "^10.4.27",
     "daisyui": "^5.5.19",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.2.0",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.1",
     "typescript": "~5.6.3",
     "vite": "^6.4.1",
     "vue-tsc": "^2.2.12"
