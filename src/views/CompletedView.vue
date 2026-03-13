@@ -1,16 +1,7 @@
 <template>
   <div class="completed-view">
-    <div class="mb-8">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h1 class="text-3xl font-bold tracking-tight">已完成</h1>
-          <p class="text-base-content/70 mt-2">查看已完成的任务历史。这是你的成就记录，也是复盘的好地方。</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="badge badge-primary badge-outline">{{ tasks.length }} 个任务</span>
-          <button class="btn btn-ghost" @click="clearCompleted" :disabled="tasks.length === 0">清空已完成</button>
-        </div>
-      </div>
+    <div class="mb-4 flex justify-end">
+      <button class="btn btn-ghost" @click="clearCompleted" :disabled="tasks.length === 0">清空已完成</button>
     </div>
 
     <TaskList
