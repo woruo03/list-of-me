@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
-import { DAISYUI_THEMES, STORAGE_KEYS } from '@/utils/constants'
+import { DAISYUI_THEMES, FONT_FAMILIES, FONT_SIZES, STORAGE_KEYS } from '@/utils/constants'
 
 interface UIState {
   sidebarCollapsed: boolean
   theme: string
+  fontSize: number
+  fontFamily: string
   modal: {
     isOpen: boolean
     type: 'task' | 'project' | 'settings' | null
@@ -22,6 +24,8 @@ export const useUIStore = defineStore('ui', {
   state: (): UIState => ({
     sidebarCollapsed: false,
     theme: 'light',
+    fontSize: 16,
+    fontFamily: '"Space Grotesk", "Noto Sans SC", sans-serif',
     modal: {
       isOpen: false,
       type: null,
@@ -49,12 +53,41 @@ export const useUIStore = defineStore('ui', {
       document.documentElement.setAttribute('data-theme', next)
     },
 
+    setFontSize(size: number) {
+      const next = FONT_SIZES.includes(size) ? size : 16
+      this.fontSize = next
+      localStorage.setItem(STORAGE_KEYS.FONT_SIZE, String(next))
+      document.documentElement.style.setProperty('--app-font-size', `${next}px`)
+    },
+
+    setFontFamily(family: string) {
+      const trimmed = family.trim()
+      const next = trimmed || '"Space Grotesk", "Noto Sans SC", sans-serif'
+      this.fontFamily = next
+      localStorage.setItem(STORAGE_KEYS.FONT_FAMILY, next)
+      document.documentElement.style.setProperty('--app-font', next)
+    },
+
     hydrateFromStorage() {
       const storedTheme = localStorage.getItem(STORAGE_KEYS.THEME)
       if (storedTheme) {
         this.setTheme(storedTheme)
       } else {
         this.setTheme('light')
+      }
+
+      const storedFontSize = localStorage.getItem(STORAGE_KEYS.FONT_SIZE)
+      if (storedFontSize) {
+        this.setFontSize(Number(storedFontSize))
+      } else {
+        this.setFontSize(16)
+      }
+
+      const storedFontFamily = localStorage.getItem(STORAGE_KEYS.FONT_FAMILY)
+      if (storedFontFamily) {
+        this.setFontFamily(storedFontFamily)
+      } else {
+        this.setFontFamily('"Space Grotesk", "Noto Sans SC", sans-serif')
       }
 
       const collapsed = localStorage.getItem(STORAGE_KEYS.SIDEBAR_COLLAPSED)

@@ -45,6 +45,8 @@ export const STORAGE_KEYS = {
   THEME: 'list-of-me-theme',
   SIDEBAR_COLLAPSED: 'list-of-me-sidebar-collapsed',
   LAST_VISITED: 'list-of-me-last-visited',
+  FONT_SIZE: 'list-of-me-font-size',
+  FONT_FAMILY: 'list-of-me-font-family',
 }
 
 // DaisyUI 内置主题
@@ -85,6 +87,19 @@ export const DAISYUI_THEMES = [
   'abyss',
   'silk',
 ]
+
+export const FONT_SIZES = [12, 13, 14, 15, 16, 17, 18, 20]
+
+export const FONT_FAMILIES = [
+  { label: 'Space Grotesk', value: '"Space Grotesk", "Noto Sans SC", sans-serif' },
+  { label: 'Noto Sans SC', value: '"Noto Sans SC", sans-serif' },
+  { label: 'Inter', value: 'Inter, "Noto Sans SC", sans-serif' },
+  { label: 'Source Sans 3', value: '"Source Sans 3", "Noto Sans SC", sans-serif' },
+  { label: 'System UI', value: 'system-ui, -apple-system, "Noto Sans SC", sans-serif' },
+]
+
+// 常见本机字体候选列表（用于检测）
+// 不使用预设字体列表，字体由本机检测提供
 
 // 快捷键常量
 export const SHORTCUTS = {

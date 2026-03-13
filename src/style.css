@@ -4,7 +4,10 @@
 }
 
 :root {
-  font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
+  --app-font: "Space Grotesk", "Noto Sans SC", sans-serif;
+  --app-font-size: 16px;
+  font-family: var(--app-font);
+  font-size: var(--app-font-size);
 }
 
 html,
