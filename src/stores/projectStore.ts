@@ -1,6 +1,7 @@
-import { defineStore } from 'pinia';
-import { invoke } from '@tauri-apps/api/core';
-import type { Project, ProjectCreate, ProjectUpdate } from '@/types/project';
+import { defineStore } from 'pinia'
+import type { Project } from '@/types/project'
+import ProjectService from '@/services/projectService'
+import { useUIStore } from './uiStore'
 
 export const useProjectStore = defineStore('projects', {
   state: () => ({
@@ -8,111 +9,108 @@ export const useProjectStore = defineStore('projects', {
     isLoading: false,
     error: null as string | null,
   }),
-  
+
   actions: {
-    // 获取项目列表
     async fetchProjects() {
-      this.isLoading = true;
-      this.error = null;
-      
+      this.isLoading = true
+      this.error = null
+
       try {
-        const projects = await invoke<Project[]>('get_projects');
-        this.projects = projects;
+        this.projects = await ProjectService.getProjects()
       } catch (error) {
-        this.error = error instanceof Error ? error.message : '获取项目失败';
-        console.error('Failed to fetch projects:', error);
+        this.error = error instanceof Error ? error.message : '获取项目失败'
+        console.error('Failed to fetch projects:', error)
       } finally {
-        this.isLoading = false;
+        this.isLoading = false
       }
     },
-    
-    // 创建项目
-    async createProject(projectData: ProjectCreate) {
-      this.isLoading = true;
-      this.error = null;
-      
+
+    async createProject(name: string) {
+      this.isLoading = true
+      this.error = null
+      const uiStore = useUIStore()
+
       try {
-        const project = await invoke<Project>('create_project', { 
-          name: projectData.name 
-        });
-        this.projects.push(project);
-        return project;
+        const project = await ProjectService.createProject(name)
+        this.projects.push(project)
+        uiStore.addNotification({ type: 'success', message: '项目已创建' })
+        return project
       } catch (error) {
-        this.error = error instanceof Error ? error.message : '创建项目失败';
-        console.error('Failed to create project:', error);
-        throw error;
+        this.error = error instanceof Error ? error.message : '创建项目失败'
+        uiStore.addNotification({ type: 'error', message: this.error })
+        console.error('Failed to create project:', error)
+        throw error
       } finally {
-        this.isLoading = false;
+        this.isLoading = false
       }
     },
-    
-    // 更新项目
-    async updateProject(id: number, update: ProjectUpdate) {
-      this.isLoading = true;
-      this.error = null;
-      
+
+    async updateProject(id: number, name: string) {
+      this.isLoading = true
+      this.error = null
+      const uiStore = useUIStore()
+
       try {
-        const project = await invoke<Project>('update_project', { 
-          id, 
-          name: update.name || '' 
-        });
-        const index = this.projects.findIndex(p => p.id === id);
-        if (index !== -1) {
-          this.projects[index] = project;
-        }
-        return project;
+        const project = await ProjectService.updateProject(id, name)
+        const index = this.projects.findIndex((p) => p.id === id)
+        if (index !== -1) this.projects[index] = project
+        uiStore.addNotification({ type: 'success', message: '项目已更新' })
+        return project
       } catch (error) {
-        this.error = error instanceof Error ? error.message : '更新项目失败';
-        console.error('Failed to update project:', error);
-        throw error;
+        this.error = error instanceof Error ? error.message : '更新项目失败'
+        uiStore.addNotification({ type: 'error', message: this.error })
+        console.error('Failed to update project:', error)
+        throw error
       } finally {
-        this.isLoading = false;
+        this.isLoading = false
       }
     },
-    
-    // 删除项目
+
     async deleteProject(id: number) {
-      this.isLoading = true;
-      this.error = null;
-      
+      this.isLoading = true
+      this.error = null
+      const uiStore = useUIStore()
+      const previous = [...this.projects]
+      this.projects = this.projects.filter((p) => p.id !== id)
+
       try {
-        await invoke('delete_project', { id });
-        this.projects = this.projects.filter(p => p.id !== id);
+        await ProjectService.deleteProject(id)
+        uiStore.addNotification({ type: 'success', message: '项目已删除' })
       } catch (error) {
-        this.error = error instanceof Error ? error.message : '删除项目失败';
-        console.error('Failed to delete project:', error);
-        throw error;
+        this.projects = previous
+        this.error = error instanceof Error ? error.message : '删除项目失败'
+        uiStore.addNotification({ type: 'error', message: this.error })
+        console.error('Failed to delete project:', error)
+        throw error
       } finally {
-        this.isLoading = false;
+        this.isLoading = false
       }
     },
-    
-    // 获取单个项目
+
     async getProject(id: number) {
       try {
-        return await invoke<Project>('get_project', { id });
+        return await ProjectService.getProject(id)
       } catch (error) {
-        console.error('Failed to fetch project:', error);
-        throw error;
+        console.error('Failed to fetch project:', error)
+        throw error
       }
     },
   },
-  
+
   getters: {
-    // 项目统计
-    projectStats: (state) => {
-      return state.projects.map(project => ({
-        ...project,
-        taskCount: 0, // TODO: 需要从任务store获取
-      }));
-    },
-    
-    // 项目映射
     projectMap: (state) => {
       return state.projects.reduce((map, project) => {
-        map[project.id] = project;
-        return map;
-      }, {} as Record<number, Project>);
+        map[project.id] = project
+        return map
+      }, {} as Record<number, Project>)
+    },
+
+    projectNameById: (state) => {
+      return (projectId: number | null) => {
+        if (!projectId) return '收集箱'
+        const project = state.projects.find((p) => p.id === projectId)
+        return project?.name || '未知项目'
+      }
     },
   },
-});
+})
