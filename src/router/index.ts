@@ -37,6 +37,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '已完成' },
   },
   {
+    path: '/tasks/:id/edit',
+    name: 'TaskEdit',
+    component: () => import('@/views/TaskEditView.vue'),
+    meta: { title: '编辑任务' },
+  },
+  {
     path: '/settings',
     name: 'Settings',
     component: () => import('@/views/SettingsView.vue'),
