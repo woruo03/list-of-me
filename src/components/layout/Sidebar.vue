@@ -5,65 +5,58 @@
   >
     <div class="p-6 border-b border-base-300 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+        <div class="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
           <span class="text-primary-content font-bold">L</span>
         </div>
-        <h1 v-if="!uiStore.sidebarCollapsed" class="text-xl font-bold">List-of-Me</h1>
+        <div v-if="!uiStore.sidebarCollapsed">
+          <h1 class="text-xl font-bold tracking-tight">List-of-Me</h1>
+          <p class="text-xs text-base-content/60">把今天安排得更聪明</p>
+        </div>
       </div>
       <button class="btn btn-ghost btn-sm" @click="uiStore.toggleSidebar">☰</button>
     </div>
 
     <nav class="flex-1 p-4">
-      <ul class="space-y-2">
-        <NavItem icon="📥" label="收集箱" to="/inbox" :badge="summary?.inbox_count || 0" :collapsed="uiStore.sidebarCollapsed" />
-        <NavItem icon="📅" label="今日" to="/today" :badge="summary?.today_count || 0" :collapsed="uiStore.sidebarCollapsed" />
+      <ul class="menu menu-md gap-1">
+        <NavItem icon="📥" label="收集箱" to="/inbox" :collapsed="uiStore.sidebarCollapsed" />
+        <NavItem icon="📅" label="今日" to="/today" :collapsed="uiStore.sidebarCollapsed" />
         <NavItem icon="📁" label="项目" to="/projects" :collapsed="uiStore.sidebarCollapsed" />
         <NavItem icon="✅" label="已完成" to="/completed" :collapsed="uiStore.sidebarCollapsed" />
       </ul>
     </nav>
 
     <div class="p-4 border-t border-base-300">
-      <button class="btn btn-primary w-full" @click="openQuickAdd">
-        <span class="mr-2">+</span>
-        <span v-if="!uiStore.sidebarCollapsed">快速添加任务</span>
-      </button>
+      <div v-if="!uiStore.sidebarCollapsed" class="text-xs text-base-content/60 mb-2">主题</div>
+      <select
+        class="select select-bordered select-sm w-full"
+        :value="uiStore.theme"
+        @change="handleThemeChange"
+      >
+        <option v-for="theme in themes" :key="theme" :value="theme">
+          {{ theme }}
+        </option>
+      </select>
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount } from 'vue'
+import { computed } from 'vue'
 import NavItem from './NavItem.vue'
-import { useTaskStore } from '@/stores/taskStore'
 import { useUIStore } from '@/stores/uiStore'
+import { DAISYUI_THEMES } from '@/utils/constants'
 
-const taskStore = useTaskStore()
 const uiStore = useUIStore()
-
-const summary = computed(() => taskStore.summary)
+const themes = DAISYUI_THEMES
 
 const sidebarClass = computed(() => {
   return uiStore.sidebarCollapsed ? 'w-20' : 'w-64'
 })
 
-const openQuickAdd = () => {
-  uiStore.openModal('task', { mode: 'create' })
+const handleThemeChange = (event: Event) => {
+  const target = event.target as HTMLSelectElement
+  uiStore.setTheme(target.value)
 }
-
-let intervalId: number | null = null
-
-const startSummaryRefresh = () => {
-  taskStore.refreshSummary()
-  intervalId = window.setInterval(() => taskStore.refreshSummary(), 30000)
-}
-
-onMounted(() => {
-  startSummaryRefresh()
-})
-
-onBeforeUnmount(() => {
-  if (intervalId) window.clearInterval(intervalId)
-})
 </script>
 
 <style scoped>
