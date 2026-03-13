@@ -21,8 +21,8 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="board-column" @dragover.prevent @drop="handleDrop(Status.Todo)">
-      <div class="board-header">待办</div>
-      <div class="board-list">
+        <div class="board-header">待办</div>
+        <div class="board-list">
         <TaskCard
           v-for="task in todoTasks"
           :key="task.id"
@@ -44,7 +44,7 @@
     </div>
 
       <div class="board-column" @dragover.prevent @drop="handleDrop(Status.Doing)">
-      <div class="board-header">进行中</div>
+        <div class="board-header">进行中</div>
       <div class="board-list">
         <TaskCard
           v-for="task in doingTasks"
@@ -67,7 +67,7 @@
     </div>
 
       <div class="board-column" @dragover.prevent @drop="handleDrop(Status.Done)">
-      <div class="board-header">已完成</div>
+        <div class="board-header">已完成</div>
       <div class="board-list">
         <TaskCard
           v-for="task in doneTasks"
