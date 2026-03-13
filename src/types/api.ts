@@ -1,20 +1,24 @@
 // API 响应类型
-interface ApiResponse<T> {
+export interface ApiResponse<T> {
   data?: T
   error?: string
   success: boolean
 }
 
 // 分页参数
-interface PaginationParams {
+export interface PaginationParams {
   page?: number
   limit?: number
 }
 
 // 排序参数
-interface SortParams {
+export interface SortParams {
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 }
 
-export type { ApiResponse, PaginationParams, SortParams }
+// 统计摘要
+export interface Summary {
+  inbox_count: number
+  today_count: number
+}

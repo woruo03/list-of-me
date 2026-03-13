@@ -5,45 +5,24 @@
   >
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <!-- 项目图标 -->
         <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
           <span class="text-primary text-lg">📁</span>
         </div>
 
-        <!-- 项目信息 -->
         <div>
           <h3 class="font-medium text-lg">{{ project.name }}</h3>
           <p class="text-base-content/70 text-sm">{{ taskCount }} 个任务</p>
         </div>
       </div>
 
-      <!-- 操作按钮 -->
       <div class="flex items-center gap-2">
-        <button
-          class="btn btn-ghost btn-sm"
-          @click.stop="emit('edit', project)"
-          title="编辑项目"
-        >
+        <button class="btn btn-ghost btn-sm" @click.stop="emit('edit', project)" title="编辑项目">
           ✏️
         </button>
-        <button
-          class="btn btn-ghost btn-sm text-error"
-          @click.stop="confirmDelete"
-          title="删除项目"
-        >
+        <button class="btn btn-ghost btn-sm text-error" @click.stop="confirmDelete" title="删除项目">
           🗑️
         </button>
       </div>
-    </div>
-
-    <!-- 项目描述 -->
-    <div
-      v-if="project.description"
-      class="mt-3 pt-3 border-t border-base-300"
-    >
-      <p class="text-base-content/80 text-sm">
-        {{ project.description }}
-      </p>
     </div>
   </div>
 </template>
