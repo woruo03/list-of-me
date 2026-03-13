@@ -8,7 +8,7 @@ interface UIState {
   fontFamily: string
   modal: {
     isOpen: boolean
-    type: 'task' | 'project' | 'settings' | null
+    type: 'project' | null
     data: any
   }
   notifications: {
@@ -96,7 +96,7 @@ export const useUIStore = defineStore('ui', {
       }
     },
 
-    openModal(type: 'task' | 'project' | 'settings', data?: any) {
+    openModal(type: 'project', data?: any) {
       this.modal = {
         isOpen: true,
         type,
