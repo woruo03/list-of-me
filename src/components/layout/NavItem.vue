@@ -1,8 +1,8 @@
 <template>
-  <li>
+  <li class="w-full">
     <router-link
       :to="to"
-      class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-base-300 transition-colors"
+      class="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-base-300 transition-colors"
       :class="{ 'bg-base-300': isActive }"
     >
       <div class="flex items-center gap-3">

@@ -36,6 +36,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/CompletedView.vue'),
     meta: { title: '已完成' },
   },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: () => import('@/views/SettingsView.vue'),
+    meta: { title: '设置' },
+  },
 ]
 
 const router = createRouter({

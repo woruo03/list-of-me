@@ -17,6 +17,7 @@
       <router-link class="text-base-content/60" to="/today">📅<span class="btm-nav-label">今日</span></router-link>
       <router-link class="text-base-content/60" to="/projects">📁<span class="btm-nav-label">项目</span></router-link>
       <router-link class="text-base-content/60" to="/completed">✅<span class="btm-nav-label">完成</span></router-link>
+      <router-link class="text-base-content/60" to="/settings">⚙<span class="btm-nav-label">设置</span></router-link>
     </nav>
 
     <Modal
