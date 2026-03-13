@@ -26,17 +26,8 @@
       :show-actions="false"
       @close="uiStore.closeModal"
     >
-      <TaskForm
-        v-if="uiStore.modal.type === 'task'"
-        :initial-task="modalTask"
-        :projects="projectStore.projects"
-        :default-project-id="uiStore.modal.data?.defaultProjectId ?? null"
-        :mode="modalTask ? 'edit' : 'create'"
-        @submit="handleTaskSubmit"
-        @cancel="uiStore.closeModal"
-      />
       <ProjectForm
-        v-else-if="uiStore.modal.type === 'project'"
+        v-if="uiStore.modal.type === 'project'"
         :initial-project="modalProject"
         :mode="modalProject ? 'edit' : 'create'"
         @submit="handleProjectSubmit"
@@ -72,29 +63,9 @@ const modalProject = computed<Project | null>(() => {
 })
 
 const modalTitle = computed(() => {
-  if (uiStore.modal.type === 'task') return modalTask.value ? '编辑任务' : '添加任务'
   if (uiStore.modal.type === 'project') return modalProject.value ? '编辑项目' : '新建项目'
   return ''
 })
-
-const handleTaskSubmit = async (data: TaskCreate | TaskUpdate) => {
-  const payload = { ...data } as TaskCreate
-  const modalData = uiStore.modal.data || {}
-
-  if (uiStore.modal.type !== 'task') return
-
-  if (modalData.forceInbox) {
-    payload.project_id = null
-  }
-
-  if (modalTask.value) {
-    await taskStore.updateTask(modalTask.value.id, payload)
-  } else {
-    await taskStore.createTask(payload)
-  }
-
-  uiStore.closeModal()
-}
 
 const handleProjectSubmit = async (data: { name: string }) => {
   if (uiStore.modal.type !== 'project') return
