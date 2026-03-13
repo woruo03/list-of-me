@@ -6,25 +6,17 @@
       'border-l-4 border-l-warning': task.status === Status.Doing,
       'border-l-4 border-l-success': task.status === Status.Done,
       'opacity-70': task.status === Status.Done,
+      'border-error/60 bg-error/10 ring-2 ring-error/40': selected,
       'ring-2 ring-primary/30': focused,
     }"
     :draggable="draggable"
     @dragstart="handleDragStart"
     @dragend="emit('dragend', task.id)"
-    @click="emit('focus', task.id)"
+    @click="handleCardClick"
   >
     <div class="flex items-start justify-between">
       <div class="flex-1 min-w-0 pr-4">
         <div class="flex items-center gap-2 mb-2">
-          <input
-            v-if="selectable"
-            type="checkbox"
-            class="checkbox checkbox-sm"
-            :checked="selected"
-            @click.stop
-            @change="emit('select', task.id)"
-          />
-
           <button
             class="w-5 h-5 rounded-full border flex items-center justify-center"
             :class="{
@@ -214,6 +206,14 @@ const toggleDescription = () => {
 
 const toggleNotes = () => {
   isNotesExpanded.value = !isNotesExpanded.value
+}
+
+const handleCardClick = () => {
+  if (props.selectable) {
+    emit('select', props.task.id)
+    return
+  }
+  emit('focus', props.task.id)
 }
 
 const confirmDelete = () => {

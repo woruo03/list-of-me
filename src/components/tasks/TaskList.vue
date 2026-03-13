@@ -18,20 +18,22 @@
     </div>
 
     <div v-else>
-      <div v-if="showBulkActions && enableSelection && taskStore.selectedCount > 0" class="mb-4">
-        <div class="alert bg-base-100 border border-base-300 shadow-sm">
-          <div class="flex flex-wrap items-center gap-3">
-            <span>已选择 {{ taskStore.selectedCount }} 项</span>
-            <button class="btn btn-xs btn-success" @click="markSelectedDone">标记完成</button>
-            <button class="btn btn-xs btn-info" @click="moveSelectedToToday">移至今日</button>
-            <div class="w-32">
-              <SelectMenu v-model="bulkProjectId" :options="bulkProjectOptions" size="sm" />
-            </div>
-            <button class="btn btn-xs" @click="moveSelectedToProject">移动</button>
-            <button class="btn btn-xs btn-error" @click="deleteSelected">删除</button>
-            <button class="btn btn-xs btn-ghost" @click="taskStore.clearSelection()">清除选择</button>
-          </div>
-        </div>
+      <div v-if="enableSelection" class="mb-4 flex items-center justify-end gap-2">
+        <button class="btn btn-ghost btn-sm" @click="toggleSelectionMode">
+          {{ selectionMode ? '取消多选' : '多选' }}
+        </button>
+        <template v-if="selectionMode">
+          <button class="btn btn-ghost btn-sm" @click="toggleSelectAll">
+            {{ allSelected ? '取消全选' : '全选' }}
+          </button>
+          <button
+            class="btn btn-error btn-sm"
+            :disabled="taskStore.selectedCount === 0"
+            @click="deleteSelected"
+          >
+            删除
+          </button>
+        </template>
       </div>
 
       <div class="space-y-4">
@@ -42,7 +44,7 @@
           :project="getProject(task.project_id)"
           :selected="taskStore.isSelected(task.id)"
           :focused="taskStore.focusedTaskId === task.id"
-          :selectable="enableSelection"
+          :selectable="selectionMode"
           @edit="emit('edit', task)"
           @delete="emit('delete', task.id)"
           @toggle-status="emit('toggle-status', task.id)"
@@ -64,9 +66,7 @@ import { computed, ref, watch } from 'vue'
 import TaskCard from './TaskCard.vue'
 import type { Task } from '@/types/task'
 import type { Project } from '@/types/project'
-import { Status } from '@/types/task'
 import { useTaskStore } from '@/stores/taskStore'
-import SelectMenu from '@/components/ui/SelectMenu.vue'
 
 interface Props {
   tasks: Task[]
@@ -97,15 +97,15 @@ const emit = defineEmits<{
 }>()
 
 const taskStore = useTaskStore()
-const bulkProjectId = ref<number | null>(null)
+const selectionMode = ref(false)
 const visibleCount = ref(20)
 
 const visibleTasks = computed(() => props.tasks.slice(0, visibleCount.value))
 
-const bulkProjectOptions = computed(() => [
-  { label: '收集箱', value: null },
-  ...props.projects.map((project) => ({ label: project.name, value: project.id })),
-])
+const allSelected = computed(() => {
+  if (props.tasks.length === 0) return false
+  return props.tasks.every((task) => taskStore.isSelected(task.id))
+})
 
 const getProject = (projectId: number | null) => {
   if (!projectId) return null
@@ -123,21 +123,22 @@ watch(
   },
 )
 
-const markSelectedDone = async () => {
-  await taskStore.bulkUpdateStatus(taskStore.selectedIds, Status.Done)
-}
-
-const moveSelectedToToday = async () => {
-  await taskStore.bulkMoveToToday(taskStore.selectedIds)
-}
-
-const moveSelectedToProject = async () => {
-  await taskStore.bulkMoveToProject(taskStore.selectedIds, bulkProjectId.value)
-}
-
 const deleteSelected = async () => {
   if (!confirm('确定要删除所选任务吗？此操作不可撤销。')) return
   await taskStore.bulkDelete(taskStore.selectedIds)
+}
+
+const toggleSelectionMode = () => {
+  selectionMode.value = !selectionMode.value
+  if (!selectionMode.value) taskStore.clearSelection()
+}
+
+const toggleSelectAll = () => {
+  if (allSelected.value) {
+    taskStore.clearSelection()
+    return
+  }
+  taskStore.selectAll(props.tasks.map((task) => task.id))
 }
 </script>
 
