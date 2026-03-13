@@ -1,7 +1,6 @@
 <template>
   <div class="task-form">
     <form @submit.prevent="handleSubmit">
-      <!-- 标题 -->
       <div class="form-control mb-4">
         <label class="label">
           <span class="label-text font-medium">任务标题 *</span>
@@ -13,9 +12,11 @@
           class="input input-bordered w-full"
           required
         />
+        <label v-if="errors.title" class="label">
+          <span class="label-text-alt text-error">{{ errors.title }}</span>
+        </label>
       </div>
 
-      <!-- 描述 -->
       <div class="form-control mb-4">
         <label class="label">
           <span class="label-text">描述</span>
@@ -25,75 +26,48 @@
           placeholder="添加任务描述..."
           class="textarea textarea-bordered w-full h-24"
         />
+        <label v-if="errors.description" class="label">
+          <span class="label-text-alt text-error">{{ errors.description }}</span>
+        </label>
       </div>
 
       <div class="grid grid-cols-2 gap-4 mb-4">
-        <!-- 项目选择 -->
         <div class="form-control">
           <label class="label">
             <span class="label-text">项目</span>
           </label>
-          <select
-            v-model="formData.project_id"
-            class="select select-bordered w-full"
-          >
+          <select v-model="formData.project_id" class="select select-bordered w-full">
             <option :value="null">收集箱（无项目）</option>
-            <option
-              v-for="project in projects"
-              :key="project.id"
-              :value="project.id"
-            >
+            <option v-for="project in projectOptions" :key="project.id" :value="project.id">
               {{ project.name }}
             </option>
           </select>
         </div>
 
-        <!-- 状态选择 -->
         <div class="form-control">
           <label class="label">
             <span class="label-text">状态</span>
           </label>
-          <select
-            v-model="formData.status"
-            class="select select-bordered w-full"
-          >
-            <option value="todo">待办</option>
-            <option value="doing">进行中</option>
-            <option value="done">已完成</option>
+          <select v-model="formData.status" class="select select-bordered w-full">
+            <option :value="Status.Todo">待办</option>
+            <option :value="Status.Doing">进行中</option>
+            <option :value="Status.Done">已完成</option>
           </select>
         </div>
       </div>
 
       <div class="grid grid-cols-2 gap-4 mb-6">
-        <!-- 截止时间 -->
         <div class="form-control">
           <label class="label">
             <span class="label-text">截止时间</span>
           </label>
-          <input
-            type="datetime-local"
-            v-model="dueAtLocal"
-            class="input input-bordered w-full"
-          />
-        </div>
-
-        <!-- 优先级 -->
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">优先级</span>
+          <input type="datetime-local" v-model="dueAtLocal" class="input input-bordered w-full" />
+          <label v-if="errors.due_at" class="label">
+            <span class="label-text-alt text-error">{{ errors.due_at }}</span>
           </label>
-          <select
-            v-model="formData.priority"
-            class="select select-bordered w-full"
-          >
-            <option value="low">低</option>
-            <option value="medium">中</option>
-            <option value="high">高</option>
-          </select>
         </div>
       </div>
 
-      <!-- 笔记 -->
       <div class="form-control mb-6">
         <label class="label">
           <span class="label-text">笔记</span>
@@ -105,24 +79,10 @@
         />
       </div>
 
-      <!-- 表单操作 -->
       <div class="flex justify-end gap-3">
-        <button
-          type="button"
-          class="btn btn-ghost"
-          @click="emit('cancel')"
-        >
-          取消
-        </button>
-        <button
-          type="submit"
-          class="btn btn-primary"
-          :disabled="isSubmitting"
-        >
-          <span
-            v-if="isSubmitting"
-            class="loading loading-spinner"
-          ></span>
+        <button type="button" class="btn btn-ghost" @click="emit('cancel')">取消</button>
+        <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+          <span v-if="isSubmitting" class="loading loading-spinner"></span>
           {{ submitButtonText }}
         </button>
       </div>
@@ -131,19 +91,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import type { Task, Project, TaskCreate, TaskUpdate, Status } from '@/types/task'
-import TauriService from '@/services/tauriService'
+import { ref, computed, onMounted, watch } from 'vue'
+import type { Task, TaskCreate, TaskUpdate } from '@/types/task'
+import { Status } from '@/types/task'
+import type { Project } from '@/types/project'
+import { validateTaskTitle, validateDescription, validateDueDate } from '@/utils/validation'
+import { useProjectStore } from '@/stores/projectStore'
 
 interface Props {
   initialTask?: Task | null
-  projects: Project[]
+  projects?: Project[]
   mode?: 'create' | 'edit'
+  defaultProjectId?: number | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
   initialTask: null,
+  projects: () => [],
   mode: 'create',
+  defaultProjectId: null,
 })
 
 const emit = defineEmits<{
@@ -152,25 +118,27 @@ const emit = defineEmits<{
 }>()
 
 const isSubmitting = ref(false)
-const projects = ref<Project[]>(props.projects)
+const projectStore = useProjectStore()
 
-// 表单数据
+const projectOptions = computed(() => {
+  return props.projects.length > 0 ? props.projects : projectStore.projects
+})
+
+const errors = ref<{ title?: string; description?: string; due_at?: string }>({})
+
 const formData = ref({
   title: '',
   description: null as string | null,
   project_id: null as number | null,
-  status: 'todo' as Status,
+  status: Status.Todo as Status,
   due_at: null as string | null,
   notes: null as string | null,
-  priority: 'medium' as 'low' | 'medium' | 'high',
 })
 
-// 本地日期时间（用于 datetime-local 输入）
 const dueAtLocal = computed({
   get() {
     if (!formData.value.due_at) return ''
     const date = new Date(formData.value.due_at)
-    // 转换为本地时间字符串格式 YYYY-MM-DDTHH:mm
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
@@ -183,7 +151,6 @@ const dueAtLocal = computed({
       formData.value.due_at = null
       return
     }
-    // 将本地时间转换为 UTC 字符串
     const date = new Date(value)
     formData.value.due_at = date.toISOString()
   },
@@ -194,7 +161,20 @@ const submitButtonText = computed(() => {
   return props.mode === 'create' ? '创建任务' : '更新任务'
 })
 
-// 初始化表单数据
+const validateForm = () => {
+  errors.value = {}
+  const titleResult = validateTaskTitle(formData.value.title)
+  if (!titleResult.valid) errors.value.title = titleResult.message
+
+  const descResult = validateDescription(formData.value.description)
+  if (!descResult.valid) errors.value.description = descResult.message
+
+  const dueResult = validateDueDate(formData.value.due_at)
+  if (!dueResult.valid) errors.value.due_at = dueResult.message
+
+  return Object.keys(errors.value).length === 0
+}
+
 onMounted(() => {
   if (props.initialTask) {
     formData.value = {
@@ -204,36 +184,48 @@ onMounted(() => {
       status: props.initialTask.status,
       due_at: props.initialTask.due_at,
       notes: props.initialTask.notes,
-      priority: 'medium',
     }
+  } else if (props.defaultProjectId !== null && props.defaultProjectId !== undefined) {
+    formData.value.project_id = props.defaultProjectId
   }
 
-  // 如果没有传入项目列表，则获取项目
-  if (projects.value.length === 0) {
-    fetchProjects()
+  if (projectOptions.value.length === 0) {
+    projectStore.fetchProjects()
   }
 })
 
-const fetchProjects = async () => {
-  try {
-    projects.value = await TauriService.getProjects()
-  } catch (error) {
-    console.error('Failed to fetch projects:', error)
-  }
-}
+watch(
+  () => props.initialTask,
+  (task) => {
+    if (!task) return
+    formData.value = {
+      title: task.title,
+      description: task.description,
+      project_id: task.project_id,
+      status: task.status,
+      due_at: task.due_at,
+      notes: task.notes,
+    }
+  },
+)
+
+watch(
+  () => props.defaultProjectId,
+  (projectId) => {
+    if (props.initialTask) return
+    if (projectId !== null && projectId !== undefined) {
+      formData.value.project_id = projectId
+    }
+  },
+)
 
 const handleSubmit = async () => {
-  if (!formData.value.title.trim()) {
-    alert('请填写任务标题')
-    return
-  }
+  if (!validateForm()) return
 
   isSubmitting.value = true
-
   try {
-    // 准备提交数据
     const submitData = {
-      title: formData.value.title,
+      title: formData.value.title.trim(),
       description: formData.value.description,
       project_id: formData.value.project_id,
       status: formData.value.status,
@@ -242,9 +234,6 @@ const handleSubmit = async () => {
     }
 
     emit('submit', submitData)
-  } catch (error) {
-    console.error('Form submission error:', error)
-    alert('提交失败，请重试')
   } finally {
     isSubmitting.value = false
   }
