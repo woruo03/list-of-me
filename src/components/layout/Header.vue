@@ -30,11 +30,12 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useTaskStore } from '@/stores/taskStore'
 import { useUIStore } from '@/stores/uiStore'
 
 const route = useRoute()
+const router = useRouter()
 const taskStore = useTaskStore()
 const uiStore = useUIStore()
 const searchInput = ref<HTMLInputElement | null>(null)
@@ -58,7 +59,7 @@ const handleSearch = (event: Event) => {
 }
 
 const openAddTaskModal = () => {
-  uiStore.openModal('task', { mode: 'create' })
+  router.push('/tasks/new')
 }
 
 

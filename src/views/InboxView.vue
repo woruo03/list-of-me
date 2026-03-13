@@ -72,7 +72,7 @@ const moveOptions = computed(() => [
 ])
 
 const openAddTaskModal = () => {
-  uiStore.openModal('task', { mode: 'create', forceInbox: true })
+  router.push('/tasks/new?inbox=1')
 }
 
 const openEditTaskModal = (task: Task) => {

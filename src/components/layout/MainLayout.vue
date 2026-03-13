@@ -50,26 +50,21 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import Sidebar from './Sidebar.vue'
 import Header from './Header.vue'
 import Modal from '@/components/ui/Modal.vue'
-import TaskForm from '@/components/tasks/TaskForm.vue'
 import ProjectForm from '@/components/projects/ProjectForm.vue'
 import ToastList from '@/components/ui/ToastList.vue'
 import { useUIStore } from '@/stores/uiStore'
 import { useTaskStore } from '@/stores/taskStore'
 import { useProjectStore } from '@/stores/projectStore'
-import type { Task, TaskCreate, TaskUpdate } from '@/types/task'
 import type { Project } from '@/types/project'
 
 const uiStore = useUIStore()
 const taskStore = useTaskStore()
 const projectStore = useProjectStore()
-
-const modalTask = computed<Task | null>(() => {
-  if (uiStore.modal.type !== 'task') return null
-  return uiStore.modal.data?.task || null
-})
+const router = useRouter()
 
 const modalProject = computed<Project | null>(() => {
   if (uiStore.modal.type !== 'project') return null
@@ -127,7 +122,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 
   if (meta && key === 'n') {
     event.preventDefault()
-    uiStore.openModal('task', { mode: 'create' })
+    router.push('/tasks/new')
     return
   }
 

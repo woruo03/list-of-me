@@ -153,7 +153,7 @@ const fetchProjectTasks = async () => {
 }
 
 const openAddTaskModal = () => {
-  uiStore.openModal('task', { mode: 'create', defaultProjectId: projectId.value })
+  router.push(`/tasks/new?projectId=${projectId.value}`)
 }
 
 const openEditTaskModal = (task: Task) => {
