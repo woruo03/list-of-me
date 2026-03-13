@@ -1,6 +1,6 @@
 <template>
   <div class="settings-view">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 gap-6">
       <div class="card card-bordered bg-base-100">
         <div class="card-body">
           <h2 class="card-title text-lg">主题</h2>
