@@ -5,39 +5,39 @@
         <label class="label">
           <span class="label-text">项目</span>
         </label>
-        <select v-model="localFilter.project_id" class="select select-bordered select-sm" @change="updateFilter">
-          <option :value="undefined">所有项目</option>
-          <option :value="null">收集箱</option>
-          <option v-for="project in projects" :key="project.id" :value="project.id">
-            {{ project.name }}
-          </option>
-        </select>
+        <SelectMenu
+          v-model="localFilter.project_id"
+          :options="projectOptions"
+          size="sm"
+          placeholder="所有项目"
+          @update:modelValue="updateFilter"
+        />
       </div>
 
       <div class="form-control">
         <label class="label">
           <span class="label-text">状态</span>
         </label>
-        <select v-model="localFilter.status" class="select select-bordered select-sm" @change="updateFilter">
-          <option :value="undefined">所有状态</option>
-          <option value="todo">待办</option>
-          <option value="doing">进行中</option>
-          <option value="done">已完成</option>
-        </select>
+        <SelectMenu
+          v-model="localFilter.status"
+          :options="statusOptions"
+          size="sm"
+          placeholder="所有状态"
+          @update:modelValue="updateFilter"
+        />
       </div>
 
       <div class="form-control">
         <label class="label">
           <span class="label-text">排序</span>
         </label>
-        <select v-model="localSort" class="select select-bordered select-sm" @change="updateSort">
-          <option value="created_desc">最新创建</option>
-          <option value="created_asc">最早创建</option>
-          <option value="due_asc">截止时间最早</option>
-          <option value="due_desc">截止时间最晚</option>
-          <option value="title_asc">标题 A-Z</option>
-          <option value="title_desc">标题 Z-A</option>
-        </select>
+        <SelectMenu
+          v-model="localSort"
+          :options="sortOptions"
+          size="sm"
+          placeholder="排序"
+          @update:modelValue="updateSort"
+        />
       </div>
 
       <div class="form-control">
@@ -64,10 +64,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { TaskFilter } from '@/types/task'
 import type { Project } from '@/types/project'
 import type { TaskSort } from '@/stores/taskStore'
+import SelectMenu from '@/components/ui/SelectMenu.vue'
 
 interface Props {
   projects: Project[]
@@ -91,6 +92,30 @@ const emit = defineEmits<{
 const localFilter = ref<TaskFilter>({ ...props.initialFilter })
 const localSort = ref<TaskSort>(props.initialSort)
 const searchQuery = ref(props.initialSearch)
+
+const projectOptions = computed(() => {
+  return [
+    { label: '所有项目', value: undefined },
+    { label: '收集箱', value: null },
+    ...props.projects.map((project) => ({ label: project.name, value: project.id })),
+  ]
+})
+
+const statusOptions = [
+  { label: '所有状态', value: undefined },
+  { label: '待办', value: 'todo' },
+  { label: '进行中', value: 'doing' },
+  { label: '已完成', value: 'done' },
+]
+
+const sortOptions = [
+  { label: '最新创建', value: 'created_desc' },
+  { label: '最早创建', value: 'created_asc' },
+  { label: '截止时间最早', value: 'due_asc' },
+  { label: '截止时间最晚', value: 'due_desc' },
+  { label: '标题 A-Z', value: 'title_asc' },
+  { label: '标题 Z-A', value: 'title_desc' },
+]
 
 const updateFilter = () => {
   emit('filter', { ...localFilter.value })

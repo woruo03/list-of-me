@@ -6,12 +6,9 @@
           <span>已选择 {{ taskStore.selectedCount }} 项</span>
           <button class="btn btn-xs btn-success" @click="markSelectedDone">标记完成</button>
           <button class="btn btn-xs btn-info" @click="moveSelectedToToday">移至今日</button>
-          <select v-model="bulkProjectId" class="select select-bordered select-xs">
-            <option :value="null">收集箱</option>
-            <option v-for="project in projects" :key="project.id" :value="project.id">
-              {{ project.name }}
-            </option>
-          </select>
+          <div class="w-32">
+            <SelectMenu v-model="bulkProjectId" :options="bulkProjectOptions" size="sm" />
+          </div>
           <button class="btn btn-xs" @click="moveSelectedToProject">移动</button>
           <button class="btn btn-xs btn-error" @click="deleteSelected">删除</button>
           <button class="btn btn-xs btn-ghost" @click="taskStore.clearSelection()">清除选择</button>
@@ -99,6 +96,7 @@ import type { Task } from '@/types/task'
 import { Status } from '@/types/task'
 import type { Project } from '@/types/project'
 import { useTaskStore } from '@/stores/taskStore'
+import SelectMenu from '@/components/ui/SelectMenu.vue'
 
 interface Props {
   tasks: Task[]
@@ -121,6 +119,11 @@ const bulkProjectId = ref<number | null>(null)
 const todoTasks = computed(() => props.tasks.filter((t) => t.status === Status.Todo))
 const doingTasks = computed(() => props.tasks.filter((t) => t.status === Status.Doing))
 const doneTasks = computed(() => props.tasks.filter((t) => t.status === Status.Done))
+
+const bulkProjectOptions = computed(() => [
+  { label: '收集箱', value: null },
+  ...props.projects.map((project) => ({ label: project.name, value: project.id })),
+])
 
 const getProject = (projectId: number | null) => {
   if (!projectId) return null

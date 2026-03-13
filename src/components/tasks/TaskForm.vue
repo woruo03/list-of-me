@@ -36,23 +36,14 @@
           <label class="label">
             <span class="label-text">项目</span>
           </label>
-          <select v-model="formData.project_id" class="select select-bordered w-full">
-            <option :value="null">收集箱（无项目）</option>
-            <option v-for="project in projectOptions" :key="project.id" :value="project.id">
-              {{ project.name }}
-            </option>
-          </select>
+          <SelectMenu v-model="formData.project_id" :options="projectSelectOptions" />
         </div>
 
         <div class="form-control">
           <label class="label">
             <span class="label-text">状态</span>
           </label>
-          <select v-model="formData.status" class="select select-bordered w-full">
-            <option :value="Status.Todo">待办</option>
-            <option :value="Status.Doing">进行中</option>
-            <option :value="Status.Done">已完成</option>
-          </select>
+          <SelectMenu v-model="formData.status" :options="statusOptions" />
         </div>
       </div>
 
@@ -97,6 +88,7 @@ import { Status } from '@/types/task'
 import type { Project } from '@/types/project'
 import { validateTaskTitle, validateDescription, validateDueDate } from '@/utils/validation'
 import { useProjectStore } from '@/stores/projectStore'
+import SelectMenu from '@/components/ui/SelectMenu.vue'
 
 interface Props {
   initialTask?: Task | null
@@ -123,6 +115,19 @@ const projectStore = useProjectStore()
 const projectOptions = computed(() => {
   return props.projects.length > 0 ? props.projects : projectStore.projects
 })
+
+const projectSelectOptions = computed(() => {
+  return [
+    { label: '收集箱（无项目）', value: null },
+    ...projectOptions.value.map((project) => ({ label: project.name, value: project.id })),
+  ]
+})
+
+const statusOptions = [
+  { label: '待办', value: Status.Todo },
+  { label: '进行中', value: Status.Doing },
+  { label: '已完成', value: Status.Done },
+]
 
 const errors = ref<{ title?: string; description?: string; due_at?: string }>({})
 
