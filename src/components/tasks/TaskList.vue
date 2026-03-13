@@ -18,24 +18,6 @@
     </div>
 
     <div v-else>
-      <div v-if="enableSelection" class="mb-4 flex items-center justify-end gap-2">
-        <button class="btn btn-ghost btn-sm" @click="toggleSelectionMode">
-          {{ selectionMode ? '取消多选' : '多选' }}
-        </button>
-        <template v-if="selectionMode">
-          <button class="btn btn-ghost btn-sm" @click="toggleSelectAll">
-            {{ allSelected ? '取消全选' : '全选' }}
-          </button>
-          <button
-            class="btn btn-error btn-sm"
-            :disabled="taskStore.selectedCount === 0"
-            @click="deleteSelected"
-          >
-            删除
-          </button>
-        </template>
-      </div>
-
       <div class="space-y-4">
         <TaskCard
           v-for="task in visibleTasks"
@@ -77,6 +59,7 @@ interface Props {
   showAddButton?: boolean
   showBulkActions?: boolean
   enableSelection?: boolean
+  selectionMode?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -86,6 +69,7 @@ const props = withDefaults(defineProps<Props>(), {
   showAddButton: true,
   showBulkActions: true,
   enableSelection: true,
+  selectionMode: false,
 })
 
 const emit = defineEmits<{
@@ -97,15 +81,11 @@ const emit = defineEmits<{
 }>()
 
 const taskStore = useTaskStore()
-const selectionMode = ref(false)
 const visibleCount = ref(20)
 
 const visibleTasks = computed(() => props.tasks.slice(0, visibleCount.value))
 
-const allSelected = computed(() => {
-  if (props.tasks.length === 0) return false
-  return props.tasks.every((task) => taskStore.isSelected(task.id))
-})
+const selectionMode = computed(() => props.enableSelection && props.selectionMode)
 
 const getProject = (projectId: number | null) => {
   if (!projectId) return null
@@ -123,23 +103,6 @@ watch(
   },
 )
 
-const deleteSelected = async () => {
-  if (!confirm('确定要删除所选任务吗？此操作不可撤销。')) return
-  await taskStore.bulkDelete(taskStore.selectedIds)
-}
-
-const toggleSelectionMode = () => {
-  selectionMode.value = !selectionMode.value
-  if (!selectionMode.value) taskStore.clearSelection()
-}
-
-const toggleSelectAll = () => {
-  if (allSelected.value) {
-    taskStore.clearSelection()
-    return
-  }
-  taskStore.selectAll(props.tasks.map((task) => task.id))
-}
 </script>
 
 <style scoped>
