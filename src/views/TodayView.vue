@@ -3,17 +3,12 @@
     <div class="mb-8">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h1 class="text-3xl font-bold">今日</h1>
+          <h1 class="text-3xl font-bold tracking-tight">今日</h1>
           <p class="text-base-content/70 mt-2">
             专注于今日需要完成的任务。截止时间为今天的任务会显示在这里。
           </p>
         </div>
         <div class="flex items-center gap-3">
-          <span class="badge badge-primary badge-lg">{{ tasks.length }} 个任务</span>
-          <button class="btn btn-primary" @click="openAddTaskModal">
-            <span class="mr-2">+</span>
-            添加任务
-          </button>
           <button class="btn btn-ghost" @click="toggleViewMode">
             {{ viewMode === 'list' ? '看板视图' : '列表视图' }}
           </button>

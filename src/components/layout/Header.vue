@@ -1,19 +1,19 @@
 <template>
   <header class="bg-base-100 border-b border-base-300 px-6 py-4">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-6">
       <div>
-        <h2 class="text-2xl font-bold">{{ pageTitle }}</h2>
+        <h2 class="text-2xl font-bold tracking-tight">{{ pageTitle }}</h2>
         <p class="text-base-content/70 text-sm mt-1">{{ pageDescription }}</p>
       </div>
 
-      <div class="flex items-center gap-4">
-        <div class="relative">
+      <div class="flex items-center gap-3">
+        <div class="relative w-72">
           <input
             ref="searchInput"
             type="text"
             :value="taskStore.searchQuery"
             placeholder="搜索任务..."
-            class="input input-bordered w-64 pl-10"
+            class="input input-bordered w-full pl-10"
             @input="handleSearch"
           />
           <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50">🔍</span>

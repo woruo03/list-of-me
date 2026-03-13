@@ -3,12 +3,12 @@
     <div class="mb-8">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h1 class="text-3xl font-bold">项目</h1>
+          <h1 class="text-3xl font-bold tracking-tight">项目</h1>
           <p class="text-base-content/70 mt-2">按项目组织和管理任务。每个项目可以包含多个相关任务。</p>
         </div>
         <div class="flex items-center gap-3">
-          <span class="badge badge-primary badge-lg">{{ projectStore.projects.length }} 个项目</span>
-          <button class="btn btn-primary" @click="openAddProjectModal">
+          <span class="badge badge-primary badge-outline">{{ projectStore.projects.length }} 个项目</span>
+          <button class="btn btn-primary shadow-md" @click="openAddProjectModal">
             <span class="mr-2">+</span>
             新建项目
           </button>

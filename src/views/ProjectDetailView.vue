@@ -5,13 +5,13 @@
         <div>
           <div class="flex items-center gap-3 mb-2">
             <button class="btn btn-ghost btn-sm" @click="router.back()">← 返回</button>
-            <h1 class="text-3xl font-bold">{{ project?.name || '加载中...' }}</h1>
-            <span class="badge badge-primary">项目</span>
+            <h1 class="text-3xl font-bold tracking-tight">{{ project?.name || '加载中...' }}</h1>
+            <span class="badge badge-primary badge-outline">项目</span>
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <span class="badge badge-primary badge-lg">{{ tasks.length }} 个任务</span>
-          <button class="btn btn-primary" @click="openAddTaskModal">
+          <span class="badge badge-primary badge-outline">{{ tasks.length }} 个任务</span>
+          <button class="btn btn-primary shadow-md" @click="openAddTaskModal">
             <span class="mr-2">+</span>
             添加任务
           </button>

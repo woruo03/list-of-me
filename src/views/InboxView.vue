@@ -3,17 +3,10 @@
     <div class="mb-8">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h1 class="text-3xl font-bold">收集箱</h1>
+          <h1 class="text-3xl font-bold tracking-tight">收集箱</h1>
           <p class="text-base-content/70 mt-2">
             收集所有未整理的想法和任务。将它们移动到今日或指定项目以开始行动。
           </p>
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="badge badge-primary badge-lg">{{ tasks.length }} 个任务</span>
-          <button class="btn btn-primary" @click="openAddTaskModal">
-            <span class="mr-2">+</span>
-            添加任务
-          </button>
         </div>
       </div>
     </div>

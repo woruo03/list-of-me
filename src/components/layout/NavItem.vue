@@ -2,17 +2,17 @@
   <li>
     <router-link
       :to="to"
-      class="flex items-center justify-between p-3 rounded-lg hover:bg-base-300 transition-colors"
+      class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-base-300 transition-colors"
       :class="{ 'bg-base-300': isActive }"
     >
       <div class="flex items-center gap-3">
-        <div class="w-5 h-5 flex items-center justify-center">
+        <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-base-200">
           <span class="text-lg">{{ icon }}</span>
         </div>
         <span v-if="!collapsed" class="font-medium">{{ label }}</span>
       </div>
 
-      <span v-if="badge !== undefined && badge > 0 && !collapsed" class="badge badge-primary">
+      <span v-if="badge !== undefined && badge > 0 && !collapsed" class="badge badge-primary badge-sm">
         {{ badge }}
       </span>
     </router-link>
