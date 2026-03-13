@@ -2,12 +2,12 @@
   <div class="projects-view">
     <div class="mb-4 flex flex-col items-end gap-2">
       <div class="flex items-center justify-end gap-2 flex-wrap">
+        <button class="btn btn-ghost" @click="toggleSelectionMode">
+          {{ selectionMode ? '取消选择' : '选择' }}
+        </button>
         <button class="btn btn-primary" @click="openAddProjectModal">
           <span class="mr-2">+</span>
           新建项目
-        </button>
-        <button class="btn btn-ghost" @click="toggleSelectionMode">
-          {{ selectionMode ? '取消选择' : '选择' }}
         </button>
       </div>
       <div v-if="selectionMode" class="flex items-center justify-end gap-2 w-full">
