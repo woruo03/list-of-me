@@ -1,7 +1,8 @@
 <template>
   <div
     class="card card-bordered bg-base-100 p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-    @click="emit('click', project)"
+    :class="{ 'border-error/60 bg-error/10 ring-2 ring-error/40': selected }"
+    @click="handleClick"
   >
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -15,7 +16,7 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div v-if="!selectable" class="flex items-center gap-2">
         <button class="btn btn-ghost btn-sm" @click.stop="emit('edit', project)" title="编辑项目">
           ✏️
         </button>
@@ -33,17 +34,30 @@ import type { Project } from '@/types/project'
 interface Props {
   project: Project
   taskCount?: number
+  selectable?: boolean
+  selected?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   taskCount: 0,
+  selectable: false,
+  selected: false,
 })
 
 const emit = defineEmits<{
   click: [project: Project]
   edit: [project: Project]
   delete: [id: number]
+  select: [id: number]
 }>()
+
+const handleClick = () => {
+  if (props.selectable) {
+    emit('select', props.project.id)
+    return
+  }
+  emit('click', props.project)
+}
 
 const confirmDelete = () => {
   if (confirm(`确定要删除项目 "${props.project.name}" 吗？`)) {
