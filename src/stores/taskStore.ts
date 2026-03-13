@@ -103,6 +103,22 @@ export const useTaskStore = defineStore('tasks', {
       }
     },
 
+    async fetchTaskById(id: number) {
+      const existing = this.tasks.find((task) => task.id === id)
+      if (existing) return existing
+
+      try {
+        const task = await TaskService.getTask(id)
+        const index = this.tasks.findIndex((item) => item.id === id)
+        if (index >= 0) this.tasks[index] = task
+        else this.tasks.unshift(task)
+        return task
+      } catch (error) {
+        console.error('Failed to fetch task:', error)
+        throw error
+      }
+    },
+
     async createTask(taskData: TaskCreate) {
       this.error = null
       const uiStore = useUIStore()
