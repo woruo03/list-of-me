@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { DAISYUI_THEMES, FONT_FAMILIES, FONT_SIZES, STORAGE_KEYS } from '@/utils/constants'
+import { DAISYUI_THEMES, FONT_SIZES, STORAGE_KEYS } from '@/utils/constants'
 
 interface UIState {
   sidebarCollapsed: boolean
