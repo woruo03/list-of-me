@@ -1,13 +1,18 @@
 <template>
   <div class="project-detail-view">
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <button class="btn btn-ghost btn-sm" @click="router.back()">← 返回</button>
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
+        <button class="btn btn-ghost btn-sm" @click="router.back()">← 返回</button>
         <button class="btn btn-primary" @click="openAddTaskModal">
           <span class="mr-2">+</span>
           添加任务
         </button>
         <button class="btn btn-ghost" @click="openEditProjectModal">编辑项目</button>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="btn btn-ghost" @click="toggleFilter">
+          {{ showFilters ? '隐藏筛选' : '筛选' }}
+        </button>
         <button class="btn btn-ghost" @click="toggleViewMode">
           {{ viewMode === 'list' ? '看板视图' : '列表视图' }}
         </button>
@@ -15,6 +20,7 @@
     </div>
 
     <TaskFilter
+      v-if="showFilters"
       :projects="projectStore.projects"
       :initial-filter="taskStore.userFilter"
       :initial-sort="taskStore.sort"
@@ -70,6 +76,7 @@ const uiStore = useUIStore()
 
 const project = ref<Project | null>(null)
 const viewMode = ref<'list' | 'board'>('list')
+const showFilters = ref(false)
 
 const projectId = computed(() => {
   const id = route.params.id
@@ -110,6 +117,10 @@ const handleDeleteTask = async (taskId: number) => {
 
 const toggleViewMode = () => {
   viewMode.value = viewMode.value === 'list' ? 'board' : 'list'
+}
+
+const toggleFilter = () => {
+  showFilters.value = !showFilters.value
 }
 
 onMounted(() => {

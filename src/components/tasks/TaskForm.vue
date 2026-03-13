@@ -52,7 +52,24 @@
           <label class="label">
             <span class="label-text">截止时间</span>
           </label>
-          <input type="datetime-local" v-model="dueAtLocal" class="input input-bordered w-full" />
+          <div class="join w-full">
+            <input
+              ref="dueInputRef"
+              type="datetime-local"
+              v-model="dueAtLocal"
+              class="input input-bordered join-item w-full"
+            />
+            <button
+              type="button"
+              class="btn btn-ghost btn-square join-item"
+              :disabled="!formData.due_at"
+              title="清除截止时间"
+              aria-label="清除截止时间"
+              @click="clearDueDate"
+            >
+              ✕
+            </button>
+          </div>
           <label v-if="errors.due_at" class="label">
             <span class="label-text-alt text-error">{{ errors.due_at }}</span>
           </label>
@@ -82,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import type { Task, TaskCreate, TaskUpdate } from '@/types/task'
 import { Status } from '@/types/task'
 import type { Project } from '@/types/project'
@@ -130,6 +147,7 @@ const statusOptions = [
 ]
 
 const errors = ref<{ title?: string; description?: string; due_at?: string }>({})
+const dueInputRef = ref<HTMLInputElement | null>(null)
 
 const formData = ref({
   title: '',
@@ -242,6 +260,13 @@ const handleSubmit = async () => {
   } finally {
     isSubmitting.value = false
   }
+}
+
+const clearDueDate = async () => {
+  dueAtLocal.value = ''
+  errors.value.due_at = undefined
+  await nextTick()
+  dueInputRef.value?.blur()
 }
 </script>
 

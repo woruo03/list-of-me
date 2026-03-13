@@ -1,12 +1,16 @@
 <template>
   <div class="today-view">
-    <div class="mb-4 flex justify-end">
+    <div class="mb-4 flex items-center justify-end gap-2">
+      <button class="btn btn-ghost" @click="toggleFilter">
+        {{ showFilters ? '隐藏筛选' : '筛选' }}
+      </button>
       <button class="btn btn-ghost" @click="toggleViewMode">
         {{ viewMode === 'list' ? '看板视图' : '列表视图' }}
       </button>
     </div>
 
     <TaskFilter
+      v-if="showFilters"
       :projects="projectStore.projects"
       :initial-filter="taskStore.userFilter"
       :initial-sort="taskStore.sort"
@@ -56,6 +60,7 @@ const taskStore = useTaskStore()
 const projectStore = useProjectStore()
 const uiStore = useUIStore()
 const viewMode = ref<'list' | 'board'>('list')
+const showFilters = ref(false)
 
 const tasks = computed(() => taskStore.filterTasks(taskStore.todayTasks))
 
@@ -73,6 +78,10 @@ const handleDeleteTask = async (taskId: number) => {
 
 const toggleViewMode = () => {
   viewMode.value = viewMode.value === 'list' ? 'board' : 'list'
+}
+
+const toggleFilter = () => {
+  showFilters.value = !showFilters.value
 }
 
 onMounted(() => {
