@@ -2,112 +2,89 @@
   <div
     class="bg-base-100 border border-base-300 rounded-lg p-4 mb-3 hover:shadow-md transition-shadow"
     :class="{
-      'border-l-4 border-l-primary': task.status === 'todo',
-      'border-l-4 border-l-warning': task.status === 'doing',
-      'border-l-4 border-l-success': task.status === 'done',
-      'opacity-70': task.status === 'done',
+      'border-l-4 border-l-primary': task.status === Status.Todo,
+      'border-l-4 border-l-warning': task.status === Status.Doing,
+      'border-l-4 border-l-success': task.status === Status.Done,
+      'opacity-70': task.status === Status.Done,
+      'ring-2 ring-primary/30': focused,
     }"
+    :draggable="draggable"
+    @dragstart="handleDragStart"
+    @dragend="emit('dragend', task.id)"
+    @click="emit('focus', task.id)"
   >
     <div class="flex items-start justify-between">
-      <!-- 左侧内容 -->
       <div class="flex-1">
-        <!-- 标题和状态 -->
         <div class="flex items-center gap-2 mb-2">
-          <!-- 状态指示器 -->
+          <input
+            v-if="selectable"
+            type="checkbox"
+            class="checkbox checkbox-sm"
+            :checked="selected"
+            @click.stop
+            @change="emit('select', task.id)"
+          />
+
           <button
             class="w-5 h-5 rounded-full border flex items-center justify-center"
             :class="{
-              'border-base-300': task.status === 'todo',
-              'border-warning bg-warning/20': task.status === 'doing',
-              'border-success bg-success/20': task.status === 'done',
+              'border-base-300': task.status === Status.Todo,
+              'border-warning bg-warning/20': task.status === Status.Doing,
+              'border-success bg-success/20': task.status === Status.Done,
             }"
-            @click="toggleStatus"
+            @click.stop="toggleStatus"
           >
-            <span
-              v-if="task.status === 'done'"
-              class="text-success text-sm"
-            >
-              ✓
-            </span>
+            <span v-if="task.status === Status.Done" class="text-success text-sm">✓</span>
           </button>
 
-          <!-- 标题 -->
           <h3
             class="font-medium text-lg"
-            :class="{
-              'line-through text-base-content/50': task.status === 'done',
-            }"
+            :class="{ 'line-through text-base-content/50': task.status === Status.Done }"
           >
             {{ task.title }}
           </h3>
 
-          <!-- 优先级标签 -->
-          <span
-            v-if="isDueSoon"
-            class="badge badge-warning badge-sm"
-          >
-            即将到期
-          </span>
+          <span v-if="isDueSoon" class="badge badge-warning badge-sm">即将到期</span>
         </div>
 
-        <!-- 描述 -->
-        <p
-          v-if="task.description"
-          class="text-base-content/70 mb-3 ml-7"
-        >
+        <p v-if="task.description" class="text-base-content/70 mb-3 ml-7">
           {{ task.description }}
         </p>
 
-        <!-- 元信息 -->
         <div class="flex items-center gap-4 text-sm text-base-content/50 ml-7">
-          <!-- 项目 -->
-          <span v-if="task.project_id && projectName"> 📁 {{ projectName }} </span>
-
-          <!-- 截止时间 -->
+          <span v-if="showProject && task.project_id && projectName"> 📁 {{ projectName }} </span>
           <span v-if="task.due_at"> 📅 {{ formattedDueDate }} </span>
-
-          <!-- 创建时间 -->
           <span> 🕐 {{ formattedCreatedAt }} </span>
         </div>
       </div>
 
-      <!-- 右侧操作按钮 -->
       <div class="flex items-center gap-2">
-        <!-- 移动到今日 -->
         <button
-          v-if="task.status !== 'done' && !isTodayTask"
+          v-if="task.status !== Status.Done && !isTodayTask"
           class="btn btn-ghost btn-sm"
-          @click="moveToToday"
+          @click.stop="moveToToday"
           title="移动到今日"
         >
           📅
         </button>
 
-        <!-- 编辑按钮 -->
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="emit('edit', task)"
-          title="编辑任务"
-        >
+        <button class="btn btn-ghost btn-sm" @click.stop="emit('edit', task)" title="编辑任务">
           ✏️
         </button>
 
-        <!-- 删除按钮 -->
         <button
           class="btn btn-ghost btn-sm text-error"
-          @click="confirmDelete"
+          @click.stop="confirmDelete"
           title="删除任务"
         >
           🗑️
         </button>
+
+        <span v-if="draggable" class="cursor-grab text-base-content/40">⋮⋮</span>
       </div>
     </div>
 
-    <!-- 笔记 -->
-    <div
-      v-if="task.notes"
-      class="mt-3 pt-3 border-t border-base-300 ml-7"
-    >
+    <div v-if="task.notes" class="mt-3 pt-3 border-t border-base-300 ml-7">
       <p class="text-base-content/80 text-sm">📝 {{ task.notes }}</p>
     </div>
   </div>
@@ -115,24 +92,41 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Task, Project } from '@/types/task'
+import type { Task } from '@/types/task'
+import { Status } from '@/types/task'
+import type { Project } from '@/types/project'
 
 interface Props {
   task: Task
-  project?: Project
+  project?: Project | null
+  selected?: boolean
+  focused?: boolean
+  selectable?: boolean
+  draggable?: boolean
+  showProject?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  project: null,
+  selected: false,
+  focused: false,
+  selectable: true,
+  draggable: false,
+  showProject: true,
+})
+
 const emit = defineEmits<{
   edit: [task: Task]
   delete: [id: number]
   toggleStatus: [id: number]
   moveToToday: [id: number]
+  select: [id: number]
+  focus: [id: number]
+  dragstart: [id: number]
+  dragend: [id: number]
 }>()
 
-const projectName = computed(() => {
-  return props.project?.name || '未知项目'
-})
+const projectName = computed(() => props.project?.name || '未知项目')
 
 const formattedDueDate = computed(() => {
   if (!props.task.due_at) return ''
@@ -164,7 +158,7 @@ const isTodayTask = computed(() => {
 })
 
 const isDueSoon = computed(() => {
-  if (!props.task.due_at || props.task.status === 'done') return false
+  if (!props.task.due_at || props.task.status === Status.Done) return false
   const dueDate = new Date(props.task.due_at)
   const now = new Date()
   const hoursDiff = (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60)
@@ -183,6 +177,13 @@ const confirmDelete = () => {
   if (confirm(`确定要删除任务 "${props.task.title}" 吗？`)) {
     emit('delete', props.task.id)
   }
+}
+
+const handleDragStart = (event: DragEvent) => {
+  if (!props.draggable) return
+  event.dataTransfer?.setData('text/plain', String(props.task.id))
+  event.dataTransfer?.setDragImage(new Image(), 0, 0)
+  emit('dragstart', props.task.id)
 }
 </script>
 
