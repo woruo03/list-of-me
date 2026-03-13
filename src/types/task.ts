@@ -32,6 +32,7 @@ export interface TaskUpdate {
   status?: Status
   due_at?: string | null | undefined
   notes?: string | null | undefined
+  clear_due_at?: boolean
 }
 
 export interface TaskFilter {

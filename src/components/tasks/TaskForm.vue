@@ -47,29 +47,104 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-4 mb-6">
-        <div class="form-control">
+      <div class="grid grid-cols-1 gap-4 mb-6">
+        <div class="form-control relative" ref="duePickerRef">
           <label class="label">
             <span class="label-text">截止时间</span>
           </label>
-          <div class="join w-full">
-            <input
-              ref="dueInputRef"
-              type="datetime-local"
-              v-model="dueAtLocal"
-              class="input input-bordered join-item w-full"
-            />
-            <button
-              type="button"
-              class="btn btn-ghost btn-square join-item"
-              :disabled="!formData.due_at"
-              title="清除截止时间"
-              aria-label="清除截止时间"
-              @click="clearDueDate"
-            >
-              ✕
-            </button>
+          <button
+            type="button"
+            class="input input-bordered w-full flex items-center justify-between"
+            @click="toggleDuePicker"
+          >
+            <span class="text-base-content/80">
+              {{ dueDisplay || '未设置截止时间' }}
+            </span>
+            <span class="text-base-content/40">📅</span>
+          </button>
+
+          <div
+            v-if="isDuePickerOpen"
+            class="absolute z-30 mt-2 w-full max-w-[520px] rounded-box border border-base-300 bg-base-100 p-4 shadow-xl"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <button type="button" class="btn btn-ghost btn-xs" @click="prevMonth">‹</button>
+              <div class="font-medium">{{ monthLabel }}</div>
+              <button type="button" class="btn btn-ghost btn-xs" @click="nextMonth">›</button>
+            </div>
+
+            <div class="grid grid-cols-7 text-xs text-base-content/60 mb-2">
+              <span v-for="label in weekLabels" :key="label" class="text-center">{{ label }}</span>
+            </div>
+
+            <div class="grid grid-cols-7 gap-1">
+              <button
+                v-for="(day, index) in calendarDays"
+                :key="index"
+                type="button"
+                class="btn btn-ghost btn-xs h-8 w-full"
+                :class="day && isSameDate(day, selectedDate) ? 'btn-primary text-primary-content' : ''"
+                :disabled="!day"
+                @click="day && selectDate(day)"
+              >
+                {{ day ? day.getDate() : '' }}
+              </button>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-3">
+              <div>
+                <div class="text-xs text-base-content/60 mb-2">小时</div>
+                <div class="h-40 overflow-y-auto rounded-box border border-base-300">
+                  <button
+                    v-for="hour in hours"
+                    :key="hour"
+                    type="button"
+                    class="w-full px-3 py-1 text-left hover:bg-base-200"
+                    :class="hour === selectedHour ? 'bg-base-200 font-medium' : ''"
+                    @click="selectedHour = hour"
+                  >
+                    {{ hour }}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <div class="text-xs text-base-content/60 mb-2">分钟</div>
+                <div class="h-40 overflow-y-auto rounded-box border border-base-300">
+                  <button
+                    v-for="minute in minutes"
+                    :key="minute"
+                    type="button"
+                    class="w-full px-3 py-1 text-left hover:bg-base-200"
+                    :class="minute === selectedMinute ? 'bg-base-200 font-medium' : ''"
+                    @click="selectedMinute = minute"
+                  >
+                    {{ minute }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-wrap gap-2">
+                <button type="button" class="btn btn-ghost btn-xs" @click="setDuePreset(0)">
+                  今天
+                </button>
+                <button type="button" class="btn btn-ghost btn-xs" @click="setDuePreset(1)">
+                  明天
+                </button>
+                <button type="button" class="btn btn-ghost btn-xs" @click="setDuePreset(7)">
+                  下周
+                </button>
+                <button type="button" class="btn btn-ghost btn-xs" @click="clearDueDate">
+                  清除
+                </button>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" @click="closeDuePicker">
+                完成
+              </button>
+            </div>
           </div>
+
           <label v-if="errors.due_at" class="label">
             <span class="label-text-alt text-error">{{ errors.due_at }}</span>
           </label>
@@ -99,7 +174,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import type { Task, TaskCreate, TaskUpdate } from '@/types/task'
 import { Status } from '@/types/task'
 import type { Project } from '@/types/project'
@@ -147,7 +222,14 @@ const statusOptions = [
 ]
 
 const errors = ref<{ title?: string; description?: string; due_at?: string }>({})
-const dueInputRef = ref<HTMLInputElement | null>(null)
+const duePickerRef = ref<HTMLElement | null>(null)
+const isDuePickerOpen = ref(false)
+const clearedDueAt = ref(false)
+const calendarMonth = ref(new Date())
+
+const weekLabels = ['一', '二', '三', '四', '五', '六', '日']
+const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
+const minutes = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'))
 
 const formData = ref({
   title: '',
@@ -158,26 +240,156 @@ const formData = ref({
   notes: null as string | null,
 })
 
-const dueAtLocal = computed({
+const formatDateLocal = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const formatTimeLocal = (date: Date) => {
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${hours}:${minutes}`
+}
+
+const formatDisplay = (date: Date) => {
+  return `${formatDateLocal(date)} ${formatTimeLocal(date)}`
+}
+
+const setDueFromParts = (dateStr: string, timeStr: string) => {
+  if (!dateStr) {
+    formData.value.due_at = null
+    clearedDueAt.value = true
+    return
+  }
+  const safeTime = timeStr || '23:59'
+  const date = new Date(`${dateStr}T${safeTime}`)
+  if (isNaN(date.getTime())) return
+  formData.value.due_at = date.toISOString()
+  clearedDueAt.value = false
+}
+
+const dueDateLocal = computed({
   get() {
     if (!formData.value.due_at) return ''
-    const date = new Date(formData.value.due_at)
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    return `${year}-${month}-${day}T${hours}:${minutes}`
+    return formatDateLocal(new Date(formData.value.due_at))
   },
   set(value: string) {
     if (!value) {
       formData.value.due_at = null
+      clearedDueAt.value = true
       return
     }
-    const date = new Date(value)
-    formData.value.due_at = date.toISOString()
+    setDueFromParts(value, dueTimeLocal.value)
   },
 })
+
+const dueTimeLocal = computed({
+  get() {
+    if (!formData.value.due_at) return ''
+    return formatTimeLocal(new Date(formData.value.due_at))
+  },
+  set(value: string) {
+    if (!dueDateLocal.value) {
+      if (!value) {
+        formData.value.due_at = null
+        clearedDueAt.value = true
+        return
+      }
+      const today = new Date()
+      setDueFromParts(formatDateLocal(today), value)
+      return
+    }
+    setDueFromParts(dueDateLocal.value, value)
+  },
+})
+
+const selectedDate = computed(() => {
+  if (!formData.value.due_at) return null
+  return new Date(formData.value.due_at)
+})
+
+const dueDisplay = computed(() => {
+  if (!formData.value.due_at) return ''
+  return formatDisplay(new Date(formData.value.due_at))
+})
+
+const monthLabel = computed(() => {
+  const year = calendarMonth.value.getFullYear()
+  const month = calendarMonth.value.getMonth() + 1
+  return `${year} 年 ${month} 月`
+})
+
+const calendarDays = computed(() => {
+  const year = calendarMonth.value.getFullYear()
+  const month = calendarMonth.value.getMonth()
+  const firstDay = new Date(year, month, 1)
+  const startOffset = (firstDay.getDay() + 6) % 7
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const days: Array<Date | null> = []
+
+  for (let i = 0; i < startOffset; i += 1) days.push(null)
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    days.push(new Date(year, month, day))
+  }
+  return days
+})
+
+const selectedHour = computed({
+  get() {
+    if (!dueTimeLocal.value) return '23'
+    return dueTimeLocal.value.split(':')[0] || '23'
+  },
+  set(value: string) {
+    dueTimeLocal.value = `${value}:${selectedMinute.value}`
+  },
+})
+
+const selectedMinute = computed({
+  get() {
+    if (!dueTimeLocal.value) return '59'
+    return dueTimeLocal.value.split(':')[1] || '59'
+  },
+  set(value: string) {
+    dueTimeLocal.value = `${selectedHour.value}:${value}`
+  },
+})
+
+const isSameDate = (a: Date, b: Date | null) => {
+  if (!b) return false
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+}
+
+const selectDate = (date: Date) => {
+  dueDateLocal.value = formatDateLocal(date)
+}
+
+const prevMonth = () => {
+  const current = calendarMonth.value
+  calendarMonth.value = new Date(current.getFullYear(), current.getMonth() - 1, 1)
+}
+
+const nextMonth = () => {
+  const current = calendarMonth.value
+  calendarMonth.value = new Date(current.getFullYear(), current.getMonth() + 1, 1)
+}
+
+const toggleDuePicker = () => {
+  isDuePickerOpen.value = !isDuePickerOpen.value
+}
+
+const closeDuePicker = () => {
+  isDuePickerOpen.value = false
+}
+
+const handleClickOutside = (event: MouseEvent) => {
+  if (!isDuePickerOpen.value) return
+  const target = event.target as Node
+  if (duePickerRef.value && !duePickerRef.value.contains(target)) {
+    isDuePickerOpen.value = false
+  }
+}
 
 const submitButtonText = computed(() => {
   if (isSubmitting.value) return '处理中...'
@@ -212,9 +424,16 @@ onMounted(() => {
     formData.value.project_id = props.defaultProjectId
   }
 
+  if (formData.value.due_at) {
+    const current = new Date(formData.value.due_at)
+    calendarMonth.value = new Date(current.getFullYear(), current.getMonth(), 1)
+  }
+
   if (projectOptions.value.length === 0) {
     projectStore.fetchProjects()
   }
+
+  document.addEventListener('mousedown', handleClickOutside)
 })
 
 watch(
@@ -229,6 +448,10 @@ watch(
       due_at: task.due_at,
       notes: task.notes,
     }
+    if (task.due_at) {
+      const current = new Date(task.due_at)
+      calendarMonth.value = new Date(current.getFullYear(), current.getMonth(), 1)
+    }
   },
 )
 
@@ -242,12 +465,21 @@ watch(
   },
 )
 
+watch(
+  () => formData.value.due_at,
+  (value) => {
+    if (!value) return
+    const current = new Date(value)
+    calendarMonth.value = new Date(current.getFullYear(), current.getMonth(), 1)
+  },
+)
+
 const handleSubmit = async () => {
   if (!validateForm()) return
 
   isSubmitting.value = true
   try {
-    const submitData = {
+    const submitData: TaskCreate & TaskUpdate = {
       title: formData.value.title.trim(),
       description: formData.value.description,
       project_id: formData.value.project_id,
@@ -256,18 +488,34 @@ const handleSubmit = async () => {
       notes: formData.value.notes,
     }
 
+    if (clearedDueAt.value && formData.value.due_at === null) {
+      submitData.clear_due_at = true
+    }
+
     emit('submit', submitData)
   } finally {
     isSubmitting.value = false
   }
 }
 
-const clearDueDate = async () => {
-  dueAtLocal.value = ''
-  errors.value.due_at = undefined
-  await nextTick()
-  dueInputRef.value?.blur()
+const setDuePreset = (daysFromNow: number) => {
+  const target = new Date()
+  target.setDate(target.getDate() + daysFromNow)
+  target.setHours(23, 59, 0, 0)
+  formData.value.due_at = target.toISOString()
+  clearedDueAt.value = false
 }
+
+const clearDueDate = async () => {
+  formData.value.due_at = null
+  errors.value.due_at = undefined
+  clearedDueAt.value = true
+  closeDuePicker()
+}
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', handleClickOutside)
+})
 </script>
 
 <style scoped>

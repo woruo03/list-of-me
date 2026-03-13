@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde::de::{self, Deserializer, DeserializeOwned};
 use std::fmt;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -55,6 +56,20 @@ pub struct Project {
     pub name: String,
 }
 
+fn deserialize_double_option<'de, D, T>(deserializer: D) -> Result<Option<Option<T>>, D::Error>
+where
+    D: Deserializer<'de>,
+    T: DeserializeOwned,
+{
+    let value = serde_json::Value::deserialize(deserializer)?;
+    if value.is_null() {
+        return Ok(Some(None));
+    }
+
+    let inner = serde_json::from_value(value).map_err(de::Error::custom)?;
+    Ok(Some(Some(inner)))
+}
+
 #[derive(serde::Deserialize)]
 pub struct TaskCreate {
     pub project_id: Option<i64>,
@@ -67,16 +82,22 @@ pub struct TaskCreate {
 
 #[derive(serde::Deserialize)]
 pub struct TaskUpdate {
+    #[serde(default, deserialize_with = "deserialize_double_option")]
     pub project_id: Option<Option<i64>>,
     pub title: Option<String>,
+    #[serde(default, deserialize_with = "deserialize_double_option")]
     pub description: Option<Option<String>>,
     pub status: Option<Status>,
+    #[serde(default, deserialize_with = "deserialize_double_option")]
     pub due_at: Option<Option<DateTime<Utc>>>,
+    #[serde(default, deserialize_with = "deserialize_double_option")]
     pub notes: Option<Option<String>>,
+    pub clear_due_at: Option<bool>,
 }
 
 #[derive(serde::Deserialize, Default)]
 pub struct TaskFilter {
+    #[serde(default, deserialize_with = "deserialize_double_option")]
     pub project_id: Option<Option<i64>>, // Some(None) means Inbox (NULL)
     pub status: Option<Status>,
 }

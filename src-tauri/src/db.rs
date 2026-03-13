@@ -276,7 +276,10 @@ impl Database {
             sets.push("status = ?");
             params.push(Box::new(status.as_str().to_string()));
         }
-        if let Some(due_at) = update.due_at {
+        if update.clear_due_at == Some(true) {
+            sets.push("due_at = ?");
+            params.push(Box::new(Option::<chrono::DateTime<Utc>>::None));
+        } else if let Some(due_at) = update.due_at {
             sets.push("due_at = ?");
             params.push(Box::new(due_at));
         }
