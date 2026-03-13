@@ -103,7 +103,7 @@ const openAddTaskModal = () => {
 }
 
 const openEditTaskModal = (task: Task) => {
-  uiStore.openModal('task', { mode: 'edit', task, defaultProjectId: projectId.value })
+  router.push(`/tasks/${task.id}/edit`)
 }
 
 const openEditProjectModal = () => {

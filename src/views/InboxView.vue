@@ -17,6 +17,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import TaskList from '@/components/tasks/TaskList.vue'
 import type { Task } from '@/types/task'
 import { useTaskStore } from '@/stores/taskStore'
@@ -26,6 +27,7 @@ import { useUIStore } from '@/stores/uiStore'
 const taskStore = useTaskStore()
 const projectStore = useProjectStore()
 const uiStore = useUIStore()
+const router = useRouter()
 
 const tasks = computed(() => taskStore.filterTasks(taskStore.inboxTasks))
 
@@ -34,7 +36,7 @@ const openAddTaskModal = () => {
 }
 
 const openEditTaskModal = (task: Task) => {
-  uiStore.openModal('task', { mode: 'edit', task })
+  router.push(`/tasks/${task.id}/edit`)
 }
 
 const handleDeleteTask = async (taskId: number) => {

@@ -48,6 +48,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import TaskList from '@/components/tasks/TaskList.vue'
 import TaskFilter from '@/components/tasks/TaskFilter.vue'
 import TaskBoard from '@/components/tasks/TaskBoard.vue'
@@ -59,6 +60,7 @@ import { useUIStore } from '@/stores/uiStore'
 const taskStore = useTaskStore()
 const projectStore = useProjectStore()
 const uiStore = useUIStore()
+const router = useRouter()
 const viewMode = ref<'list' | 'board'>('list')
 const showFilters = ref(false)
 
@@ -69,7 +71,7 @@ const openAddTaskModal = () => {
 }
 
 const openEditTaskModal = (task: Task) => {
-  uiStore.openModal('task', { mode: 'edit', task })
+  router.push(`/tasks/${task.id}/edit`)
 }
 
 const handleDeleteTask = async (taskId: number) => {
