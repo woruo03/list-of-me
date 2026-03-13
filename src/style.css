@@ -17,3 +17,27 @@ body {
   margin: 0;
   background-color: hsl(var(--b1));
 }
+
+/* 全局下拉框美化 */
+.select {
+  border-radius: 12px;
+  background-color: hsl(var(--b1));
+  border-color: hsl(var(--b3));
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+.select:focus,
+.select:focus-visible {
+  border-color: hsl(var(--p));
+  box-shadow: 0 0 0 2px hsla(var(--p) / 0.2);
+  outline: none;
+}
+
+.select:hover {
+  border-color: hsl(var(--b4, var(--b3)));
+}
+
+.select select,
+.select option {
+  font-size: 0.9rem;
+}
