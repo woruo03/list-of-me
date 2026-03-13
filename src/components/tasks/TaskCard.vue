@@ -14,7 +14,7 @@
     @click="emit('focus', task.id)"
   >
     <div class="flex items-start justify-between">
-      <div class="flex-1">
+      <div class="flex-1 min-w-0 pr-4">
         <div class="flex items-center gap-2 mb-2">
           <input
             v-if="selectable"
@@ -38,7 +38,7 @@
           </button>
 
           <h3
-            class="font-medium text-lg"
+            class="font-medium text-lg break-all"
             :class="{ 'line-through text-base-content/50': task.status === Status.Done }"
           >
             {{ task.title }}
@@ -47,18 +47,18 @@
           <span v-if="isDueSoon" class="badge badge-warning badge-sm">即将到期</span>
         </div>
 
-        <p v-if="task.description" class="text-base-content/70 mb-3 ml-7">
+        <p v-if="task.description" class="text-base-content/70 mb-3 ml-7 whitespace-normal break-all">
           {{ task.description }}
         </p>
 
-        <div class="flex items-center gap-4 text-sm text-base-content/50 ml-7">
+        <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/50 ml-7">
           <span v-if="showProject && task.project_id && projectName"> 📁 {{ projectName }} </span>
           <span v-if="task.due_at"> 📅 {{ formattedDueDate }} </span>
           <span> 🕐 {{ formattedCreatedAt }} </span>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-shrink-0">
         <button
           v-if="task.status !== Status.Done && !isTodayTask"
           class="btn btn-ghost btn-sm"
@@ -85,7 +85,7 @@
     </div>
 
     <div v-if="task.notes" class="mt-3 pt-3 border-t border-base-300 ml-7">
-      <p class="text-base-content/80 text-sm">📝 {{ task.notes }}</p>
+      <p class="text-base-content/80 text-sm break-all">📝 {{ task.notes }}</p>
     </div>
   </div>
 </template>
