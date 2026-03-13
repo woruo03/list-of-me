@@ -61,6 +61,7 @@ const openAddTaskModal = () => {
   uiStore.openModal('task', { mode: 'create' })
 }
 
+
 watch(
   () => uiStore.searchFocusToken,
   () => {
