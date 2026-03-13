@@ -4,20 +4,22 @@
       <span class="loading loading-spinner loading-lg"></span>
     </div>
 
-    <div v-else-if="tasks.length === 0" class="text-center py-12">
-      <div class="text-base-content/50 mb-4">
-        <span class="text-6xl">📋</span>
+      <div v-else-if="tasks.length === 0" class="text-center py-12">
+        <div class="card card-bordered bg-base-100 mx-auto max-w-md p-8 shadow-sm">
+        <div class="text-base-content/50 mb-4">
+          <span class="text-6xl">📋</span>
+        </div>
+        <h3 class="text-xl font-medium mb-2">{{ emptyTitle }}</h3>
+        <p class="text-base-content/70 mb-6">{{ emptyDescription }}</p>
+        <button v-if="showAddButton" class="btn btn-primary" @click="emit('add')">
+          添加任务
+        </button>
       </div>
-      <h3 class="text-xl font-medium mb-2">{{ emptyTitle }}</h3>
-      <p class="text-base-content/70 mb-6">{{ emptyDescription }}</p>
-      <button v-if="showAddButton" class="btn btn-primary" @click="emit('add')">
-        添加任务
-      </button>
     </div>
 
     <div v-else>
       <div v-if="showBulkActions && enableSelection && taskStore.selectedCount > 0" class="mb-4">
-        <div class="alert bg-base-200">
+        <div class="alert bg-base-100 border border-base-300 shadow-sm">
           <div class="flex flex-wrap items-center gap-3">
             <span>已选择 {{ taskStore.selectedCount }} 项</span>
             <button class="btn btn-xs btn-success" @click="markSelectedDone">标记完成</button>

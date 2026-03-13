@@ -3,7 +3,7 @@
     <div
       v-for="toast in uiStore.notifications"
       :key="toast.id"
-      class="alert shadow-lg"
+      class="alert shadow-lg border border-base-300 bg-base-100"
       :class="alertClass(toast.type)"
     >
       <span>{{ toast.message }}</span>

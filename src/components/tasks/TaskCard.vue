@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-base-100 border border-base-300 rounded-lg p-4 mb-3 hover:shadow-md transition-shadow"
+    class="card card-bordered bg-base-100 p-4 mb-3 shadow-sm hover:shadow-md transition-shadow"
     :class="{
       'border-l-4 border-l-primary': task.status === Status.Todo,
       'border-l-4 border-l-warning': task.status === Status.Doing,

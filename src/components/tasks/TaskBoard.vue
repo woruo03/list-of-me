@@ -1,7 +1,7 @@
 <template>
   <div class="task-board">
     <div v-if="taskStore.selectedCount > 0" class="mb-4">
-      <div class="alert bg-base-200">
+      <div class="alert bg-base-100 border border-base-300 shadow-sm">
         <div class="flex flex-wrap items-center gap-3">
           <span>已选择 {{ taskStore.selectedCount }} 项</span>
           <button class="btn btn-xs btn-success" @click="markSelectedDone">标记完成</button>
@@ -165,15 +165,18 @@ const deleteSelected = async () => {
 }
 
 .board-column {
-  background: rgba(0, 0, 0, 0.02);
-  border: 1px dashed rgba(0, 0, 0, 0.1);
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--b3));
   border-radius: 12px;
-  padding: 12px;
+  padding: 16px;
 }
 
 .board-header {
   font-weight: 600;
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .board-list {

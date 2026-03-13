@@ -1,11 +1,11 @@
 <template>
   <div
-    class="bg-base-100 border border-base-300 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+    class="card card-bordered bg-base-100 p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
     @click="emit('click', project)"
   >
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+        <div class="w-11 h-11 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
           <span class="text-primary text-lg">📁</span>
         </div>
 

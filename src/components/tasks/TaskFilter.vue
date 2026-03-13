@@ -138,9 +138,10 @@ watch(
 
 <style scoped>
 .task-filter {
-  background: rgba(0, 0, 0, 0.02);
-  border-radius: 8px;
+  background: hsl(var(--b1));
+  border-radius: 12px;
   padding: 16px;
   margin-bottom: 20px;
+  border: 1px solid hsl(var(--b3));
 }
 </style>

@@ -3,10 +3,7 @@
     v-if="isOpen"
     class="modal modal-open"
   >
-    <div
-      class="modal-box"
-      :class="sizeClass"
-    >
+    <div class="modal-box bg-base-100 border border-base-300" :class="sizeClass">
       <!-- 标题 -->
       <div
         v-if="title"
