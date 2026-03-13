@@ -1,83 +1,68 @@
 <template>
-  <aside class="w-64 bg-base-200 border-r border-base-300 flex flex-col">
-    <!-- Logo -->
-    <div class="p-6 border-b border-base-300">
+  <aside
+    class="bg-base-200 border-r border-base-300 flex flex-col transition-all duration-200"
+    :class="sidebarClass"
+  >
+    <div class="p-6 border-b border-base-300 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
           <span class="text-primary-content font-bold">L</span>
         </div>
-        <h1 class="text-xl font-bold">List-of-Me</h1>
+        <h1 v-if="!uiStore.sidebarCollapsed" class="text-xl font-bold">List-of-Me</h1>
       </div>
+      <button class="btn btn-ghost btn-sm" @click="uiStore.toggleSidebar">☰</button>
     </div>
 
-    <!-- 导航菜单 -->
     <nav class="flex-1 p-4">
       <ul class="space-y-2">
-        <NavItem
-          icon="inbox"
-          label="收集箱"
-          to="/inbox"
-          :badge="inboxCount"
-        />
-        <NavItem
-          icon="calendar"
-          label="今日"
-          to="/today"
-          :badge="todayCount"
-        />
-        <NavItem
-          icon="folder"
-          label="项目"
-          to="/projects"
-        />
-        <NavItem
-          icon="check-circle"
-          label="已完成"
-          to="/completed"
-        />
+        <NavItem icon="📥" label="收集箱" to="/inbox" :badge="summary?.inbox_count || 0" :collapsed="uiStore.sidebarCollapsed" />
+        <NavItem icon="📅" label="今日" to="/today" :badge="summary?.today_count || 0" :collapsed="uiStore.sidebarCollapsed" />
+        <NavItem icon="📁" label="项目" to="/projects" :collapsed="uiStore.sidebarCollapsed" />
+        <NavItem icon="✅" label="已完成" to="/completed" :collapsed="uiStore.sidebarCollapsed" />
       </ul>
     </nav>
 
-    <!-- 底部区域 -->
     <div class="p-4 border-t border-base-300">
-      <button
-        class="btn btn-primary w-full"
-        @click="openQuickAdd"
-      >
+      <button class="btn btn-primary w-full" @click="openQuickAdd">
         <span class="mr-2">+</span>
-        快速添加任务
+        <span v-if="!uiStore.sidebarCollapsed">快速添加任务</span>
       </button>
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, onBeforeUnmount } from 'vue'
 import NavItem from './NavItem.vue'
-import TauriService from '@/services/tauriService'
+import { useTaskStore } from '@/stores/taskStore'
+import { useUIStore } from '@/stores/uiStore'
 
-const inboxCount = ref(0)
-const todayCount = ref(0)
+const taskStore = useTaskStore()
+const uiStore = useUIStore()
+
+const summary = computed(() => taskStore.summary)
+
+const sidebarClass = computed(() => {
+  return uiStore.sidebarCollapsed ? 'w-20' : 'w-64'
+})
 
 const openQuickAdd = () => {
-  // TODO: 实现快速添加任务模态框
-  console.log('打开快速添加任务')
+  uiStore.openModal('task', { mode: 'create' })
 }
 
-const fetchSummary = async () => {
-  try {
-    const summary = await TauriService.getSummary()
-    inboxCount.value = summary.inbox_count
-    todayCount.value = summary.today_count
-  } catch (error) {
-    console.error('Failed to fetch summary:', error)
-  }
+let intervalId: number | null = null
+
+const startSummaryRefresh = () => {
+  taskStore.refreshSummary()
+  intervalId = window.setInterval(() => taskStore.refreshSummary(), 30000)
 }
 
 onMounted(() => {
-  fetchSummary()
-  // 每30秒刷新一次统计
-  setInterval(fetchSummary, 30000)
+  startSummaryRefresh()
+})
+
+onBeforeUnmount(() => {
+  if (intervalId) window.clearInterval(intervalId)
 })
 </script>
 

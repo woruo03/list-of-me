@@ -7,17 +7,12 @@
     >
       <div class="flex items-center gap-3">
         <div class="w-5 h-5 flex items-center justify-center">
-          <!-- 图标占位 -->
           <span class="text-lg">{{ icon }}</span>
         </div>
-        <span class="font-medium">{{ label }}</span>
+        <span v-if="!collapsed" class="font-medium">{{ label }}</span>
       </div>
 
-      <!-- 徽章 -->
-      <span
-        v-if="badge !== undefined && badge > 0"
-        class="badge badge-primary"
-      >
+      <span v-if="badge !== undefined && badge > 0 && !collapsed" class="badge badge-primary">
         {{ badge }}
       </span>
     </router-link>
@@ -33,9 +28,13 @@ interface Props {
   label: string
   to: string
   badge?: number
+  collapsed?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  collapsed: false,
+})
+
 const route = useRoute()
 
 const isActive = computed(() => {
