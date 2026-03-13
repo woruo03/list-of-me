@@ -1,12 +1,36 @@
 <template>
   <div class="today-view">
-    <div class="mb-4 flex items-center justify-end gap-2">
-      <button class="btn btn-ghost" @click="toggleFilter">
-        {{ showFilters ? '隐藏筛选' : '筛选' }}
-      </button>
-      <button class="btn btn-ghost" @click="toggleViewMode">
-        {{ viewMode === 'list' ? '看板视图' : '列表视图' }}
-      </button>
+    <div class="mb-4 flex flex-col items-end gap-2">
+      <div class="flex items-center justify-end gap-2 flex-wrap">
+        <button class="btn btn-ghost" @click="toggleFilter">
+          {{ showFilters ? '隐藏筛选' : '筛选' }}
+        </button>
+        <button class="btn btn-ghost" @click="toggleViewMode">
+          {{ viewMode === 'list' ? '看板视图' : '列表视图' }}
+        </button>
+        <button class="btn btn-ghost" @click="toggleSelectionMode">
+          {{ selectionMode ? '取消选择' : '选择' }}
+        </button>
+      </div>
+      <div v-if="selectionMode" class="flex items-center justify-end gap-2 w-full">
+        <button class="btn btn-ghost" @click="toggleSelectAll">
+          {{ allSelected ? '取消全选' : '全选' }}
+        </button>
+        <button class="btn btn-ghost" @click="toggleMoveMenu">移动</button>
+        <button
+          class="btn btn-ghost text-error"
+          :disabled="taskStore.selectedCount === 0"
+          @click="deleteSelected"
+        >
+          删除
+        </button>
+      </div>
+      <div v-if="selectionMode && showMoveMenu" class="flex items-center justify-end gap-2 w-full">
+        <div class="w-56">
+          <SelectMenu v-model="moveTargetId" :options="moveOptions" size="sm" />
+        </div>
+        <button class="btn btn-ghost" @click="confirmMove">确定</button>
+      </div>
     </div>
 
     <TaskFilter
@@ -35,6 +59,7 @@
       :tasks="tasks"
       :projects="projectStore.projects"
       :is-loading="taskStore.isLoading"
+      :selection-mode="selectionMode"
       empty-title="今日没有任务"
       empty-description="今天可以放松一下，或者添加一些新任务。"
       @add="openAddTaskModal"
@@ -52,6 +77,7 @@ import { useRouter } from 'vue-router'
 import TaskList from '@/components/tasks/TaskList.vue'
 import TaskFilter from '@/components/tasks/TaskFilter.vue'
 import TaskBoard from '@/components/tasks/TaskBoard.vue'
+import SelectMenu from '@/components/ui/SelectMenu.vue'
 import type { Task } from '@/types/task'
 import { useTaskStore } from '@/stores/taskStore'
 import { useProjectStore } from '@/stores/projectStore'
@@ -63,8 +89,19 @@ const uiStore = useUIStore()
 const router = useRouter()
 const viewMode = ref<'list' | 'board'>('list')
 const showFilters = ref(false)
+const selectionMode = ref(false)
+const showMoveMenu = ref(false)
+const moveTargetId = ref<number | null>(null)
 
 const tasks = computed(() => taskStore.filterTasks(taskStore.todayTasks))
+const allSelected = computed(() => {
+  if (tasks.value.length === 0) return false
+  return tasks.value.every((task) => taskStore.isSelected(task.id))
+})
+const moveOptions = computed(() => [
+  { label: '收集箱', value: null },
+  ...projectStore.projects.map((project) => ({ label: project.name, value: project.id })),
+])
 
 const openAddTaskModal = () => {
   uiStore.openModal('task', { mode: 'create' })
@@ -84,6 +121,35 @@ const toggleViewMode = () => {
 
 const toggleFilter = () => {
   showFilters.value = !showFilters.value
+}
+
+const toggleSelectionMode = () => {
+  selectionMode.value = !selectionMode.value
+  if (!selectionMode.value) taskStore.clearSelection()
+  if (!selectionMode.value) showMoveMenu.value = false
+}
+
+const toggleSelectAll = () => {
+  if (allSelected.value) {
+    taskStore.clearSelection()
+    return
+  }
+  taskStore.selectAll(tasks.value.map((task) => task.id))
+}
+
+const deleteSelected = async () => {
+  if (!confirm('确定要删除所选任务吗？此操作不可撤销。')) return
+  await taskStore.bulkDelete(taskStore.selectedIds)
+}
+
+const toggleMoveMenu = () => {
+  showMoveMenu.value = !showMoveMenu.value
+}
+
+const confirmMove = async () => {
+  if (taskStore.selectedIds.length === 0) return
+  await taskStore.bulkMoveToProject(taskStore.selectedIds, moveTargetId.value)
+  showMoveMenu.value = false
 }
 
 onMounted(() => {
