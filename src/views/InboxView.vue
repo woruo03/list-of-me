@@ -62,7 +62,6 @@ onMounted(() => {
 
 <style scoped>
 .inbox-view {
-  max-width: 800px;
-  margin: 0 auto;
+  width: 100%;
 }
 </style>
