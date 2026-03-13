@@ -2,9 +2,6 @@
   <div class="task-filter">
     <div class="flex flex-wrap gap-4 items-center">
       <div class="form-control">
-        <label class="label">
-          <span class="label-text">项目</span>
-        </label>
         <SelectMenu
           v-model="localFilter.project_id"
           :options="projectOptions"
@@ -15,9 +12,6 @@
       </div>
 
       <div class="form-control">
-        <label class="label">
-          <span class="label-text">状态</span>
-        </label>
         <SelectMenu
           v-model="localFilter.status"
           :options="statusOptions"
@@ -28,9 +22,6 @@
       </div>
 
       <div class="form-control">
-        <label class="label">
-          <span class="label-text">排序</span>
-        </label>
         <SelectMenu
           v-model="localSort"
           :options="sortOptions"
@@ -41,9 +32,6 @@
       </div>
 
       <div class="form-control">
-        <label class="label">
-          <span class="label-text">搜索</span>
-        </label>
         <div class="relative">
           <input
             type="text"
