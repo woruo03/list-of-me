@@ -9,13 +9,37 @@
         </button>
         <button class="btn btn-ghost" @click="openEditProjectModal">编辑项目</button>
       </div>
-      <div class="flex items-center gap-2">
-        <button class="btn btn-ghost" @click="toggleFilter">
-          {{ showFilters ? '隐藏筛选' : '筛选' }}
-        </button>
-        <button class="btn btn-ghost" @click="toggleViewMode">
-          {{ viewMode === 'list' ? '看板视图' : '列表视图' }}
-        </button>
+      <div class="flex flex-col items-end gap-2">
+        <div class="flex items-center gap-2 flex-wrap justify-end">
+          <button class="btn btn-ghost" @click="toggleFilter">
+            {{ showFilters ? '隐藏筛选' : '筛选' }}
+          </button>
+          <button class="btn btn-ghost" @click="toggleViewMode">
+            {{ viewMode === 'list' ? '看板视图' : '列表视图' }}
+          </button>
+          <button class="btn btn-ghost" @click="toggleSelectionMode">
+            {{ selectionMode ? '取消选择' : '选择' }}
+          </button>
+        </div>
+        <div v-if="selectionMode" class="flex items-center gap-2 w-full justify-end">
+          <button class="btn btn-ghost" @click="toggleSelectAll">
+            {{ allSelected ? '取消全选' : '全选' }}
+          </button>
+          <button class="btn btn-ghost" @click="toggleMoveMenu">移动</button>
+          <button
+            class="btn btn-ghost text-error"
+            :disabled="taskStore.selectedCount === 0"
+            @click="deleteSelected"
+          >
+            删除
+          </button>
+        </div>
+        <div v-if="selectionMode && showMoveMenu" class="flex items-center gap-2 w-full justify-end">
+          <div class="w-56">
+            <SelectMenu v-model="moveTargetId" :options="moveOptions" size="sm" />
+          </div>
+          <button class="btn btn-ghost" @click="confirmMove">确定</button>
+        </div>
       </div>
     </div>
 
@@ -45,6 +69,7 @@
       :tasks="tasks"
       :projects="projectStore.projects"
       :is-loading="taskStore.isLoading"
+      :selection-mode="selectionMode"
       empty-title="项目中没有任务"
       empty-description="为这个项目添加第一个任务吧。"
       @add="openAddTaskModal"
@@ -62,6 +87,7 @@ import { useRoute, useRouter } from 'vue-router'
 import TaskList from '@/components/tasks/TaskList.vue'
 import TaskFilter from '@/components/tasks/TaskFilter.vue'
 import TaskBoard from '@/components/tasks/TaskBoard.vue'
+import SelectMenu from '@/components/ui/SelectMenu.vue'
 import type { Task } from '@/types/task'
 import type { Project } from '@/types/project'
 import { useTaskStore } from '@/stores/taskStore'
@@ -77,6 +103,9 @@ const uiStore = useUIStore()
 const project = ref<Project | null>(null)
 const viewMode = ref<'list' | 'board'>('list')
 const showFilters = ref(false)
+const selectionMode = ref(false)
+const showMoveMenu = ref(false)
+const moveTargetId = ref<number | null>(null)
 
 const projectId = computed(() => {
   const id = route.params.id
@@ -84,6 +113,14 @@ const projectId = computed(() => {
 })
 
 const tasks = computed(() => taskStore.filterTasks(taskStore.tasksByProjectId(projectId.value)))
+const allSelected = computed(() => {
+  if (tasks.value.length === 0) return false
+  return tasks.value.every((task) => taskStore.isSelected(task.id))
+})
+const moveOptions = computed(() => [
+  { label: '收集箱', value: null },
+  ...projectStore.projects.map((project) => ({ label: project.name, value: project.id })),
+])
 
 const fetchProject = async () => {
   try {
@@ -121,6 +158,35 @@ const toggleViewMode = () => {
 
 const toggleFilter = () => {
   showFilters.value = !showFilters.value
+}
+
+const toggleSelectionMode = () => {
+  selectionMode.value = !selectionMode.value
+  if (!selectionMode.value) taskStore.clearSelection()
+  if (!selectionMode.value) showMoveMenu.value = false
+}
+
+const toggleSelectAll = () => {
+  if (allSelected.value) {
+    taskStore.clearSelection()
+    return
+  }
+  taskStore.selectAll(tasks.value.map((task) => task.id))
+}
+
+const deleteSelected = async () => {
+  if (!confirm('确定要删除所选任务吗？此操作不可撤销。')) return
+  await taskStore.bulkDelete(taskStore.selectedIds)
+}
+
+const toggleMoveMenu = () => {
+  showMoveMenu.value = !showMoveMenu.value
+}
+
+const confirmMove = async () => {
+  if (taskStore.selectedIds.length === 0) return
+  await taskStore.bulkMoveToProject(taskStore.selectedIds, moveTargetId.value)
+  showMoveMenu.value = false
 }
 
 onMounted(() => {
