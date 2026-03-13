@@ -72,11 +72,17 @@
           📅
         </button>
 
-        <button class="btn btn-ghost btn-sm" @click.stop="emit('edit', task)" title="编辑任务">
+        <button
+          v-if="!selectable"
+          class="btn btn-ghost btn-sm"
+          @click.stop="emit('edit', task)"
+          title="编辑任务"
+        >
           ✏️
         </button>
 
         <button
+          v-if="!selectable"
           class="btn btn-ghost btn-sm text-error"
           @click.stop="confirmDelete"
           title="删除任务"
