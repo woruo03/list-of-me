@@ -1,0 +1,113 @@
+<template>
+  <div class="projects-view">
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h1 class="text-3xl font-bold">项目</h1>
+          <p class="text-base-content/70 mt-2">
+            按项目组织和管理任务。每个项目可以包含多个相关任务。
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="badge badge-primary badge-lg">
+            {{ projects.length }} 个项目
+          </span>
+          <button 
+            class="btn btn-primary"
+            @click="openAddProjectModal"
+          >
+            <span class="mr-2">+</span>
+            新建项目
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 项目网格 -->
+    <div v-if="isLoading" class="flex justify-center py-12">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+
+    <div v-else-if="projects.length === 0" class="text-center py-12">
+      <div class="text-base-content/50 mb-4">
+        <span class="text-6xl">📁</span>
+      </div>
+      <h3 class="text-xl font-medium mb-2">还没有项目</h3>
+      <p class="text-base-content/70 mb-6">
+        创建项目来更好地组织你的任务。
+      </p>
+      <button 
+        class="btn btn-primary"
+        @click="openAddProjectModal"
+      >
+        创建第一个项目
+      </button>
+    </div>
+
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <ProjectCard
+        v-for="project in projects"
+        :key="project.id"
+        :project="project"
+        @click="navigateToProject"
+        @edit="openEditProjectModal"
+        @delete="handleDeleteProject"
+      />
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import ProjectCard from '@/components/projects/ProjectCard.vue';
+import type { Project } from '@/types/project';
+import TauriService from '@/services/tauriService';
+
+const router = useRouter();
+const projects = ref<Project[]>([]);
+const isLoading = ref(false);
+
+const fetchProjects = async () => {
+  isLoading.value = true;
+  try {
+    projects.value = await TauriService.getProjects();
+  } catch (error) {
+    console.error('Failed to fetch projects:', error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const navigateToProject = (project: Project) => {
+  router.push(`/projects/${project.id}`);
+};
+
+const openAddProjectModal = () => {
+  console.log('打开添加项目模态框');
+};
+
+const openEditProjectModal = (project: Project) => {
+  console.log('编辑项目:', project);
+};
+
+const handleDeleteProject = async (projectId: number) => {
+  try {
+    await TauriService.deleteProject(projectId);
+    fetchProjects();
+  } catch (error) {
+    console.error('Failed to delete project:', error);
+  }
+};
+
+onMounted(() => {
+  fetchProjects();
+});
+</script>
+
+<style scoped>
+.projects-view {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+</style>
