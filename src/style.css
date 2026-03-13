@@ -1,2 +1,10 @@
-@import 'tailwindcss';
-@plugin "daisyui"
+@import "tailwindcss";
+@plugin "daisyui";
+
+:root {
+  font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
+}
+
+body {
+  margin: 0;
+}
