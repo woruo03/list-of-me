@@ -12,7 +12,7 @@
           {{ selectionMode ? '取消选择' : '选择' }}
         </button>
       </div>
-      <div v-if="selectionMode" class="flex items-center justify-end gap-2 w-full">
+      <div v-if="selectionMode && !showFilters" class="flex items-center justify-end gap-2 w-full">
         <button class="btn btn-ghost" @click="toggleSelectAll">
           {{ allSelected ? '取消全选' : '全选' }}
         </button>
@@ -25,24 +25,41 @@
           删除
         </button>
       </div>
-      <div v-if="selectionMode && showMoveMenu" class="flex items-center justify-end gap-2 w-full">
-        <div class="w-56">
-          <SelectMenu v-model="moveTargetId" :options="moveOptions" size="sm" />
-        </div>
-        <button class="btn btn-ghost" @click="confirmMove">确定</button>
+    </div>
+
+    <div v-if="showFilters" class="mb-4 flex flex-wrap items-start gap-3">
+      <div class="flex-1 min-w-[260px]">
+        <TaskFilter
+          :projects="projectStore.projects"
+          :initial-filter="taskStore.userFilter"
+          :initial-sort="taskStore.sort"
+          :initial-search="taskStore.searchQuery"
+          @filter="taskStore.setUserFilter"
+          @search="taskStore.setSearchQuery"
+          @sort="taskStore.setSort"
+        />
+      </div>
+      <div v-if="selectionMode" class="flex items-center justify-end gap-2 flex-shrink-0">
+        <button class="btn btn-ghost" @click="toggleSelectAll">
+          {{ allSelected ? '取消全选' : '全选' }}
+        </button>
+        <button class="btn btn-ghost" @click="toggleMoveMenu">移动</button>
+        <button
+          class="btn btn-ghost text-error"
+          :disabled="taskStore.selectedCount === 0"
+          @click="deleteSelected"
+        >
+          删除
+        </button>
       </div>
     </div>
 
-    <TaskFilter
-      v-if="showFilters"
-      :projects="projectStore.projects"
-      :initial-filter="taskStore.userFilter"
-      :initial-sort="taskStore.sort"
-      :initial-search="taskStore.searchQuery"
-      @filter="taskStore.setUserFilter"
-      @search="taskStore.setSearchQuery"
-      @sort="taskStore.setSort"
-    />
+    <div v-if="selectionMode && showMoveMenu" class="mb-4 flex items-center justify-end gap-2">
+      <div class="w-56">
+        <SelectMenu v-model="moveTargetId" :options="moveOptions" size="sm" />
+      </div>
+      <button class="btn btn-ghost" @click="confirmMove">确定</button>
+    </div>
 
     <TaskBoard
       v-if="viewMode === 'board'"
