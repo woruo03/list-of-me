@@ -57,7 +57,7 @@ interface Props {
   helperText?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   type: 'text',
   size: 'md',
 })

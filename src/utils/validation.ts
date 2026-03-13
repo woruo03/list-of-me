@@ -38,7 +38,6 @@ export const validateDueDate = (dueAt: string | null): { valid: boolean; message
   if (!dueAt) return { valid: true };
   
   const date = new Date(dueAt);
-  const now = new Date();
   
   if (isNaN(date.getTime())) {
     return { valid: false, message: '无效的日期格式' };
