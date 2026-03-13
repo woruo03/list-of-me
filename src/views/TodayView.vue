@@ -9,104 +9,93 @@
           </p>
         </div>
         <div class="flex items-center gap-3">
-          <span class="badge badge-primary badge-lg">
-            {{ tasks.length }} 个任务
-          </span>
-          <button 
-            class="btn btn-primary"
-            @click="openAddTaskModal"
-          >
+          <span class="badge badge-primary badge-lg">{{ tasks.length }} 个任务</span>
+          <button class="btn btn-primary" @click="openAddTaskModal">
             <span class="mr-2">+</span>
             添加任务
+          </button>
+          <button class="btn btn-ghost" @click="toggleViewMode">
+            {{ viewMode === 'list' ? '看板视图' : '列表视图' }}
           </button>
         </div>
       </div>
     </div>
 
-    <TaskList
+    <TaskFilter
+      :projects="projectStore.projects"
+      :initial-filter="taskStore.userFilter"
+      :initial-sort="taskStore.sort"
+      :initial-search="taskStore.searchQuery"
+      @filter="taskStore.setUserFilter"
+      @search="taskStore.setSearchQuery"
+      @sort="taskStore.setSort"
+    />
+
+    <TaskBoard
+      v-if="viewMode === 'board'"
       :tasks="tasks"
-      :projects="projects"
-      :is-loading="isLoading"
+      :projects="projectStore.projects"
+      @edit="openEditTaskModal"
+      @delete="handleDeleteTask"
+      @toggle-status="taskStore.toggleTaskStatus"
+      @move-to-today="taskStore.moveToToday"
+    />
+
+    <TaskList
+      v-else
+      :tasks="tasks"
+      :projects="projectStore.projects"
+      :is-loading="taskStore.isLoading"
       empty-title="今日没有任务"
       empty-description="今天可以放松一下，或者添加一些新任务。"
       @add="openAddTaskModal"
       @edit="openEditTaskModal"
       @delete="handleDeleteTask"
-      @toggle-status="handleToggleStatus"
+      @toggle-status="taskStore.toggleTaskStatus"
+      @move-to-today="taskStore.moveToToday"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import TaskList from '@/components/tasks/TaskList.vue';
-import type { Task, TaskCreate, TaskUpdate } from '@/types/task';
-import TauriService from '@/services/tauriService';
+import { computed, onMounted, ref } from 'vue'
+import TaskList from '@/components/tasks/TaskList.vue'
+import TaskFilter from '@/components/tasks/TaskFilter.vue'
+import TaskBoard from '@/components/tasks/TaskBoard.vue'
+import type { Task } from '@/types/task'
+import { useTaskStore } from '@/stores/taskStore'
+import { useProjectStore } from '@/stores/projectStore'
+import { useUIStore } from '@/stores/uiStore'
 
-const tasks = ref<Task[]>([]);
-const projects = ref([]);
-const isLoading = ref(false);
+const taskStore = useTaskStore()
+const projectStore = useProjectStore()
+const uiStore = useUIStore()
+const viewMode = ref<'list' | 'board'>('list')
 
-const fetchTodayTasks = async () => {
-  isLoading.value = true;
-  try {
-    // TODO: 实现今日任务筛选
-    const allTasks = await TauriService.getTasks();
-    // 临时筛选：显示所有任务
-    tasks.value = allTasks;
-  } catch (error) {
-    console.error('Failed to fetch today tasks:', error);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const fetchProjects = async () => {
-  try {
-    projects.value = await TauriService.getProjects();
-  } catch (error) {
-    console.error('Failed to fetch projects:', error);
-  }
-};
+const tasks = computed(() => taskStore.filterTasks(taskStore.todayTasks))
 
 const openAddTaskModal = () => {
-  console.log('打开添加任务模态框');
-};
+  uiStore.openModal('task', { mode: 'create' })
+}
 
 const openEditTaskModal = (task: Task) => {
-  console.log('编辑任务:', task);
-};
+  uiStore.openModal('task', { mode: 'edit', task })
+}
 
 const handleDeleteTask = async (taskId: number) => {
-  try {
-    await TauriService.deleteTask(taskId);
-    fetchTodayTasks();
-  } catch (error) {
-    console.error('Failed to delete task:', error);
-  }
-};
+  await taskStore.deleteTask(taskId)
+}
 
-const handleToggleStatus = async (taskId: number) => {
-  try {
-    const task = tasks.value.find(t => t.id === taskId);
-    if (!task) return;
-    
-    let newStatus;
-    if (task.status === 'todo') newStatus = 'doing';
-    else if (task.status === 'doing') newStatus = 'done';
-    else newStatus = 'todo';
-    
-    await TauriService.updateTask(taskId, { status: newStatus });
-    fetchTodayTasks();
-  } catch (error) {
-    console.error('Failed to toggle task status:', error);
-  }
-};
+const toggleViewMode = () => {
+  viewMode.value = viewMode.value === 'list' ? 'board' : 'list'
+}
 
 onMounted(() => {
-  fetchTodayTasks();
-  fetchProjects();
-});
+  taskStore.setUserFilter({})
+  taskStore.clearSelection()
+  taskStore.fetchAll()
+  projectStore.fetchProjects()
+})
 </script>
 
 <style scoped>

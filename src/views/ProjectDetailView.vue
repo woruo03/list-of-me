@@ -1,154 +1,143 @@
 <template>
   <div class="project-detail-view">
-    <!-- 项目头部 -->
     <div class="mb-8">
       <div class="flex items-center justify-between mb-4">
         <div>
           <div class="flex items-center gap-3 mb-2">
-            <button 
-              class="btn btn-ghost btn-sm"
-              @click="router.back()"
-            >
-              ← 返回
-            </button>
+            <button class="btn btn-ghost btn-sm" @click="router.back()">← 返回</button>
             <h1 class="text-3xl font-bold">{{ project?.name || '加载中...' }}</h1>
-            <span 
-              class="badge"
-              :style="{ backgroundColor: project?.color || '#3b82f6' }"
-            >
-              项目
-            </span>
+            <span class="badge badge-primary">项目</span>
           </div>
-          <p v-if="project?.description" class="text-base-content/70 mt-2">
-            {{ project.description }}
-          </p>
         </div>
         <div class="flex items-center gap-3">
-          <span class="badge badge-primary badge-lg">
-            {{ tasks.length }} 个任务
-          </span>
-          <button 
-            class="btn btn-primary"
-            @click="openAddTaskModal"
-          >
+          <span class="badge badge-primary badge-lg">{{ tasks.length }} 个任务</span>
+          <button class="btn btn-primary" @click="openAddTaskModal">
             <span class="mr-2">+</span>
             添加任务
           </button>
-          <button 
-            class="btn btn-ghost"
-            @click="openEditProjectModal"
-          >
-            编辑项目
+          <button class="btn btn-ghost" @click="openEditProjectModal">编辑项目</button>
+          <button class="btn btn-ghost" @click="toggleViewMode">
+            {{ viewMode === 'list' ? '看板视图' : '列表视图' }}
           </button>
         </div>
       </div>
     </div>
 
-    <!-- 任务列表 -->
-    <TaskList
+    <TaskFilter
+      :projects="projectStore.projects"
+      :initial-filter="taskStore.userFilter"
+      :initial-sort="taskStore.sort"
+      :initial-search="taskStore.searchQuery"
+      @filter="taskStore.setUserFilter"
+      @search="taskStore.setSearchQuery"
+      @sort="taskStore.setSort"
+    />
+
+    <TaskBoard
+      v-if="viewMode === 'board'"
       :tasks="tasks"
-      :projects="[project]"
-      :is-loading="isLoading"
+      :projects="projectStore.projects"
+      @edit="openEditTaskModal"
+      @delete="handleDeleteTask"
+      @toggle-status="taskStore.toggleTaskStatus"
+      @move-to-today="taskStore.moveToToday"
+    />
+
+    <TaskList
+      v-else
+      :tasks="tasks"
+      :projects="projectStore.projects"
+      :is-loading="taskStore.isLoading"
       empty-title="项目中没有任务"
       empty-description="为这个项目添加第一个任务吧。"
       @add="openAddTaskModal"
       @edit="openEditTaskModal"
       @delete="handleDeleteTask"
-      @toggle-status="handleToggleStatus"
+      @toggle-status="taskStore.toggleTaskStatus"
+      @move-to-today="taskStore.moveToToday"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import TaskList from '@/components/tasks/TaskList.vue';
-import type { Task, TaskFilter } from '@/types/task';
-import type { Project } from '@/types/project';
-import TauriService from '@/services/tauriService';
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import TaskList from '@/components/tasks/TaskList.vue'
+import TaskFilter from '@/components/tasks/TaskFilter.vue'
+import TaskBoard from '@/components/tasks/TaskBoard.vue'
+import type { Task } from '@/types/task'
+import type { Project } from '@/types/project'
+import { useTaskStore } from '@/stores/taskStore'
+import { useProjectStore } from '@/stores/projectStore'
+import { useUIStore } from '@/stores/uiStore'
 
-const route = useRoute();
-const router = useRouter();
+const route = useRoute()
+const router = useRouter()
+const taskStore = useTaskStore()
+const projectStore = useProjectStore()
+const uiStore = useUIStore()
 
-const project = ref<Project | null>(null);
-const tasks = ref<Task[]>([]);
-const isLoading = ref(false);
+const project = ref<Project | null>(null)
+const viewMode = ref<'list' | 'board'>('list')
 
 const projectId = computed(() => {
-  const id = route.params.id;
-  return typeof id === 'string' ? parseInt(id, 10) : Number(id);
-});
+  const id = route.params.id
+  return typeof id === 'string' ? parseInt(id, 10) : Number(id)
+})
+
+const tasks = computed(() => taskStore.filterTasks(taskStore.tasksByProjectId(projectId.value)))
 
 const fetchProject = async () => {
   try {
-    project.value = await TauriService.getProject(projectId.value);
+    project.value = await projectStore.getProject(projectId.value)
   } catch (error) {
-    console.error('Failed to fetch project:', error);
-    router.push('/projects');
+    console.error('Failed to fetch project:', error)
+    router.push('/projects')
   }
-};
+}
 
 const fetchProjectTasks = async () => {
-  isLoading.value = true;
-  try {
-    const filter: TaskFilter = {
-      project_id: projectId.value,
-    };
-    tasks.value = await TauriService.getTasks(filter);
-  } catch (error) {
-    console.error('Failed to fetch project tasks:', error);
-  } finally {
-    isLoading.value = false;
-  }
-};
+  await taskStore.fetchAll({ project_id: projectId.value })
+}
 
 const openAddTaskModal = () => {
-  console.log('打开添加任务模态框');
-};
+  uiStore.openModal('task', { mode: 'create', defaultProjectId: projectId.value })
+}
 
 const openEditTaskModal = (task: Task) => {
-  console.log('编辑任务:', task);
-};
+  uiStore.openModal('task', { mode: 'edit', task, defaultProjectId: projectId.value })
+}
 
 const openEditProjectModal = () => {
-  console.log('编辑项目:', project.value);
-};
+  if (!project.value) return
+  uiStore.openModal('project', { mode: 'edit', project: project.value })
+}
 
 const handleDeleteTask = async (taskId: number) => {
-  try {
-    await TauriService.deleteTask(taskId);
-    fetchProjectTasks();
-  } catch (error) {
-    console.error('Failed to delete task:', error);
-  }
-};
+  await taskStore.deleteTask(taskId)
+}
 
-const handleToggleStatus = async (taskId: number) => {
-  try {
-    const task = tasks.value.find(t => t.id === taskId);
-    if (!task) return;
-    
-    let newStatus;
-    if (task.status === 'todo') newStatus = 'doing';
-    else if (task.status === 'doing') newStatus = 'done';
-    else newStatus = 'todo';
-    
-    await TauriService.updateTask(taskId, { status: newStatus });
-    fetchProjectTasks();
-  } catch (error) {
-    console.error('Failed to toggle task status:', error);
-  }
-};
+const toggleViewMode = () => {
+  viewMode.value = viewMode.value === 'list' ? 'board' : 'list'
+}
 
 onMounted(() => {
-  fetchProject();
-  fetchProjectTasks();
-});
+  taskStore.setUserFilter({})
+  taskStore.clearSelection()
+  projectStore.fetchProjects()
+  fetchProject()
+  fetchProjectTasks()
+})
 
-watch(() => route.params.id, () => {
-  fetchProject();
-  fetchProjectTasks();
-});
+watch(
+  () => route.params.id,
+  () => {
+    taskStore.setUserFilter({})
+    taskStore.clearSelection()
+    fetchProject()
+    fetchProjectTasks()
+  },
+)
 </script>
 
 <style scoped>
