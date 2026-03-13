@@ -47,9 +47,21 @@
           <span v-if="isDueSoon" class="badge badge-warning badge-sm">即将到期</span>
         </div>
 
-        <p v-if="task.description" class="text-base-content/70 mb-3 ml-7 whitespace-normal break-all">
-          {{ task.description }}
-        </p>
+        <div v-if="task.description" class="mb-3 ml-7">
+          <p
+            class="text-base-content/70 whitespace-normal break-all"
+            :class="{ 'line-clamp-2': !isDescriptionExpanded }"
+          >
+            {{ task.description }}
+          </p>
+          <button
+            v-if="hasLongDescription"
+            class="btn btn-ghost btn-xs mt-1"
+            @click.stop="toggleDescription"
+          >
+            {{ isDescriptionExpanded ? '收起' : '展开' }}
+          </button>
+        </div>
 
         <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/50 ml-7">
           <span v-if="showProject && task.project_id && projectName"> 📁 {{ projectName }} </span>
@@ -85,13 +97,25 @@
     </div>
 
     <div v-if="task.notes" class="mt-3 pt-3 border-t border-base-300 ml-7">
-      <p class="text-base-content/80 text-sm break-all">📝 {{ task.notes }}</p>
+      <p
+        class="text-base-content/80 text-sm break-all"
+        :class="{ 'line-clamp-2': !isNotesExpanded }"
+      >
+        📝 {{ task.notes }}
+      </p>
+      <button
+        v-if="hasLongNotes"
+        class="btn btn-ghost btn-xs mt-1"
+        @click.stop="toggleNotes"
+      >
+        {{ isNotesExpanded ? '收起' : '展开' }}
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { Task } from '@/types/task'
 import { Status } from '@/types/task'
 import type { Project } from '@/types/project'
@@ -165,12 +189,31 @@ const isDueSoon = computed(() => {
   return hoursDiff < 24 && hoursDiff > 0
 })
 
+const isDescriptionExpanded = ref(false)
+const isNotesExpanded = ref(false)
+
+const hasLongDescription = computed(() => {
+  return (props.task.description?.length || 0) > 80
+})
+
+const hasLongNotes = computed(() => {
+  return (props.task.notes?.length || 0) > 80
+})
+
 const toggleStatus = () => {
   emit('toggleStatus', props.task.id)
 }
 
 const moveToToday = () => {
   emit('moveToToday', props.task.id)
+}
+
+const toggleDescription = () => {
+  isDescriptionExpanded.value = !isDescriptionExpanded.value
+}
+
+const toggleNotes = () => {
+  isNotesExpanded.value = !isNotesExpanded.value
 }
 
 const confirmDelete = () => {
@@ -189,4 +232,10 @@ const handleDragStart = (event: DragEvent) => {
 
 <style scoped>
 /* 任务卡片样式 */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 </style>
