@@ -1,10 +1,27 @@
 <template>
   <div class="projects-view">
-    <div class="mb-4 flex justify-end">
-      <button class="btn btn-primary" @click="openAddProjectModal">
-        <span class="mr-2">+</span>
-        新建项目
-      </button>
+    <div class="mb-4 flex flex-col items-end gap-2">
+      <div class="flex items-center justify-end gap-2 flex-wrap">
+        <button class="btn btn-primary" @click="openAddProjectModal">
+          <span class="mr-2">+</span>
+          新建项目
+        </button>
+        <button class="btn btn-ghost" @click="toggleSelectionMode">
+          {{ selectionMode ? '取消选择' : '选择' }}
+        </button>
+      </div>
+      <div v-if="selectionMode" class="flex items-center justify-end gap-2 w-full">
+        <button class="btn btn-ghost" @click="toggleSelectAll">
+          {{ allSelected ? '取消全选' : '全选' }}
+        </button>
+        <button
+          class="btn btn-ghost text-error"
+          :disabled="selectedIds.length === 0"
+          @click="deleteSelected"
+        >
+          删除
+        </button>
+      </div>
     </div>
 
     <div v-if="projectStore.isLoading" class="flex justify-center py-12">
@@ -26,7 +43,10 @@
         :key="project.id"
         :project="project"
         :task-count="projectStats[project.id] || 0"
+        :selectable="selectionMode"
+        :selected="selectedIds.includes(project.id)"
         @click="navigateToProject"
+        @select="toggleSelect"
         @edit="openEditProjectModal"
         @delete="handleDeleteProject"
       />
@@ -35,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ProjectCard from '@/components/projects/ProjectCard.vue'
 import type { Project } from '@/types/project'
@@ -47,6 +67,8 @@ const router = useRouter()
 const projectStore = useProjectStore()
 const taskStore = useTaskStore()
 const uiStore = useUIStore()
+const selectionMode = ref(false)
+const selectedIds = ref<number[]>([])
 
 const projectStats = computed(() => {
   const stats: Record<number, number> = {}
@@ -56,6 +78,11 @@ const projectStats = computed(() => {
     }
   }
   return stats
+})
+
+const allSelected = computed(() => {
+  if (projectStore.projects.length === 0) return false
+  return projectStore.projects.every((project) => selectedIds.value.includes(project.id))
 })
 
 const navigateToProject = (project: Project) => {
@@ -72,6 +99,35 @@ const openEditProjectModal = (project: Project) => {
 
 const handleDeleteProject = async (projectId: number) => {
   await projectStore.deleteProject(projectId)
+}
+
+const toggleSelectionMode = () => {
+  selectionMode.value = !selectionMode.value
+  if (!selectionMode.value) selectedIds.value = []
+}
+
+const toggleSelect = (projectId: number) => {
+  if (selectedIds.value.includes(projectId)) {
+    selectedIds.value = selectedIds.value.filter((id) => id !== projectId)
+  } else {
+    selectedIds.value = [...selectedIds.value, projectId]
+  }
+}
+
+const toggleSelectAll = () => {
+  if (allSelected.value) {
+    selectedIds.value = []
+    return
+  }
+  selectedIds.value = projectStore.projects.map((project) => project.id)
+}
+
+const deleteSelected = async () => {
+  if (!confirm('确定要删除所选项目吗？此操作不可撤销。')) return
+  for (const id of selectedIds.value) {
+    await projectStore.deleteProject(id)
+  }
+  selectedIds.value = []
 }
 
 onMounted(() => {
