@@ -47,6 +47,45 @@ export const STORAGE_KEYS = {
   LAST_VISITED: 'list-of-me-last-visited',
 }
 
+// DaisyUI 内置主题
+export const DAISYUI_THEMES = [
+  'light',
+  'dark',
+  'cupcake',
+  'bumblebee',
+  'emerald',
+  'corporate',
+  'synthwave',
+  'retro',
+  'cyberpunk',
+  'valentine',
+  'halloween',
+  'garden',
+  'forest',
+  'aqua',
+  'lofi',
+  'pastel',
+  'fantasy',
+  'wireframe',
+  'black',
+  'luxury',
+  'dracula',
+  'cmyk',
+  'autumn',
+  'business',
+  'acid',
+  'lemonade',
+  'night',
+  'coffee',
+  'winter',
+  'dim',
+  'nord',
+  'sunset',
+  'caramellatte',
+  'abyss',
+  'silk',
+]
+
 // 快捷键常量
 export const SHORTCUTS = {
   NEW_TASK: 'Ctrl+N',

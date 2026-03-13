@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
-import { STORAGE_KEYS } from '@/utils/constants'
+import { DAISYUI_THEMES, STORAGE_KEYS } from '@/utils/constants'
 
 interface UIState {
   sidebarCollapsed: boolean
-  theme: 'light' | 'dark' | 'auto'
+  theme: string
   modal: {
     isOpen: boolean
     type: 'task' | 'project' | 'settings' | null
@@ -42,25 +42,19 @@ export const useUIStore = defineStore('ui', {
       localStorage.setItem(STORAGE_KEYS.SIDEBAR_COLLAPSED, String(this.sidebarCollapsed))
     },
 
-    setTheme(theme: 'light' | 'dark' | 'auto') {
-      this.theme = theme
-      localStorage.setItem(STORAGE_KEYS.THEME, theme)
-
-      if (theme === 'dark') {
-        document.documentElement.classList.add('dark')
-      } else if (theme === 'light') {
-        document.documentElement.classList.remove('dark')
-      } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        if (prefersDark) document.documentElement.classList.add('dark')
-        else document.documentElement.classList.remove('dark')
-      }
+    setTheme(theme: string) {
+      const next = DAISYUI_THEMES.includes(theme) ? theme : 'light'
+      this.theme = next
+      localStorage.setItem(STORAGE_KEYS.THEME, next)
+      document.documentElement.setAttribute('data-theme', next)
     },
 
     hydrateFromStorage() {
       const storedTheme = localStorage.getItem(STORAGE_KEYS.THEME)
-      if (storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'auto') {
+      if (storedTheme) {
         this.setTheme(storedTheme)
+      } else {
+        this.setTheme('light')
       }
 
       const collapsed = localStorage.getItem(STORAGE_KEYS.SIDEBAR_COLLAPSED)
