@@ -8,7 +8,6 @@
       @click="toggle"
     >
       <span class="truncate">{{ selectedLabel }}</span>
-      <span class="text-base-content/60">▾</span>
     </button>
 
     <ul
