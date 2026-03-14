@@ -51,11 +51,9 @@ import SelectMenu from '@/components/ui/SelectMenu.vue'
 import type { Task } from '@/types/task'
 import { useTaskStore } from '@/stores/taskStore'
 import { useProjectStore } from '@/stores/projectStore'
-import { useUIStore } from '@/stores/uiStore'
 
 const taskStore = useTaskStore()
 const projectStore = useProjectStore()
-const uiStore = useUIStore()
 const router = useRouter()
 const selectionMode = ref(false)
 const showMoveMenu = ref(false)
