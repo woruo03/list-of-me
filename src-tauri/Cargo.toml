@@ -1,9 +1,16 @@
 [package]
 name = "list-of-me"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["woruo03"]
+description = "A personal task management desktop application built with Tauri + Vue 3"
+authors = ["woruo03 <woruo03@gmail.com>"]
 edition = "2024"
+license = "MIT"
+repository = "https://github.com/woruo03/list-of-me"
+readme = "../README.md"
+homepage = "https://github.com/woruo03/list-of-me"
+documentation = "https://github.com/woruo03/list-of-me#readme"
+keywords = ["task-management", "gtd", "tauri", "vue", "desktop-app"]
+categories = ["task-management", "gui", "desktop-application"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
