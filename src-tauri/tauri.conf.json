@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.tauri.app/config/2",
+  "$schema": "https://schema.api.tauri.app/config/2",
   "productName": "list-of-me",
   "version": "0.1.0",
   "identifier": "com.woruo03.list-of-me",
@@ -31,5 +31,14 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg5QkE4MUU4MEJGNUM4RkYKUldUL3lQVUw2SUc2aWJZWVJEQ04wekF6ZWNWQ0lZSnl1QUVSWWlRUjEzc2VWbXhPblJSdE00dEkK",
+      "endpoints": [
+        "https://github.com/woruo03/list-of-me/releases/latest/download/latest.json"
+      ]
+    }
   }
 }
