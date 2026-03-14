@@ -117,24 +117,24 @@ jobs:
           DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/${FILE_NAME}"
           export SIGNATURE VERSION PUB_DATE DOWNLOAD_URL
           python - <<'PY'
-import json
-import os
+          import json
+          import os
 
-data = {
-    "version": os.environ["VERSION"],
-    "notes": "",
-    "pub_date": os.environ["PUB_DATE"],
-    "platforms": {
-        "linux-x86_64": {
-            "signature": os.environ["SIGNATURE"],
-            "url": os.environ["DOWNLOAD_URL"],
-        }
-    },
-}
+          data = {
+              "version": os.environ["VERSION"],
+              "notes": "",
+              "pub_date": os.environ["PUB_DATE"],
+              "platforms": {
+                  "linux-x86_64": {
+                      "signature": os.environ["SIGNATURE"],
+                      "url": os.environ["DOWNLOAD_URL"],
+                  }
+              },
+          }
 
-with open("latest.json", "w", encoding="utf-8") as f:
-    json.dump(data, f, ensure_ascii=False, indent=2)
-PY
+          with open("latest.json", "w", encoding="utf-8") as f:
+              json.dump(data, f, ensure_ascii=False, indent=2)
+          PY
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
