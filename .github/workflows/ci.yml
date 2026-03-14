@@ -16,9 +16,76 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  windows-build:
+    runs-on: windows-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: x86_64-pc-windows-msvc
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Cache pnpm dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pnpm-store
+            node_modules
+            **/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Tauri (Windows)
+        run: pnpm tauri build --target x86_64-pc-windows-msvc
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-bundles
+          path: |
+            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
+            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+          retention-days: 7
+
   release:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    needs: [windows-build]
     permissions:
       contents: write
     env:
@@ -104,37 +171,75 @@ jobs:
           APPIMAGE_EXTRACT_AND_RUN: 1
         run: pnpm tauri build
 
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-bundles
+          path: windows-artifacts
+
       - name: Generate latest.json
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           TAG_NAME="${{ steps.release_tag.outputs.tag }}"
-          APPIMAGE_PATH=$(find src-tauri/target -path "*/release/bundle/appimage/*.AppImage" -type f | head -n 1)
-          if [ -z "$APPIMAGE_PATH" ]; then
-            echo "AppImage not found."
-            exit 1
-          fi
-          SIGNATURE=$(pnpm tauri signer sign "$APPIMAGE_PATH" | tr -d '\n')
           VERSION="${TAG_NAME#v}"
           PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          FILE_NAME=$(basename "$APPIMAGE_PATH")
-          DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${FILE_NAME}"
-          export SIGNATURE VERSION PUB_DATE DOWNLOAD_URL
+          
+          # Linux AppImage
+          APPIMAGE_PATH=$(find src-tauri/target -path "*/release/bundle/appimage/*.AppImage" -type f | head -n 1)
+          if [ -n "$APPIMAGE_PATH" ]; then
+            APPIMAGE_SIGNATURE=$(pnpm tauri signer sign "$APPIMAGE_PATH" | tr -d '\n')
+            APPIMAGE_FILE_NAME=$(basename "$APPIMAGE_PATH")
+            APPIMAGE_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${APPIMAGE_FILE_NAME}"
+            export APPIMAGE_SIGNATURE APPIMAGE_DOWNLOAD_URL
+          fi
+          
+          # Windows MSI
+          MSI_PATH=$(find windows-artifacts -name "*.msi" -type f | head -n 1)
+          if [ -n "$MSI_PATH" ]; then
+            MSI_FILE_NAME=$(basename "$MSI_PATH")
+            MSI_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${MSI_FILE_NAME}"
+            export MSI_DOWNLOAD_URL
+          fi
+          
+          # Windows EXE
+          EXE_PATH=$(find windows-artifacts -name "*.exe" -type f | head -n 1)
+          if [ -n "$EXE_PATH" ]; then
+            EXE_FILE_NAME=$(basename "$EXE_PATH")
+            EXE_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${EXE_FILE_NAME}"
+            export EXE_DOWNLOAD_URL
+          fi
+          
+          export VERSION PUB_DATE
           python - <<'PY'
           import json
           import os
 
+          platforms = {}
+          
+          # Linux platform
+          if "APPIMAGE_DOWNLOAD_URL" in os.environ:
+              platforms["linux-x86_64"] = {
+                  "signature": os.environ["APPIMAGE_SIGNATURE"],
+                  "url": os.environ["APPIMAGE_DOWNLOAD_URL"],
+              }
+          
+          # Windows platforms
+          if "MSI_DOWNLOAD_URL" in os.environ:
+              platforms["windows-x86_64"] = {
+                  "url": os.environ["MSI_DOWNLOAD_URL"],
+              }
+          elif "EXE_DOWNLOAD_URL" in os.environ:
+              platforms["windows-x86_64"] = {
+                  "url": os.environ["EXE_DOWNLOAD_URL"],
+              }
+          
           data = {
               "version": os.environ["VERSION"],
               "notes": "",
               "pub_date": os.environ["PUB_DATE"],
-              "platforms": {
-                  "linux-x86_64": {
-                      "signature": os.environ["SIGNATURE"],
-                      "url": os.environ["DOWNLOAD_URL"],
-                  }
-              },
+              "platforms": platforms,
           }
 
           with open("latest.json", "w", encoding="utf-8") as f:
@@ -153,4 +258,6 @@ jobs:
             src-tauri/target/*/release/bundle/deb/*.deb
             src-tauri/target/*/release/bundle/rpm/*.rpm
             src-tauri/target/*/release/bundle/appimage/*.AppImage
+            windows-artifacts/*.msi
+            windows-artifacts/*.exe
             latest.json
