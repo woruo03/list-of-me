@@ -7,10 +7,23 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+pnpm-lock.yaml
+
+# Build outputs
 dist
 dist-ssr
 *.local
+
+# Tauri build outputs
+src-tauri/target
+src-tauri/Cargo.lock
+
+# Arch Linux package outputs
+pkg/
+list-of-me-*.pkg.tar.zst
+list-of-me-debug-*.pkg.tar.zst
 
 # Editor directories and files
 .vscode/*
@@ -29,5 +42,30 @@ plans
 # Docs
 docs
 
-# Key
+# Keys and secrets
 tauri-signing.key
+tauri-signing.key.pub
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE specific files
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+
+# Debug files
+*.pid
+*.seed
+*.pid.lock
