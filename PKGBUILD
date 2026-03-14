@@ -27,25 +27,38 @@ package() {
         install -Dm755 "src-tauri/target/release/$pkgname" "$pkgdir/usr/bin/$pkgname"
     fi
     
-    # Install icons
+    # Install icons - ensure all required sizes are installed
+    # Install pixmaps icon
     install -Dm644 "src-tauri/icons/128x128.png" "$pkgdir/usr/share/pixmaps/$pkgname.png"
+    
+    # Install hicolor theme icons
     for size in 32 64 128 256 512; do
         if [ -f "src-tauri/icons/${size}x${size}.png" ]; then
             install -Dm644 "src-tauri/icons/${size}x${size}.png" "$pkgdir/usr/share/icons/hicolor/${size}x${size}/apps/$pkgname.png"
+        elif [ -f "src-tauri/icons/icon.png" ] && [ "$size" = "512" ]; then
+            # Use icon.png as fallback for 512x512
+            install -Dm644 "src-tauri/icons/icon.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/$pkgname.png"
         fi
     done
-    install -Dm644 "src-tauri/icons/icon.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/$pkgname.png"
+    
+    # Ensure at least one icon is installed for the .desktop file
+    if [ ! -f "$pkgdir/usr/share/icons/hicolor/128x128/apps/$pkgname.png" ]; then
+        install -Dm644 "src-tauri/icons/128x128.png" "$pkgdir/usr/share/icons/hicolor/128x128/apps/$pkgname.png"
+    fi
 
-    # Create and install .desktop file
+    # Create and install .desktop file with proper icon reference
     mkdir -p "$pkgdir/usr/share/applications"
     cat > "$pkgdir/usr/share/applications/$pkgname.desktop" << EOF
 [Desktop Entry]
 Name=List of Me
+GenericName=Task Management Application
 Exec=$pkgname
 Icon=$pkgname
 Type=Application
-Categories=Utility;
+Categories=Utility;Office;
 Terminal=false
-Comment=A Vue + Tauri application
+Comment=A personal task management desktop application built with Tauri + Vue 3
+Keywords=task;management;gtd;todo;productivity
+StartupWMClass=list-of-me
 EOF
 }
