@@ -20,7 +20,8 @@ import { useRoute, useRouter } from 'vue-router'
 import TaskForm from '@/components/tasks/TaskForm.vue'
 import { useTaskStore } from '@/stores/taskStore'
 import { useProjectStore } from '@/stores/projectStore'
-import type { TaskCreate } from '@/types/task'
+import type { TaskCreate, TaskUpdate } from '@/types/task'
+import { Status } from '@/types/task'
 
 const route = useRoute()
 const router = useRouter()
@@ -42,13 +43,21 @@ const forceInbox = computed(() => {
   return String(value) === '1' || String(value).toLowerCase() === 'true'
 })
 
-const handleSubmit = async (data: TaskCreate) => {
-  const payload = { ...data }
+const handleSubmit = async (data: TaskCreate | TaskUpdate) => {
+  const payload: TaskCreate = {
+    title: 'title' in data ? data.title ?? '' : '',
+    description: data.description ?? null,
+    project_id: data.project_id ?? null,
+    status: data.status ?? Status.Todo,
+    due_at: data.due_at ?? null,
+    notes: data.notes ?? null,
+  }
   if (forceInbox.value) {
     payload.project_id = null
   } else if (defaultProjectId.value !== null) {
     payload.project_id = defaultProjectId.value
   }
+  if (!payload.title) return
   await taskStore.createTask(payload)
   router.back()
 }
