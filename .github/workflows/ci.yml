@@ -110,7 +110,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           TAG_NAME="${{ steps.release_tag.outputs.tag }}"
-          APPIMAGE_PATH=$(ls src-tauri/target/release/bundle/appimage/*.AppImage | head -n 1)
+          APPIMAGE_PATH=$(find src-tauri/target -path "*/release/bundle/appimage/*.AppImage" -type f | head -n 1)
           if [ -z "$APPIMAGE_PATH" ]; then
             echo "AppImage not found."
             exit 1
@@ -150,4 +150,7 @@ jobs:
             src-tauri/target/release/bundle/deb/*.deb
             src-tauri/target/release/bundle/rpm/*.rpm
             src-tauri/target/release/bundle/appimage/*.AppImage
+            src-tauri/target/*/release/bundle/deb/*.deb
+            src-tauri/target/*/release/bundle/rpm/*.rpm
+            src-tauri/target/*/release/bundle/appimage/*.AppImage
             latest.json
