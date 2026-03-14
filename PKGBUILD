@@ -1,15 +1,18 @@
 pkgname=list-of-me
 pkgver=0.1.0
 pkgrel=1
-pkgdesc="A Vue + Tauri application"
+pkgdesc="A personal task management desktop application built with Tauri + Vue 3"
 arch=('x86_64')
 depends=('webkit2gtk-4.1' 'glibc' 'gcc-libs' 'cairo' 'gdk-pixbuf2' 'glib2' 'gtk3' 'pango' 'sqlite')
-makedepends=()
+makedepends=('rust' 'cargo' 'nodejs')
 source=()
+sha256sums=()
 
 options=('!lto')
 build() {
     cd "$srcdir/.."
+    # 使用core自带的pnpm（通过nodejs-corepack提供）
+    corepack enable pnpm
     pnpm install
     pnpm tauri build
 }
