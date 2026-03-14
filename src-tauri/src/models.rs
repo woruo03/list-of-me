@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
+use serde::de::{self, DeserializeOwned, Deserializer};
 use serde::{Deserialize, Serialize};
-use serde::de::{self, Deserializer, DeserializeOwned};
 use std::fmt;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

@@ -5,7 +5,7 @@ use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 
 use crate::error::{CommandError, Result};
-use crate::models::{Project, Status, Task, TaskCreate, TaskFilter, TaskUpdate, Summary};
+use crate::models::{Project, Status, Summary, Task, TaskCreate, TaskFilter, TaskUpdate};
 
 // SQL Constants
 const SQL_CREATE_PROJECTS_TABLE: &str = "
@@ -83,14 +83,14 @@ impl Database {
     }
 
     pub fn new(app_handle: &AppHandle) -> Result<Self> {
-        let app_dir = app_handle
-            .path()
-            .app_data_dir()
-            .map_err(|e| CommandError::Internal(format!("Failed to get app data directory: {e}")))?;
+        let app_dir = app_handle.path().app_data_dir().map_err(|e| {
+            CommandError::Internal(format!("Failed to get app data directory: {e}"))
+        })?;
 
         if !app_dir.exists() {
-            fs::create_dir_all(&app_dir)
-                .map_err(|e| CommandError::Internal(format!("Failed to create app data directory: {e}")))?;
+            fs::create_dir_all(&app_dir).map_err(|e| {
+                CommandError::Internal(format!("Failed to create app data directory: {e}"))
+            })?;
         }
 
         let db_path = app_dir.join("list-of-me.db");

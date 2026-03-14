@@ -41,14 +41,12 @@ pub fn run() {
             commands::get_project,
             commands::update_project,
             commands::delete_project,
-            
             // 任务管理命令 (5个)
             commands::create_task,
             commands::get_tasks,
             commands::get_task,
             commands::update_task,
             commands::delete_task,
-            
             // 统计命令 (3个)
             commands::get_inbox_count,
             commands::get_today_count,
