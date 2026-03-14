@@ -32,32 +32,47 @@
 ## 🚀 快速开始
 
 ### 系统要求
+
+#### 通用要求
 - Node.js 18+ 或更高版本
 - Rust 1.70+（用于Tauri构建）
 - pnpm 8+（推荐包管理器）
 
+#### Linux特定要求（Tauri开发）
+- WebKit2GTK 4.1+
+- GLib 2.56+
+- GTK+3 3.22+
+- libappindicator（系统托盘支持）
+
+#### Arch Linux特定要求
+```bash
+sudo pacman -S webkit2gtk-4.1 glibc gcc-libs cairo gdk-pixbuf2 glib2 gtk3 pango sqlite rust cargo nodejs
+```
+
 ### 安装与运行
 
-1. **克隆仓库**
-   ```bash
-   git clone https://github.com/woruo03/list-of-me.git
-   cd list-of-me
-   ```
+#### 1. 克隆仓库
+```bash
+git clone https://github.com/woruo03/list-of-me.git
+cd list-of-me
+```
 
-2. **安装依赖**
-   ```bash
-   pnpm install
-   ```
+#### 2. 安装依赖
+```bash
+pnpm install
+```
 
-3. **开发模式运行**
-   ```bash
-   pnpm tauri dev
-   ```
+#### 3. 开发模式运行
+```bash
+pnpm tauri dev
+```
 
-4. **构建应用**
-   ```bash
-   pnpm tauri build
-   ```
+#### 4. 构建应用
+```bash
+pnpm tauri build
+```
+
+构建完成后，应用将位于 `src-tauri/target/release/list-of-me`（Linux）或相应平台的目录中。
 
 ### 打包为Arch Linux包
 
@@ -65,6 +80,109 @@
 
 ```bash
 makepkg -si
+```
+
+这将自动安装所有依赖并构建应用包。
+
+## 🐧 Arch Linux详细安装指南
+
+### 方法一：使用PKGBUILD构建（推荐）
+
+#### 1. 安装构建依赖
+确保已安装基础开发工具和Rust工具链：
+```bash
+sudo pacman -S base-devel rust cargo nodejs
+```
+
+#### 2. 安装运行时依赖
+Tauri应用需要以下依赖：
+```bash
+sudo pacman -S webkit2gtk-4.1 glibc gcc-libs cairo gdk-pixbuf2 glib2 gtk3 pango sqlite
+```
+
+#### 3. 克隆仓库并构建
+```bash
+git clone https://github.com/woruo03/list-of-me.git
+cd list-of-me
+makepkg -si
+```
+
+`makepkg -si`命令将：
+- 自动下载所有依赖
+- 构建应用
+- 安装生成的包到系统
+
+#### 4. 运行应用
+安装完成后，可以通过以下方式运行：
+```bash
+list-of-me
+```
+
+或者在应用菜单中找到"List of Me"应用。
+
+### 方法二：手动构建
+
+如果你希望手动构建而不使用PKGBUILD：
+
+#### 1. 安装依赖
+```bash
+sudo pacman -S webkit2gtk-4.1 glibc gcc-libs cairo gdk-pixbuf2 glib2 gtk3 pango sqlite rust cargo nodejs pnpm
+```
+
+#### 2. 克隆仓库
+```bash
+git clone https://github.com/woruo03/list-of-me.git
+cd list-of-me
+```
+
+#### 3. 安装前端依赖
+```bash
+pnpm install
+```
+
+#### 4. 构建应用
+```bash
+pnpm tauri build
+```
+
+#### 5. 手动安装
+构建完成后，二进制文件位于`src-tauri/target/release/list-of-me`，你可以将其复制到系统路径：
+```bash
+sudo cp src-tauri/target/release/list-of-me /usr/local/bin/
+```
+
+### 方法三：从AUR安装（如果可用）
+
+如果应用已上传到AUR，可以使用AUR助手安装：
+
+```bash
+yay -S list-of-me
+```
+
+或
+
+```bash
+paru -S list-of-me
+```
+
+### 故障排除
+
+#### 构建失败：缺少依赖
+确保所有依赖都已安装：
+```bash
+sudo pacman -S webkit2gtk-4.1 glibc gcc-libs cairo gdk-pixbuf2 glib2 gtk3 pango sqlite rust cargo nodejs base-devel
+```
+
+#### 构建失败：Rust工具链问题
+确保Rust工具链已正确安装：
+```bash
+rustup update
+```
+
+#### 运行时错误：GTK主题问题
+如果应用界面显示异常，尝试安装GTK主题：
+```bash
+sudo pacman -S gnome-themes-extra
 ```
 
 ## 📁 项目结构
