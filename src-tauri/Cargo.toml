@@ -20,7 +20,7 @@ tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 chrono = { version = "0.4", features = ["serde"] }
-rusqlite = { version = "0.38.0", features = ["bundled", "chrono"] }
+rusqlite = { version = "0.38.0", features = ["chrono"] }
 anyhow = "1.0.101"
 tokio = { version = "1.49.0", features = ["full"] }
 thiserror = "2.0.18"
@@ -33,7 +33,6 @@ incremental = true # 增量编译，改一点编一点，速度快
 
 [profile.release]
 codegen-units = 1   # 减少分块，让编译器能全局优化代码
-lto = true          # 启用全量链接时优化，虽然打包变慢，但程序运行极快且体积更小
 opt-level = "s"     # 优先考虑二进制体积（Small），适合桌面软件
 panic = "abort"     # 出错时直接中止，不包含回溯信息，能显著减小程序体积
 strip = "debuginfo" # 自动剥离符号表，进一步缩小体积
