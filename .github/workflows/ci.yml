@@ -4,11 +4,12 @@ on:
   push:
   pull_request:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,4 +44,4 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Tauri (no bundles)
-        run: pnpm tauri build -- --bundles none
+        run: pnpm tauri build --bundles none
