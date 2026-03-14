@@ -5,22 +5,23 @@ pub mod models;
 pub mod notifications;
 pub mod shortcuts;
 
-use tauri::{Manager, AppHandle};
 use crate::db::Database;
 use crate::error::CommandError;
+use tauri::{AppHandle, Manager};
 
 /// 应用启动时的初始化设置
 fn setup(app: &AppHandle) -> Result<(), CommandError> {
     // 初始化数据库并注册到状态管理
     let db = Database::new(app)?;
     app.manage(db);
-    
+
     Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         // 注册插件
         .plugin(tauri_plugin_opener::init())
         // 设置应用启动钩子
