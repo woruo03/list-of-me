@@ -33,7 +33,7 @@
     ],
     "windows": {
       "wix": {
-        "language": ["en-US", "zh-CN"],
+        "languages": ["en-US", "zh-CN"],
         "template": "standard"
       },
       "nsis": {
@@ -42,7 +42,7 @@
         "installerSidebar": "icons/128x128.png",
         "uninstallerSidebar": "icons/128x128.png",
         "displayLanguageSelector": true,
-        "language": ["en-US", "zh-CN"]
+        "languages": ["en-US", "zh-CN"]
       }
     }
   },
