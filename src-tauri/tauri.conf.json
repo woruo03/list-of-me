@@ -35,11 +35,7 @@
       "wix": {
         "language": "zh-CN"
       },
-      "nsis": {
-        "installMode": "perUser",
-        "displayLanguageSelector": true,
-        "languages": ["en-US", "zh-CN"]
-      }
+      "nsis": {}
     }
   },
   "plugins": {
