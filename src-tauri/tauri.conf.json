@@ -33,7 +33,7 @@
     ],
     "windows": {
       "wix": {
-        "languages": ["en-US", "zh-CN"],
+        "language": "zh-CN",
         "template": "standard"
       },
       "nsis": {
