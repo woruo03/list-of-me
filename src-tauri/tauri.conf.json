@@ -30,7 +30,21 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "wix": {
+        "language": ["en-US", "zh-CN"],
+        "template": "standard"
+      },
+      "nsis": {
+        "installMode": "perUser",
+        "installerIcon": "icons/icon.ico",
+        "installerSidebar": "icons/128x128.png",
+        "uninstallerSidebar": "icons/128x128.png",
+        "displayLanguageSelector": true,
+        "languages": ["English", "SimpChinese"]
+      }
+    }
   },
   "plugins": {
     "updater": {
