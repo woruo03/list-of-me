@@ -71,6 +71,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Tauri (Windows)
+        env:
+          SQLITE3_STATIC: 1
         run: pnpm tauri build --target x86_64-pc-windows-msvc
 
       - name: Upload Windows artifacts
@@ -169,6 +171,7 @@ jobs:
           LINUXDEPLOY_PLUGIN_GTK: /tmp/linuxdeploy/linuxdeploy-plugin-gtk.sh
           LINUXDEPLOY_PLUGIN_GSTREAMER: /tmp/linuxdeploy/linuxdeploy-plugin-gstreamer.sh
           APPIMAGE_EXTRACT_AND_RUN: 1
+          SQLITE3_STATIC: 1
         run: pnpm tauri build
 
       - name: Download Windows artifacts
