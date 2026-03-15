@@ -42,7 +42,7 @@
         "installerSidebar": "icons/128x128.png",
         "uninstallerSidebar": "icons/128x128.png",
         "displayLanguageSelector": true,
-        "languages": ["English", "SimpChinese"]
+        "language": ["en-US", "zh-CN"]
       }
     }
   },
