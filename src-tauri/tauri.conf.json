@@ -33,16 +33,12 @@
     ],
     "windows": {
       "wix": {
-        "language": "zh-CN",
-        "template": "standard"
+        "language": "zh-CN"
       },
       "nsis": {
         "installMode": "perUser",
-        "installerIcon": "icons/icon.ico",
-        "installerSidebar": "icons/128x128.png",
-        "uninstallerSidebar": "icons/128x128.png",
         "displayLanguageSelector": true,
-        "languages": ["English", "SimpChinese"]
+        "languages": ["en-US", "zh-CN"]
       }
     }
   },
