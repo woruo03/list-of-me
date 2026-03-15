@@ -170,7 +170,7 @@ jobs:
           name: windows-bundles
           path: windows-artifacts
 
-      - name: Generate latest.json
+      - name: Generate latest.json with Windows signature support
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
@@ -191,41 +191,43 @@ jobs:
           # Windows MSI
           MSI_PATH=$(find windows-artifacts -name "*.msi" -type f | head -n 1)
           if [ -n "$MSI_PATH" ]; then
+            MSI_SIGNATURE=$(pnpm tauri signer sign "$MSI_PATH" | tr -d '\n')
             MSI_FILE_NAME=$(basename "$MSI_PATH")
             MSI_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${MSI_FILE_NAME}"
-            export MSI_DOWNLOAD_URL
+            export MSI_SIGNATURE MSI_DOWNLOAD_URL
           fi
           
           # Windows EXE
           EXE_PATH=$(find windows-artifacts -name "*.exe" -type f | head -n 1)
           if [ -n "$EXE_PATH" ]; then
+            EXE_SIGNATURE=$(pnpm tauri signer sign "$EXE_PATH" | tr -d '\n')
             EXE_FILE_NAME=$(basename "$EXE_PATH")
             EXE_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${EXE_FILE_NAME}"
-            export EXE_DOWNLOAD_URL
+            export EXE_SIGNATURE EXE_DOWNLOAD_URL
           fi
           
           export VERSION PUB_DATE
-          python - <<'PY'
+          python3 - <<'PY'
           import json
           import os
-
+          
           platforms = {}
           
           # Linux platform
           if "APPIMAGE_DOWNLOAD_URL" in os.environ:
               platforms["linux-x86_64"] = {
-                  "signature": os.environ["APPIMAGE_SIGNATURE"],
+                  "signature": os.environ.get("APPIMAGE_SIGNATURE", ""),
                   "url": os.environ["APPIMAGE_DOWNLOAD_URL"],
               }
           
           # Windows platforms
-          if "MSI_DOWNLOAD_URL" in os.environ:
+          windows_signature = os.environ.get("MSI_SIGNATURE") or os.environ.get("EXE_SIGNATURE")
+          windows_url = os.environ.get("MSI_DOWNLOAD_URL") or os.environ.get("EXE_DOWNLOAD_URL")
+          
+          if windows_url:
               platforms["windows-x86_64"] = {
-                  "url": os.environ["MSI_DOWNLOAD_URL"],
-              }
-          elif "EXE_DOWNLOAD_URL" in os.environ:
-              platforms["windows-x86_64"] = {
-                  "url": os.environ["EXE_DOWNLOAD_URL"],
+                  "signature": windows_signature or "",
+                  "url": windows_url,
               }
           
           data = {
@@ -234,7 +236,7 @@ jobs:
               "pub_date": os.environ["PUB_DATE"],
               "platforms": platforms,
           }
-
+          
           with open("latest.json", "w", encoding="utf-8") as f:
               json.dump(data, f, ensure_ascii=False, indent=2)
           PY
