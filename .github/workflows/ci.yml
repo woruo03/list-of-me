@@ -146,27 +146,19 @@ jobs:
             curl
           sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64
 
-      - name: Install linuxdeploy
+      - name: Download linuxdeploy
         run: |
-          mkdir -p /tmp/linuxdeploy
-          curl -L -o /tmp/linuxdeploy/linuxdeploy.AppImage https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-          curl -L -o /tmp/linuxdeploy/linuxdeploy-plugin-appimage.AppImage https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage
-          curl -L -o /tmp/linuxdeploy/linuxdeploy-plugin-gtk.sh https://raw.githubusercontent.com/tauri-apps/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
-          curl -L -o /tmp/linuxdeploy/linuxdeploy-plugin-gstreamer.sh https://raw.githubusercontent.com/tauri-apps/linuxdeploy-plugin-gstreamer/master/linuxdeploy-plugin-gstreamer.sh
-          chmod +x /tmp/linuxdeploy/linuxdeploy.AppImage \
-            /tmp/linuxdeploy/linuxdeploy-plugin-appimage.AppImage \
-            /tmp/linuxdeploy/linuxdeploy-plugin-gtk.sh \
-            /tmp/linuxdeploy/linuxdeploy-plugin-gstreamer.sh
+          curl -L -o /tmp/linuxdeploy.AppImage https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          curl -L -o /tmp/linuxdeploy-plugin-appimage.AppImage https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage
+          chmod +x /tmp/linuxdeploy.AppImage /tmp/linuxdeploy-plugin-appimage.AppImage
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build Tauri (bundles)
         env:
-          LINUXDEPLOY: /tmp/linuxdeploy/linuxdeploy.AppImage
-          LINUXDEPLOY_PLUGIN_APPIMAGE: /tmp/linuxdeploy/linuxdeploy-plugin-appimage.AppImage
-          LINUXDEPLOY_PLUGIN_GTK: /tmp/linuxdeploy/linuxdeploy-plugin-gtk.sh
-          LINUXDEPLOY_PLUGIN_GSTREAMER: /tmp/linuxdeploy/linuxdeploy-plugin-gstreamer.sh
+          LINUXDEPLOY: /tmp/linuxdeploy.AppImage
+          LINUXDEPLOY_PLUGIN_APPIMAGE: /tmp/linuxdeploy-plugin-appimage.AppImage
           APPIMAGE_EXTRACT_AND_RUN: 1
           SQLITE3_STATIC: 1
         run: pnpm tauri build
