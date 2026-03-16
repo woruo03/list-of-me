@@ -162,7 +162,7 @@ jobs:
           LINUXDEPLOY_PLUGIN_APPIMAGE: /tmp/linuxdeploy-plugin-appimage.AppImage
           APPIMAGE_EXTRACT_AND_RUN: 1
           SQLITE3_STATIC: 1
-        run: pnpm tauri build
+        run: pnpm tauri build --target x86_64-unknown-linux-gnu
 
       - name: Download Windows artifacts
         uses: actions/download-artifact@v4
