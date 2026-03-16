@@ -247,11 +247,11 @@ jobs:
           tag_name: ${{ steps.release_tag.outputs.tag }}
           target_commitish: ${{ github.sha }}
           files: |
-            src-tauri/target/release/bundle/deb/*.deb
-            src-tauri/target/release/bundle/rpm/*.rpm
-            src-tauri/target/release/bundle/appimage/*.AppImage
-            windows-artifacts/*.msi
-            windows-artifacts/*.exe
+            src-tauri/target/**/bundle/deb/**/*.deb
+            src-tauri/target/**/bundle/rpm/**/*.rpm
+            src-tauri/target/**/bundle/appimage/**/*.AppImage
+            windows-artifacts/**/*.msi
+            windows-artifacts/**/*.exe
             latest.json
           draft: false
           prerelease: false
