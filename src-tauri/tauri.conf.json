@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.api.tauri.app/config/2",
   "productName": "list-of-me",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "identifier": "com.woruo03.list-of-me",
   "build": {
     "beforeDevCommand": "pnpm dev",

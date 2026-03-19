@@ -1,5 +1,5 @@
 pkgname=list-of-me
-pkgver=0.1.0
+pkgver=0.2.0
 pkgrel=1
 pkgdesc="A personal task management desktop application built with Tauri + Vue 3"
 arch=('x86_64')
