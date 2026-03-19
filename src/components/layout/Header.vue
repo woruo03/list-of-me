@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-base-100 border-b border-base-300 px-6 py-4">
+  <header class="bg-base-100/35 backdrop-blur-xl border-b border-white/10 px-5 md:px-7 py-4 shadow-xl">
     <div class="flex items-center justify-between gap-6">
       <div>
         <h2 class="text-2xl font-bold tracking-tight">{{ pageTitle }}</h2>
@@ -13,13 +13,13 @@
             type="text"
             :value="taskStore.searchQuery"
             placeholder="搜索任务..."
-            class="input input-bordered w-full pl-10"
+            class="input input-bordered w-full pl-10 bg-base-100/50 border-white/10 focus:outline-none focus:border-primary/50"
             @input="handleSearch"
           />
           <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50">🔍</span>
         </div>
 
-        <button class="btn btn-primary" @click="openAddTaskModal">
+        <button class="btn btn-primary btn-outline shadow-lg" @click="openAddTaskModal">
           <span class="mr-2">+</span>
           添加任务
         </button>

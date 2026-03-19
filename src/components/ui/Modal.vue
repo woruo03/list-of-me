@@ -3,7 +3,7 @@
     v-if="isOpen"
     class="modal modal-open"
   >
-    <div class="modal-box bg-base-100 border border-base-300" :class="sizeClass">
+    <div class="modal-box bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl" :class="sizeClass">
       <!-- 标题 -->
       <div
         v-if="title"
@@ -27,11 +27,11 @@
       <!-- 操作按钮 -->
       <div
         v-if="showActions"
-        class="modal-action"
+        class="modal-action gap-3"
       >
         <slot name="actions">
           <button
-            class="btn btn-ghost"
+            class="btn btn-ghost btn-outline"
             @click="closeModal"
           >
             取消
