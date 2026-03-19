@@ -254,6 +254,10 @@ pnpm tauri build
 - Android (实验性支持)
 - iOS (实验性支持)
 
+## 📝 更新日志
+
+- 查看完整更新记录：[`CHANGELOG.md`](./CHANGELOG.md)
+
 ## 🔌 API接口
 
 应用通过Tauri命令提供以下API：

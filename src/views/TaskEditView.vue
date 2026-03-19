@@ -1,7 +1,7 @@
 <template>
   <div class="task-edit-view">
-    <div class="mb-4 flex items-center justify-between">
-      <button class="btn btn-ghost btn-sm" @click="router.back()">← 返回</button>
+    <div class="mb-5 flex items-center justify-between rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl">
+      <button class="btn btn-ghost btn-outline btn-sm" @click="router.back()">← 返回</button>
     </div>
 
     <div v-if="isLoading" class="flex justify-center py-12">
@@ -10,7 +10,7 @@
 
     <div v-else-if="error" class="text-center py-12">
       <p class="text-base-content/70 mb-4">{{ error }}</p>
-      <button class="btn btn-ghost" @click="router.back()">返回</button>
+      <button class="btn btn-ghost btn-outline" @click="router.back()">返回</button>
     </div>
 
     <TaskForm

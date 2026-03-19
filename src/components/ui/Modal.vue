@@ -1,9 +1,12 @@
 <template>
   <div
     v-if="isOpen"
-    class="modal modal-open"
+    class="modal modal-open app-modal"
   >
-    <div class="modal-box bg-base-100 border border-base-300" :class="sizeClass">
+    <div
+      class="modal-box bg-base-100/95 backdrop-blur-lg border border-base-content/10 shadow-xl shadow-base-content/10"
+      :class="sizeClass"
+    >
       <!-- 标题 -->
       <div
         v-if="title"
@@ -27,11 +30,11 @@
       <!-- 操作按钮 -->
       <div
         v-if="showActions"
-        class="modal-action"
+        class="modal-action gap-3"
       >
         <slot name="actions">
           <button
-            class="btn btn-ghost"
+            class="btn btn-ghost btn-outline"
             @click="closeModal"
           >
             取消
@@ -47,7 +50,7 @@
       </div>
     </div>
     <div
-      class="modal-backdrop"
+      class="modal-backdrop bg-base-100/10 backdrop-blur-[1px]"
       @click="closeOnBackdrop && closeModal()"
     ></div>
   </div>
@@ -101,6 +104,15 @@ const handleConfirm = () => {
 </script>
 
 <style scoped>
+.app-modal {
+  background-color: hsl(var(--b1) / 0.12);
+  backdrop-filter: blur(1px);
+}
+
+.app-modal .modal-backdrop {
+  background-color: hsl(var(--b1) / 0.12);
+}
+
 .modal-content {
   max-height: 70vh;
   overflow-y: auto;

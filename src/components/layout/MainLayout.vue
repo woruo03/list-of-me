@@ -1,18 +1,22 @@
 <template>
-  <div class="min-h-screen flex text-base-content bg-base-100">
+  <div class="h-screen overflow-hidden flex text-base-content bg-transparent">
     <Sidebar class="hidden md:flex" />
 
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col min-h-0">
       <Header />
 
-      <main class="flex-1 p-6 overflow-auto pb-24 md:pb-6">
-        <div class="min-h-full rounded-box bg-base-100 border border-base-300 p-6">
+      <main class="flex-1 min-h-0 p-5 md:p-7 overflow-y-auto overflow-x-hidden pb-24 md:pb-7">
+        <div
+          class="min-h-full rounded-[1.25rem] bg-base-100/40 backdrop-blur-xl border border-white/10 p-5 md:p-7 shadow-2xl"
+        >
           <router-view />
         </div>
       </main>
     </div>
 
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 btm-nav btm-nav-sm bg-base-100 border-t border-base-300">
+    <nav
+      class="md:hidden fixed bottom-0 left-0 right-0 btm-nav btm-nav-sm bg-base-100/70 backdrop-blur-xl border-t border-white/10"
+    >
       <router-link class="text-base-content/60" to="/inbox">📥<span class="btm-nav-label">收集箱</span></router-link>
       <router-link class="text-base-content/60" to="/today">📅<span class="btm-nav-label">今日</span></router-link>
       <router-link class="text-base-content/60" to="/projects">📁<span class="btm-nav-label">项目</span></router-link>

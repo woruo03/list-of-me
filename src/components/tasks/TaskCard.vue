@@ -1,6 +1,6 @@
 <template>
   <div
-    class="card card-bordered bg-base-100 p-4 mb-3 shadow-sm hover:shadow-md transition-shadow"
+    class="card card-bordered bg-base-100/40 backdrop-blur-xl p-5 mb-4 shadow-2xl border border-white/10 hover:scale-[1.02] transition-all duration-300"
     :class="{
       'border-l-4 border-l-primary': task.status === Status.Todo,
       'border-l-4 border-l-warning': task.status === Status.Doing,
@@ -18,11 +18,11 @@
       <div class="flex-1 min-w-0 pr-4">
         <div class="flex items-center gap-2 mb-2">
           <button
-            class="w-5 h-5 rounded-full border flex items-center justify-center"
+            class="btn btn-circle btn-xs border"
             :class="{
               'border-base-300': task.status === Status.Todo,
-              'border-warning bg-warning/20': task.status === Status.Doing,
-              'border-success bg-success/20': task.status === Status.Done,
+              'border-warning bg-warning/20 text-warning-content': task.status === Status.Doing,
+              'border-success bg-success/20 text-success-content': task.status === Status.Done,
             }"
             @click.stop="toggleStatus"
           >
@@ -36,7 +36,8 @@
             {{ task.title }}
           </h3>
 
-          <span v-if="isDueSoon" class="badge badge-warning badge-sm">即将到期</span>
+          <span v-if="isOverdue" class="badge badge-error badge-outline badge-sm">已逾期</span>
+          <span v-else-if="isDueSoon" class="badge badge-warning badge-outline badge-sm">即将到期</span>
         </div>
 
         <div v-if="task.description" class="mb-3 ml-7">
@@ -55,7 +56,7 @@
           </button>
         </div>
 
-        <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/50 ml-7">
+        <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/55 ml-7">
           <span v-if="showProject && task.project_id && projectName"> 📁 {{ projectName }} </span>
           <span v-if="task.due_at"> 📅 {{ formattedDueDate }} </span>
           <span> 🕐 {{ formattedCreatedAt }} </span>
@@ -65,7 +66,7 @@
       <div class="flex items-center gap-2 flex-shrink-0">
         <button
           v-if="task.status !== Status.Done && !isTodayTask"
-          class="btn btn-ghost btn-sm"
+          class="btn btn-ghost btn-sm btn-circle"
           @click.stop="moveToToday"
           title="移动到今日"
         >
@@ -74,7 +75,7 @@
 
         <button
           v-if="!selectable"
-          class="btn btn-ghost btn-sm"
+          class="btn btn-ghost btn-sm btn-circle"
           @click.stop="emit('edit', task)"
           title="编辑任务"
         >
@@ -83,18 +84,18 @@
 
         <button
           v-if="!selectable"
-          class="btn btn-ghost btn-sm text-error"
+          class="btn btn-ghost btn-sm btn-circle text-error"
           @click.stop="confirmDelete"
           title="删除任务"
         >
           🗑️
         </button>
 
-        <span v-if="draggable" class="cursor-grab text-base-content/40">⋮⋮</span>
+        <span v-if="draggable" class="badge badge-ghost cursor-grab text-base-content/50">⋮⋮</span>
       </div>
     </div>
 
-    <div v-if="task.notes" class="mt-3 pt-3 border-t border-base-300 ml-7">
+    <div v-if="task.notes" class="mt-3 pt-3 border-t border-white/10 ml-7">
       <p
         class="text-base-content/80 text-sm break-all"
         :class="{ 'line-clamp-2': !isNotesExpanded }"
@@ -185,6 +186,13 @@ const isDueSoon = computed(() => {
   const now = new Date()
   const hoursDiff = (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60)
   return hoursDiff < 24 && hoursDiff > 0
+})
+
+const isOverdue = computed(() => {
+  if (!props.task.due_at || props.task.status === Status.Done) return false
+  const dueDate = new Date(props.task.due_at)
+  const now = new Date()
+  return dueDate.getTime() <= now.getTime()
 })
 
 const isDescriptionExpanded = ref(false)

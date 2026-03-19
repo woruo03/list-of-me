@@ -1,21 +1,21 @@
 <template>
   <div class="projects-view">
-    <div class="mb-4 flex flex-col items-end gap-2">
+    <div class="mb-5 flex flex-col items-end gap-3 rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl">
       <div class="flex items-center justify-end gap-2 flex-wrap">
-        <button class="btn btn-ghost" @click="toggleSelectionMode">
+        <button class="btn btn-ghost btn-outline" @click="toggleSelectionMode">
           {{ selectionMode ? '取消选择' : '选择' }}
         </button>
-        <button class="btn btn-primary" @click="openAddProjectModal">
+        <button class="btn btn-primary btn-outline shadow-lg" @click="openAddProjectModal">
           <span class="mr-2">+</span>
           新建项目
         </button>
       </div>
       <div v-if="selectionMode" class="flex items-center justify-end gap-2 w-full">
-        <button class="btn btn-ghost" @click="toggleSelectAll">
+        <button class="btn btn-ghost btn-outline" @click="toggleSelectAll">
           {{ allSelected ? '取消全选' : '全选' }}
         </button>
         <button
-          class="btn btn-ghost text-error"
+          class="btn btn-outline btn-error"
           :disabled="selectedIds.length === 0"
           @click="deleteSelected"
         >
@@ -29,12 +29,14 @@
     </div>
 
     <div v-else-if="projectStore.projects.length === 0" class="text-center py-12">
+      <div class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl mx-auto max-w-md p-8">
       <div class="text-base-content/50 mb-4">
         <span class="text-6xl">📁</span>
       </div>
       <h3 class="text-xl font-medium mb-2">还没有项目</h3>
       <p class="text-base-content/70 mb-6">创建项目来更好地组织你的任务。</p>
-      <button class="btn btn-primary" @click="openAddProjectModal">创建第一个项目</button>
+      <button class="btn btn-primary btn-outline" @click="openAddProjectModal">创建第一个项目</button>
+      </div>
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -1,18 +1,18 @@
 <template>
-  <div ref="root" class="relative w-full">
+  <div ref="root" class="relative z-40 w-full">
     <button
       type="button"
-      class="select select-bordered w-full flex items-center justify-between gap-2"
+      class="btn btn-outline w-full flex items-center justify-between gap-2 font-normal bg-base-100/55 border-base-content/25 hover:bg-base-100/75 hover:border-base-content/45"
       :class="sizeClass"
       :disabled="disabled"
       @click="toggle"
     >
-      <span class="truncate">{{ selectedLabel }}</span>
+      <span class="w-full text-left whitespace-nowrap overflow-hidden text-ellipsis">{{ selectedLabel }}</span>
     </button>
 
     <ul
       v-if="isOpen"
-      class="menu menu-sm menu-vertical dropdown-content absolute z-50 mt-2 w-full rounded-box border border-base-300 bg-base-100 p-1 shadow-lg"
+      class="menu menu-sm menu-vertical dropdown-content absolute z-[90] mt-2 min-w-full w-max rounded-box border border-base-content/20 bg-base-100/70 backdrop-blur-xl p-2 shadow-2xl"
       @mouseleave="handleListLeave"
     >
       <li
@@ -22,8 +22,8 @@
       >
         <button
           type="button"
-          class="justify-between w-full text-left"
-          :class="{ active: isSelected(option.value) }"
+          class="btn btn-ghost btn-sm justify-between w-full text-left font-normal normal-case hover:bg-base-100/70"
+          :class="{ 'btn-active': isSelected(option.value) }"
           @mouseenter="handleOptionEnter(option)"
           @click="selectOption(option.value)"
         >
@@ -34,7 +34,7 @@
               :data-theme="String(option.value || '')"
               :style="previewStyle()"
             ></span>
-            <span class="truncate">{{ option.label }}</span>
+            <span class="whitespace-nowrap">{{ option.label }}</span>
           </div>
           <span v-if="isSelected(option.value)">✓</span>
         </button>
@@ -77,7 +77,7 @@ const originalTheme = ref<string | null>(null)
 const isPreviewing = ref(false)
 
 const sizeClass = computed(() => {
-  return props.size === 'sm' ? 'select-sm' : ''
+  return props.size === 'sm' ? 'btn-sm' : ''
 })
 
 const selectedLabel = computed(() => {

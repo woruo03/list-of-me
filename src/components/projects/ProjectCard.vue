@@ -1,12 +1,12 @@
 <template>
   <div
-    class="card card-bordered bg-base-100 p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+    class="card card-bordered bg-base-100/40 backdrop-blur-xl p-6 shadow-2xl border border-white/10 hover:scale-[1.02] transition-all duration-300 cursor-pointer"
     :class="{ 'border-error/60 bg-error/10 ring-2 ring-error/40': selected }"
     @click="handleClick"
   >
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-11 h-11 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
+        <div class="w-11 h-11 bg-primary/15 rounded-xl flex items-center justify-center border border-primary/25">
           <span class="text-primary text-lg">📁</span>
         </div>
 
@@ -17,10 +17,10 @@
       </div>
 
       <div v-if="!selectable" class="flex items-center gap-2">
-        <button class="btn btn-ghost btn-sm" @click.stop="emit('edit', project)" title="编辑项目">
+        <button class="btn btn-ghost btn-sm btn-circle" @click.stop="emit('edit', project)" title="编辑项目">
           ✏️
         </button>
-        <button class="btn btn-ghost btn-sm text-error" @click.stop="confirmDelete" title="删除项目">
+        <button class="btn btn-ghost btn-sm btn-circle text-error" @click.stop="confirmDelete" title="删除项目">
           🗑️
         </button>
       </div>

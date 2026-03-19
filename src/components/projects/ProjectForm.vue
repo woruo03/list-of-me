@@ -9,7 +9,7 @@
           type="text"
           v-model="formData.name"
           placeholder="输入项目名称..."
-          class="input input-bordered w-full"
+          class="input input-bordered w-full bg-base-100/50 border-white/10"
           required
         />
         <label v-if="error" class="label">
@@ -18,7 +18,7 @@
       </div>
 
       <div class="flex justify-end gap-3">
-        <button type="button" class="btn btn-ghost" @click="emit('cancel')">取消</button>
+        <button type="button" class="btn btn-ghost btn-outline" @click="emit('cancel')">取消</button>
         <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
           <span v-if="isSubmitting" class="loading loading-spinner"></span>
           {{ submitButtonText }}
@@ -93,7 +93,13 @@ const handleSubmit = async () => {
 
 <style scoped>
 .project-form {
-  max-width: 500px;
+  max-width: 560px;
   margin: 0 auto;
+  border-radius: 1rem;
+  background: hsl(var(--b1) / 0.35);
+  border: 1px solid hsl(var(--bc) / 0.1);
+  backdrop-filter: blur(24px);
+  padding: 1.25rem;
+  box-shadow: 0 24px 48px hsl(var(--bc) / 0.12);
 }
 </style>

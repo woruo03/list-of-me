@@ -1,18 +1,18 @@
 <template>
   <div class="inbox-view">
-    <div class="mb-4 flex flex-col items-end gap-2">
+    <div class="relative z-20 mb-5 flex flex-col items-end gap-3 rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl">
       <div class="flex items-center justify-end gap-2 flex-wrap">
-        <button class="btn btn-ghost" @click="toggleSelectionMode">
+        <button class="btn btn-ghost btn-outline" @click="toggleSelectionMode">
           {{ selectionMode ? '取消选择' : '选择' }}
         </button>
       </div>
       <div v-if="selectionMode" class="flex items-center justify-end gap-2 w-full">
-        <button class="btn btn-ghost" @click="toggleSelectAll">
+        <button class="btn btn-ghost btn-outline" @click="toggleSelectAll">
           {{ allSelected ? '取消全选' : '全选' }}
         </button>
-        <button class="btn btn-ghost" @click="toggleMoveMenu">移动</button>
+        <button class="btn btn-ghost btn-outline" @click="toggleMoveMenu">移动</button>
         <button
-          class="btn btn-ghost text-error"
+          class="btn btn-outline btn-error"
           :disabled="taskStore.selectedCount === 0"
           @click="deleteSelected"
         >
@@ -23,7 +23,7 @@
         <div class="w-56">
           <SelectMenu v-model="moveTargetId" :options="moveOptions" size="sm" />
         </div>
-        <button class="btn btn-ghost" @click="confirmMove">确定</button>
+        <button class="btn btn-primary btn-outline btn-sm" @click="confirmMove">确定</button>
       </div>
     </div>
 

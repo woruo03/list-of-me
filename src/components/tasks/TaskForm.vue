@@ -1,6 +1,6 @@
 <template>
   <div class="task-form">
-    <form @submit.prevent="handleSubmit">
+    <form class="space-y-1" @submit.prevent="handleSubmit">
       <div class="form-control mb-4">
         <label class="label">
           <span class="label-text font-medium">任务标题 *</span>
@@ -9,7 +9,7 @@
           type="text"
           v-model="formData.title"
           placeholder="输入任务标题..."
-          class="input input-bordered w-full"
+          class="input input-bordered w-full bg-base-100/50 border-white/10"
           required
         />
         <label v-if="errors.title" class="label">
@@ -24,7 +24,7 @@
         <textarea
           v-model="formData.description"
           placeholder="添加任务描述..."
-          class="textarea textarea-bordered w-full h-24"
+          class="textarea textarea-bordered w-full h-24 bg-base-100/50 border-white/10"
         />
         <label v-if="errors.description" class="label">
           <span class="label-text-alt text-error">{{ errors.description }}</span>
@@ -48,13 +48,13 @@
       </div>
 
       <div class="grid grid-cols-1 gap-4 mb-6">
-        <div class="form-control relative" ref="duePickerRef">
+        <div class="form-control">
           <label class="label">
             <span class="label-text">截止时间</span>
           </label>
           <button
             type="button"
-            class="input input-bordered w-full flex items-center justify-between"
+            class="btn btn-outline w-full flex items-center justify-between font-normal bg-base-100/50 border-white/10"
             @click="toggleDuePicker"
           >
             <span class="text-base-content/80">
@@ -65,84 +65,87 @@
 
           <div
             v-if="isDuePickerOpen"
-            class="absolute z-30 mt-2 w-full max-w-[520px] rounded-box border border-base-300 bg-base-100 p-4 shadow-xl"
+            class="modal modal-open due-picker-modal"
           >
-            <div class="flex items-center justify-between mb-3">
-              <button type="button" class="btn btn-ghost btn-xs" @click="prevMonth">‹</button>
-              <div class="font-medium">{{ monthLabel }}</div>
-              <button type="button" class="btn btn-ghost btn-xs" @click="nextMonth">›</button>
-            </div>
+            <div class="modal-box max-w-2xl bg-base-100/95 backdrop-blur-lg border border-base-content/10 shadow-xl shadow-base-content/10">
+              <div class="flex items-center justify-between mb-3">
+                <button type="button" class="btn btn-ghost btn-xs" @click="prevMonth">‹</button>
+                <div class="font-medium">{{ monthLabel }}</div>
+                <button type="button" class="btn btn-ghost btn-xs" @click="nextMonth">›</button>
+              </div>
 
-            <div class="grid grid-cols-7 text-xs text-base-content/60 mb-2">
-              <span v-for="label in weekLabels" :key="label" class="text-center">{{ label }}</span>
-            </div>
+              <div class="grid grid-cols-7 text-xs text-base-content/60 mb-2">
+                <span v-for="label in weekLabels" :key="label" class="text-center">{{ label }}</span>
+              </div>
 
-            <div class="grid grid-cols-7 gap-1">
-              <button
-                v-for="(day, index) in calendarDays"
-                :key="index"
-                type="button"
-                class="btn btn-ghost btn-xs h-8 w-full"
-                :class="day && isSameDate(day, selectedDate) ? 'btn-primary text-primary-content' : ''"
-                :disabled="!day"
-                @click="day && selectDate(day)"
-              >
-                {{ day ? day.getDate() : '' }}
-              </button>
-            </div>
+              <div class="grid grid-cols-7 gap-1">
+                <button
+                  v-for="(day, index) in calendarDays"
+                  :key="index"
+                  type="button"
+                  class="btn btn-ghost btn-xs h-8 w-full"
+                  :class="day && isSameDate(day, selectedDate) ? 'btn-primary text-primary-content' : ''"
+                  :disabled="!day"
+                  @click="day && selectDate(day)"
+                >
+                  {{ day ? day.getDate() : '' }}
+                </button>
+              </div>
 
-            <div class="mt-4 grid grid-cols-2 gap-3">
-              <div>
-                <div class="text-xs text-base-content/60 mb-2">小时</div>
-                <div class="h-40 overflow-y-auto rounded-box border border-base-300">
-                  <button
-                    v-for="hour in hours"
-                    :key="hour"
-                    type="button"
-                    class="w-full px-3 py-1 text-left hover:bg-base-200"
-                    :class="hour === selectedHour ? 'bg-base-200 font-medium' : ''"
-                    @click="selectedHour = hour"
-                  >
-                    {{ hour }}
-                  </button>
+              <div class="mt-4 grid grid-cols-2 gap-3">
+                <div>
+                  <div class="text-xs text-base-content/60 mb-2">小时</div>
+                  <div class="h-40 overflow-y-auto rounded-box border border-white/10 bg-base-100/40 p-1">
+                    <button
+                      v-for="hour in hours"
+                      :key="hour"
+                      type="button"
+                      class="btn btn-ghost btn-sm w-full justify-start font-normal normal-case"
+                      :class="hour === selectedHour ? 'btn-active font-medium' : ''"
+                      @click="selectedHour = hour"
+                    >
+                      {{ hour }}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-base-content/60 mb-2">分钟</div>
+                  <div class="h-40 overflow-y-auto rounded-box border border-white/10 bg-base-100/40 p-1">
+                    <button
+                      v-for="minute in minutes"
+                      :key="minute"
+                      type="button"
+                      class="btn btn-ghost btn-sm w-full justify-start font-normal normal-case"
+                      :class="minute === selectedMinute ? 'btn-active font-medium' : ''"
+                      @click="selectedMinute = minute"
+                    >
+                      {{ minute }}
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div>
-                <div class="text-xs text-base-content/60 mb-2">分钟</div>
-                <div class="h-40 overflow-y-auto rounded-box border border-base-300">
-                  <button
-                    v-for="minute in minutes"
-                    :key="minute"
-                    type="button"
-                    class="w-full px-3 py-1 text-left hover:bg-base-200"
-                    :class="minute === selectedMinute ? 'bg-base-200 font-medium' : ''"
-                    @click="selectedMinute = minute"
-                  >
-                    {{ minute }}
+
+              <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex flex-wrap gap-2">
+                  <button type="button" class="btn btn-ghost btn-xs" @click="setDuePreset(0)">
+                    今天
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-xs" @click="setDuePreset(1)">
+                    明天
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-xs" @click="setDuePreset(7)">
+                    下周
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-xs" @click="clearDueDate">
+                    清除
                   </button>
                 </div>
-              </div>
-            </div>
-
-            <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
-              <div class="flex flex-wrap gap-2">
-                <button type="button" class="btn btn-ghost btn-xs" @click="setDuePreset(0)">
-                  今天
-                </button>
-                <button type="button" class="btn btn-ghost btn-xs" @click="setDuePreset(1)">
-                  明天
-                </button>
-                <button type="button" class="btn btn-ghost btn-xs" @click="setDuePreset(7)">
-                  下周
-                </button>
-                <button type="button" class="btn btn-ghost btn-xs" @click="clearDueDate">
-                  清除
+                <button type="button" class="btn btn-primary btn-sm" @click="closeDuePicker">
+                  完成
                 </button>
               </div>
-              <button type="button" class="btn btn-primary btn-sm" @click="closeDuePicker">
-                完成
-              </button>
             </div>
+            <div class="modal-backdrop bg-base-100/10 backdrop-blur-[1px]" @click="closeDuePicker"></div>
           </div>
 
           <label v-if="errors.due_at" class="label">
@@ -158,12 +161,12 @@
         <textarea
           v-model="formData.notes"
           placeholder="添加额外笔记..."
-          class="textarea textarea-bordered w-full h-20"
+          class="textarea textarea-bordered w-full h-20 bg-base-100/50 border-white/10"
         />
       </div>
 
       <div class="flex justify-end gap-3">
-        <button type="button" class="btn btn-ghost" @click="emit('cancel')">取消</button>
+        <button type="button" class="btn btn-ghost btn-outline" @click="emit('cancel')">取消</button>
         <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
           <span v-if="isSubmitting" class="loading loading-spinner"></span>
           {{ submitButtonText }}
@@ -174,7 +177,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import type { Task, TaskCreate, TaskUpdate } from '@/types/task'
 import { Status } from '@/types/task'
 import type { Project } from '@/types/project'
@@ -222,7 +225,6 @@ const statusOptions = [
 ]
 
 const errors = ref<{ title?: string; description?: string; due_at?: string }>({})
-const duePickerRef = ref<HTMLElement | null>(null)
 const isDuePickerOpen = ref(false)
 const clearedDueAt = ref(false)
 const calendarMonth = ref(new Date())
@@ -383,14 +385,6 @@ const closeDuePicker = () => {
   isDuePickerOpen.value = false
 }
 
-const handleClickOutside = (event: MouseEvent) => {
-  if (!isDuePickerOpen.value) return
-  const target = event.target as Node
-  if (duePickerRef.value && !duePickerRef.value.contains(target)) {
-    isDuePickerOpen.value = false
-  }
-}
-
 const submitButtonText = computed(() => {
   if (isSubmitting.value) return '处理中...'
   return props.mode === 'create' ? '创建任务' : '更新任务'
@@ -432,8 +426,6 @@ onMounted(() => {
   if (projectOptions.value.length === 0) {
     projectStore.fetchProjects()
   }
-
-  document.addEventListener('mousedown', handleClickOutside)
 })
 
 watch(
@@ -512,15 +504,26 @@ const clearDueDate = async () => {
   clearedDueAt.value = true
   closeDuePicker()
 }
-
-onBeforeUnmount(() => {
-  document.removeEventListener('mousedown', handleClickOutside)
-})
 </script>
 
 <style scoped>
 .task-form {
-  max-width: 600px;
+  max-width: 680px;
   margin: 0 auto;
+  border-radius: 1rem;
+  background: hsl(var(--b1) / 0.35);
+  border: 1px solid hsl(var(--bc) / 0.1);
+  backdrop-filter: blur(24px);
+  padding: 1.25rem;
+  box-shadow: 0 24px 48px hsl(var(--bc) / 0.12);
+}
+
+.due-picker-modal {
+  background-color: hsl(var(--b1) / 0.12);
+  backdrop-filter: blur(1px);
+}
+
+.due-picker-modal .modal-backdrop {
+  background-color: hsl(var(--b1) / 0.12);
 }
 </style>
