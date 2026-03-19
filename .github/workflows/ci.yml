@@ -16,7 +16,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  windows-build:
+  build-windows:
     runs-on: windows-latest
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     steps:
@@ -82,41 +82,12 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  release:
+  build-linux:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
-    needs: [windows-build]
-    permissions:
-      contents: write
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-      APPIMAGE_EXTRACT_AND_RUN: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Resolve tag
-        id: release_tag
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Ensure tag exists (manual only)
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          git fetch --tags
-          TAG="${{ steps.release_tag.outputs.tag }}"
-          if git rev-parse "refs/tags/$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists."
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git tag "$TAG" "$GITHUB_SHA"
-            git push origin "$TAG"
-          fi
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -156,7 +127,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Tauri (bundles)
+      - name: Build Tauri (Linux)
         env:
           LINUXDEPLOY: /tmp/linuxdeploy.AppImage
           LINUXDEPLOY_PLUGIN_APPIMAGE: /tmp/linuxdeploy-plugin-appimage.AppImage
@@ -164,11 +135,64 @@ jobs:
           SQLITE3_STATIC: 1
         run: pnpm tauri build --target x86_64-unknown-linux-gnu
 
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-bundles
+          path: |
+            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/**/*.deb
+            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/rpm/**/*.rpm
+            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/**/*.AppImage
+          retention-days: 7
+          if-no-files-found: error
+
+  create-release:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    needs: [build-windows, build-linux]
+    permissions:
+      contents: write
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      APPIMAGE_EXTRACT_AND_RUN: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve tag
+        id: release_tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ensure tag exists (manual only)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git fetch --tags
+          TAG="${{ steps.release_tag.outputs.tag }}"
+          if git rev-parse "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag "$TAG" "$GITHUB_SHA"
+            git push origin "$TAG"
+          fi
+
       - name: Download Windows artifacts
         uses: actions/download-artifact@v4
         with:
           name: windows-bundles
           path: windows-artifacts
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-bundles
+          path: linux-artifacts
 
       - name: Generate latest.json with Windows signature support
         env:
@@ -180,7 +204,7 @@ jobs:
           PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           
           # Linux AppImage
-          APPIMAGE_PATH=$(find src-tauri/target -path "*/release/bundle/appimage/*.AppImage" -type f | head -n 1)
+          APPIMAGE_PATH=$(find linux-artifacts -path "*/appimage/*.AppImage" -type f | head -n 1)
           if [ -n "$APPIMAGE_PATH" ]; then
             APPIMAGE_SIGNATURE=$(pnpm tauri signer sign "$APPIMAGE_PATH" | tr -d '\n')
             APPIMAGE_FILE_NAME=$(basename "$APPIMAGE_PATH")
@@ -247,9 +271,9 @@ jobs:
           tag_name: ${{ steps.release_tag.outputs.tag }}
           target_commitish: ${{ github.sha }}
           files: |
-            src-tauri/target/**/bundle/deb/**/*.deb
-            src-tauri/target/**/bundle/rpm/**/*.rpm
-            src-tauri/target/**/bundle/appimage/**/*.AppImage
+            linux-artifacts/**/*.deb
+            linux-artifacts/**/*.rpm
+            linux-artifacts/**/*.AppImage
             windows-artifacts/**/*.msi
             windows-artifacts/**/*.exe
             latest.json
