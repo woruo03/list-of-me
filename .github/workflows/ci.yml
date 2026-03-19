@@ -215,31 +215,37 @@ jobs:
           PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           
           # Linux AppImage
-          APPIMAGE_PATH=$(find linux-artifacts -path "*/appimage/*.AppImage" -type f | head -n 1)
-          if [ -n "$APPIMAGE_PATH" ]; then
-            APPIMAGE_SIGNATURE=$(pnpm tauri signer sign "$APPIMAGE_PATH" | tr -d '\n')
-            APPIMAGE_FILE_NAME=$(basename "$APPIMAGE_PATH")
-            APPIMAGE_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${APPIMAGE_FILE_NAME}"
-            export APPIMAGE_SIGNATURE APPIMAGE_DOWNLOAD_URL
+          APPIMAGE_PATH=$(find linux-artifacts -path "*/appimage/*_${VERSION}_*.AppImage" -type f | head -n 1)
+          if [ -z "$APPIMAGE_PATH" ]; then
+            echo "AppImage not found for version ${VERSION}"
+            exit 1
           fi
+          APPIMAGE_SIGNATURE=$(pnpm tauri signer sign "$APPIMAGE_PATH" | tr -d '\n')
+          APPIMAGE_FILE_NAME=$(basename "$APPIMAGE_PATH")
+          APPIMAGE_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${APPIMAGE_FILE_NAME}"
+          export APPIMAGE_SIGNATURE APPIMAGE_DOWNLOAD_URL
           
           # Windows MSI
-          MSI_PATH=$(find windows-artifacts -name "*.msi" -type f | head -n 1)
-          if [ -n "$MSI_PATH" ]; then
-            MSI_SIGNATURE=$(pnpm tauri signer sign "$MSI_PATH" | tr -d '\n')
-            MSI_FILE_NAME=$(basename "$MSI_PATH")
-            MSI_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${MSI_FILE_NAME}"
-            export MSI_SIGNATURE MSI_DOWNLOAD_URL
+          MSI_PATH=$(find windows-artifacts -name "*_${VERSION}_*.msi" -type f | head -n 1)
+          if [ -z "$MSI_PATH" ]; then
+            echo "MSI not found for version ${VERSION}"
+            exit 1
           fi
+          MSI_SIGNATURE=$(pnpm tauri signer sign "$MSI_PATH" | tr -d '\n')
+          MSI_FILE_NAME=$(basename "$MSI_PATH")
+          MSI_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${MSI_FILE_NAME}"
+          export MSI_SIGNATURE MSI_DOWNLOAD_URL
           
           # Windows EXE
-          EXE_PATH=$(find windows-artifacts -name "*.exe" -type f | head -n 1)
-          if [ -n "$EXE_PATH" ]; then
-            EXE_SIGNATURE=$(pnpm tauri signer sign "$EXE_PATH" | tr -d '\n')
-            EXE_FILE_NAME=$(basename "$EXE_PATH")
-            EXE_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${EXE_FILE_NAME}"
-            export EXE_SIGNATURE EXE_DOWNLOAD_URL
+          EXE_PATH=$(find windows-artifacts -name "*_${VERSION}_*.exe" -type f | head -n 1)
+          if [ -z "$EXE_PATH" ]; then
+            echo "EXE not found for version ${VERSION}"
+            exit 1
           fi
+          EXE_SIGNATURE=$(pnpm tauri signer sign "$EXE_PATH" | tr -d '\n')
+          EXE_FILE_NAME=$(basename "$EXE_PATH")
+          EXE_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${EXE_FILE_NAME}"
+          export EXE_SIGNATURE EXE_DOWNLOAD_URL
           
           export VERSION PUB_DATE
           python3 - <<'PY'
@@ -276,17 +282,43 @@ jobs:
               json.dump(data, f, ensure_ascii=False, indent=2)
           PY
 
+      - name: Collect version-matched release assets
+        run: |
+          TAG_NAME="${{ steps.release_tag.outputs.tag }}"
+          VERSION="${TAG_NAME#v}"
+          mkdir -p release-assets
+
+          find linux-artifacts -type f -name "*_${VERSION}_*.deb" -exec cp {} release-assets/ \;
+          find linux-artifacts -type f -name "*-${VERSION}-*.rpm" -exec cp {} release-assets/ \;
+          find linux-artifacts -type f -name "*_${VERSION}_*.AppImage" -exec cp {} release-assets/ \;
+          find windows-artifacts -type f -name "*_${VERSION}_*.msi" -exec cp {} release-assets/ \;
+          find windows-artifacts -type f -name "*_${VERSION}_*.exe" -exec cp {} release-assets/ \;
+          cp latest.json release-assets/
+
+          ls -lah release-assets
+
+      - name: Validate version-matched assets
+        run: |
+          TAG_NAME="${{ steps.release_tag.outputs.tag }}"
+          VERSION="${TAG_NAME#v}"
+          MATCHED_COUNT=$(find release-assets -maxdepth 1 -type f \( \
+            -name "*_${VERSION}_*.deb" -o \
+            -name "*-${VERSION}-*.rpm" -o \
+            -name "*_${VERSION}_*.AppImage" -o \
+            -name "*_${VERSION}_*.msi" -o \
+            -name "*_${VERSION}_*.exe" \
+          \) | wc -l)
+          if [ "$MATCHED_COUNT" -eq 0 ]; then
+            echo "No release assets found for version ${VERSION}"
+            exit 1
+          fi
+
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release_tag.outputs.tag }}
           target_commitish: ${{ github.sha }}
           files: |
-            linux-artifacts/**/*.deb
-            linux-artifacts/**/*.rpm
-            linux-artifacts/**/*.AppImage
-            windows-artifacts/**/*.msi
-            windows-artifacts/**/*.exe
-            latest.json
+            release-assets/*
           draft: false
           prerelease: false
