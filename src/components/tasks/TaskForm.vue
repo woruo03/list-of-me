@@ -1,6 +1,6 @@
 <template>
   <div class="task-form">
-    <form @submit.prevent="handleSubmit">
+    <form class="space-y-1" @submit.prevent="handleSubmit">
       <div class="form-control mb-4">
         <label class="label">
           <span class="label-text font-medium">任务标题 *</span>
@@ -9,7 +9,7 @@
           type="text"
           v-model="formData.title"
           placeholder="输入任务标题..."
-          class="input input-bordered w-full"
+          class="input input-bordered w-full bg-base-100/50 border-white/10"
           required
         />
         <label v-if="errors.title" class="label">
@@ -24,7 +24,7 @@
         <textarea
           v-model="formData.description"
           placeholder="添加任务描述..."
-          class="textarea textarea-bordered w-full h-24"
+          class="textarea textarea-bordered w-full h-24 bg-base-100/50 border-white/10"
         />
         <label v-if="errors.description" class="label">
           <span class="label-text-alt text-error">{{ errors.description }}</span>
@@ -54,7 +54,7 @@
           </label>
           <button
             type="button"
-            class="input input-bordered w-full flex items-center justify-between"
+            class="btn btn-outline w-full flex items-center justify-between font-normal bg-base-100/50 border-white/10"
             @click="toggleDuePicker"
           >
             <span class="text-base-content/80">
@@ -65,7 +65,7 @@
 
           <div
             v-if="isDuePickerOpen"
-            class="absolute z-30 mt-2 w-full max-w-[520px] rounded-box border border-base-300 bg-base-100 p-4 shadow-xl"
+            class="absolute z-30 mt-2 w-full max-w-[520px] rounded-box border border-white/10 bg-base-100/60 backdrop-blur-xl p-4 shadow-2xl"
           >
             <div class="flex items-center justify-between mb-3">
               <button type="button" class="btn btn-ghost btn-xs" @click="prevMonth">‹</button>
@@ -94,13 +94,13 @@
             <div class="mt-4 grid grid-cols-2 gap-3">
               <div>
                 <div class="text-xs text-base-content/60 mb-2">小时</div>
-                <div class="h-40 overflow-y-auto rounded-box border border-base-300">
+                <div class="h-40 overflow-y-auto rounded-box border border-white/10 bg-base-100/40 p-1">
                   <button
                     v-for="hour in hours"
                     :key="hour"
                     type="button"
-                    class="w-full px-3 py-1 text-left hover:bg-base-200"
-                    :class="hour === selectedHour ? 'bg-base-200 font-medium' : ''"
+                    class="btn btn-ghost btn-sm w-full justify-start font-normal normal-case"
+                    :class="hour === selectedHour ? 'btn-active font-medium' : ''"
                     @click="selectedHour = hour"
                   >
                     {{ hour }}
@@ -109,13 +109,13 @@
               </div>
               <div>
                 <div class="text-xs text-base-content/60 mb-2">分钟</div>
-                <div class="h-40 overflow-y-auto rounded-box border border-base-300">
+                <div class="h-40 overflow-y-auto rounded-box border border-white/10 bg-base-100/40 p-1">
                   <button
                     v-for="minute in minutes"
                     :key="minute"
                     type="button"
-                    class="w-full px-3 py-1 text-left hover:bg-base-200"
-                    :class="minute === selectedMinute ? 'bg-base-200 font-medium' : ''"
+                    class="btn btn-ghost btn-sm w-full justify-start font-normal normal-case"
+                    :class="minute === selectedMinute ? 'btn-active font-medium' : ''"
                     @click="selectedMinute = minute"
                   >
                     {{ minute }}
@@ -158,12 +158,12 @@
         <textarea
           v-model="formData.notes"
           placeholder="添加额外笔记..."
-          class="textarea textarea-bordered w-full h-20"
+          class="textarea textarea-bordered w-full h-20 bg-base-100/50 border-white/10"
         />
       </div>
 
       <div class="flex justify-end gap-3">
-        <button type="button" class="btn btn-ghost" @click="emit('cancel')">取消</button>
+        <button type="button" class="btn btn-ghost btn-outline" @click="emit('cancel')">取消</button>
         <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
           <span v-if="isSubmitting" class="loading loading-spinner"></span>
           {{ submitButtonText }}
@@ -520,7 +520,13 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .task-form {
-  max-width: 600px;
+  max-width: 680px;
   margin: 0 auto;
+  border-radius: 1rem;
+  background: hsl(var(--b1) / 0.35);
+  border: 1px solid hsl(var(--bc) / 0.1);
+  backdrop-filter: blur(24px);
+  padding: 1.25rem;
+  box-shadow: 0 24px 48px hsl(var(--bc) / 0.12);
 }
 </style>

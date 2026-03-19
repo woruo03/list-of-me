@@ -1,23 +1,27 @@
 <template>
   <div class="task-board">
     <div v-if="taskStore.selectedCount > 0" class="mb-4">
-      <div class="alert bg-base-100 border border-base-300 shadow-sm">
+      <div class="alert bg-base-100/45 backdrop-blur-xl border border-white/10 shadow-2xl">
         <div class="flex flex-wrap items-center gap-3">
           <span>已选择 {{ taskStore.selectedCount }} 项</span>
-          <button class="btn btn-xs btn-success" @click="markSelectedDone">标记完成</button>
-          <button class="btn btn-xs btn-info" @click="moveSelectedToToday">移至今日</button>
+          <button class="btn btn-xs btn-success btn-outline" @click="markSelectedDone">标记完成</button>
+          <button class="btn btn-xs btn-info btn-outline" @click="moveSelectedToToday">移至今日</button>
           <div class="w-32">
             <SelectMenu v-model="bulkProjectId" :options="bulkProjectOptions" size="sm" />
           </div>
-          <button class="btn btn-xs" @click="moveSelectedToProject">移动</button>
-          <button class="btn btn-xs btn-error" @click="deleteSelected">删除</button>
-          <button class="btn btn-xs btn-ghost" @click="taskStore.clearSelection()">清除选择</button>
+          <button class="btn btn-xs btn-outline" @click="moveSelectedToProject">移动</button>
+          <button class="btn btn-xs btn-error btn-outline" @click="deleteSelected">删除</button>
+          <button class="btn btn-xs btn-ghost btn-outline" @click="taskStore.clearSelection()">清除选择</button>
         </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="board-column" @dragover.prevent @drop="handleDrop(Status.Todo)">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div
+        class="board-column rounded-2xl bg-base-100/40 backdrop-blur-xl border border-white/10 p-5 shadow-2xl"
+        @dragover.prevent
+        @drop="handleDrop(Status.Todo)"
+      >
         <div class="board-header">待办</div>
         <div class="board-list">
         <TaskCard
@@ -40,7 +44,11 @@
       </div>
     </div>
 
-      <div class="board-column" @dragover.prevent @drop="handleDrop(Status.Doing)">
+      <div
+        class="board-column rounded-2xl bg-base-100/40 backdrop-blur-xl border border-white/10 p-5 shadow-2xl"
+        @dragover.prevent
+        @drop="handleDrop(Status.Doing)"
+      >
         <div class="board-header">进行中</div>
       <div class="board-list">
         <TaskCard
@@ -63,7 +71,11 @@
       </div>
     </div>
 
-      <div class="board-column" @dragover.prevent @drop="handleDrop(Status.Done)">
+      <div
+        class="board-column rounded-2xl bg-base-100/40 backdrop-blur-xl border border-white/10 p-5 shadow-2xl"
+        @dragover.prevent
+        @drop="handleDrop(Status.Done)"
+      >
         <div class="board-header">已完成</div>
       <div class="board-list">
         <TaskCard
@@ -165,18 +177,21 @@ const deleteSelected = async () => {
 <style scoped>
 .task-board {
   min-height: 200px;
+  position: relative;
+  z-index: 0;
 }
 
 .board-column {
-  background: hsl(var(--b1));
-  border: 1px solid hsl(var(--b3));
-  border-radius: 12px;
-  padding: 16px;
+  transition: all 300ms ease;
+}
+
+.board-column:hover {
+  transform: translateY(-2px);
 }
 
 .board-header {
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   gap: 8px;

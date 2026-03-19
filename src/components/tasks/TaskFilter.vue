@@ -1,51 +1,65 @@
 <template>
-  <div class="task-filter">
-    <div class="flex flex-wrap gap-4 items-center">
-      <div class="form-control">
-        <SelectMenu
-          v-model="localFilter.project_id"
-          :options="projectOptions"
-          size="sm"
-          placeholder="所有项目"
-          @update:modelValue="updateFilter"
-        />
-      </div>
-
-      <div class="form-control">
-        <SelectMenu
-          v-model="localFilter.status"
-          :options="statusOptions"
-          size="sm"
-          placeholder="所有状态"
-          @update:modelValue="updateFilter"
-        />
-      </div>
-
-      <div class="form-control">
-        <SelectMenu
-          v-model="localSort"
-          :options="sortOptions"
-          size="sm"
-          placeholder="排序"
-          @update:modelValue="updateSort"
-        />
-      </div>
-
-      <div class="form-control">
-        <div class="relative">
-          <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="搜索任务..."
-            class="input input-bordered input-sm w-48 pl-8"
-            @input="handleSearch"
+  <div
+    class="task-filter relative z-30 rounded-2xl bg-base-100/40 backdrop-blur-xl border border-white/10 p-4 md:p-5 shadow-2xl"
+    :class="{
+      'rounded-none bg-transparent backdrop-blur-none border-0 p-0 shadow-none': embedded,
+    }"
+  >
+    <div class="flex flex-col gap-3 md:flex-row md:items-start md:gap-5">
+      <div class="flex flex-wrap items-center gap-4 flex-1">
+        <div class="form-control min-w-[9rem]">
+          <SelectMenu
+            v-model="localFilter.project_id"
+            :options="projectOptions"
+            size="sm"
+            placeholder="所有项目"
+            @update:modelValue="updateFilter"
           />
-          <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-base-content/50">🔍</span>
+        </div>
+
+        <div class="form-control min-w-[9rem]">
+          <SelectMenu
+            v-model="localFilter.status"
+            :options="statusOptions"
+            size="sm"
+            placeholder="所有状态"
+            @update:modelValue="updateFilter"
+          />
+        </div>
+
+        <div class="form-control min-w-[9rem]">
+          <SelectMenu
+            v-model="localSort"
+            :options="sortOptions"
+            size="sm"
+            placeholder="排序"
+            @update:modelValue="updateSort"
+          />
+        </div>
+
+        <div class="form-control">
+          <div class="relative">
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="搜索任务..."
+              class="input input-bordered input-sm w-56 pl-8 bg-base-100/55 border-base-content/25"
+              @input="handleSearch"
+            />
+            <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-base-content/50">🔍</span>
+          </div>
+        </div>
+
+        <div class="form-control">
+          <button class="btn btn-outline btn-sm" @click="resetFilters">重置筛选</button>
         </div>
       </div>
 
-      <div class="form-control self-end">
-        <button class="btn btn-ghost btn-sm" @click="resetFilters">重置筛选</button>
+      <div
+        v-if="$slots.actions"
+        class="flex items-center justify-end gap-2 flex-wrap md:flex-nowrap md:self-center md:ml-auto"
+      >
+        <slot name="actions" />
       </div>
     </div>
   </div>
@@ -63,12 +77,14 @@ interface Props {
   initialFilter?: TaskFilter
   initialSort?: TaskSort
   initialSearch?: string
+  embedded?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   initialFilter: () => ({}),
   initialSort: 'created_desc',
   initialSearch: '',
+  embedded: false,
 })
 
 const emit = defineEmits<{
@@ -151,10 +167,17 @@ watch(
 
 <style scoped>
 .task-filter {
-  background: hsl(var(--b1));
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
-  border: 1px solid hsl(var(--b3));
+  margin-bottom: 0;
+}
+
+.task-filter :deep(.btn.btn-outline),
+.task-filter :deep(.btn.btn-ghost.btn-outline) {
+  border-color: hsl(var(--bc) / 0.28);
+  background-color: hsl(var(--b1) / 0.55);
+}
+
+.task-filter :deep(.btn.btn-outline:hover),
+.task-filter :deep(.btn.btn-ghost.btn-outline:hover) {
+  border-color: hsl(var(--bc) / 0.5);
 }
 </style>

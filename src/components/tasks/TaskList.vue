@@ -4,21 +4,21 @@
       <span class="loading loading-spinner loading-lg"></span>
     </div>
 
-      <div v-else-if="tasks.length === 0" class="text-center py-12">
-        <div class="card card-bordered bg-base-100 mx-auto max-w-md p-8 shadow-sm">
+    <div v-else-if="tasks.length === 0" class="text-center py-12">
+      <div class="card card-bordered bg-base-100/40 backdrop-blur-xl mx-auto max-w-md p-9 border border-white/10 shadow-2xl">
         <div class="text-base-content/50 mb-4">
           <span class="text-6xl">📋</span>
         </div>
         <h3 class="text-xl font-medium mb-2">{{ emptyTitle }}</h3>
         <p class="text-base-content/70 mb-6">{{ emptyDescription }}</p>
-        <button v-if="showAddButton" class="btn btn-primary" @click="emit('add')">
+        <button v-if="showAddButton" class="btn btn-primary btn-outline" @click="emit('add')">
           添加任务
         </button>
       </div>
     </div>
 
     <div v-else>
-      <div class="space-y-4">
+      <div class="space-y-5">
         <TaskCard
           v-for="task in visibleTasks"
           :key="task.id"
@@ -37,7 +37,7 @@
       </div>
 
       <div v-if="visibleTasks.length < tasks.length" class="flex justify-center mt-6">
-        <button class="btn btn-outline btn-sm" @click="loadMore">加载更多</button>
+        <button class="btn btn-outline btn-sm shadow-md" @click="loadMore">加载更多</button>
       </div>
     </div>
   </div>
@@ -108,5 +108,7 @@ watch(
 <style scoped>
 .task-list {
   min-height: 200px;
+  position: relative;
+  z-index: 0;
 }
 </style>
