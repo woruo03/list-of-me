@@ -36,7 +36,8 @@
             {{ task.title }}
           </h3>
 
-          <span v-if="isDueSoon" class="badge badge-warning badge-outline badge-sm">即将到期</span>
+          <span v-if="isOverdue" class="badge badge-error badge-outline badge-sm">已逾期</span>
+          <span v-else-if="isDueSoon" class="badge badge-warning badge-outline badge-sm">即将到期</span>
         </div>
 
         <div v-if="task.description" class="mb-3 ml-7">
@@ -185,6 +186,13 @@ const isDueSoon = computed(() => {
   const now = new Date()
   const hoursDiff = (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60)
   return hoursDiff < 24 && hoursDiff > 0
+})
+
+const isOverdue = computed(() => {
+  if (!props.task.due_at || props.task.status === Status.Done) return false
+  const dueDate = new Date(props.task.due_at)
+  const now = new Date()
+  return dueDate.getTime() <= now.getTime()
 })
 
 const isDescriptionExpanded = ref(false)
