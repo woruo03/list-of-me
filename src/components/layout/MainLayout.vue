@@ -1,11 +1,11 @@
 <template>
-  <div class="min-h-screen flex text-base-content bg-transparent">
+  <div class="h-screen overflow-hidden flex text-base-content bg-transparent">
     <Sidebar class="hidden md:flex" />
 
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col min-h-0">
       <Header />
 
-      <main class="flex-1 p-5 md:p-7 overflow-auto pb-24 md:pb-7">
+      <main class="flex-1 min-h-0 p-5 md:p-7 overflow-y-auto overflow-x-hidden pb-24 md:pb-7">
         <div
           class="min-h-full rounded-[1.25rem] bg-base-100/40 backdrop-blur-xl border border-white/10 p-5 md:p-7 shadow-2xl"
         >
