@@ -213,6 +213,28 @@ jobs:
           TAG_NAME="${{ steps.release_tag.outputs.tag }}"
           VERSION="${TAG_NAME#v}"
           PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          if [ -z "${TAURI_SIGNING_PRIVATE_KEY:-}" ]; then
+            echo "TAURI_SIGNING_PRIVATE_KEY is missing"
+            exit 1
+          fi
+
+          sign_and_get_signature() {
+            local file_path="$1"
+            local sig_file="${file_path}.sig"
+            pnpm tauri signer sign "$file_path" >/dev/null
+            if [ ! -f "$sig_file" ]; then
+              echo "Signature file not found: $sig_file"
+              exit 1
+            fi
+            local sig
+            sig=$(tr -d '\r\n' < "$sig_file")
+            if [ -z "$sig" ]; then
+              echo "Empty signature for: $file_path"
+              exit 1
+            fi
+            echo "$sig"
+          }
           
           # Linux AppImage
           APPIMAGE_PATH=$(find linux-artifacts -path "*/appimage/*_${VERSION}_*.AppImage" -type f | head -n 1)
@@ -220,7 +242,7 @@ jobs:
             echo "AppImage not found for version ${VERSION}"
             exit 1
           fi
-          APPIMAGE_SIGNATURE=$(pnpm tauri signer sign "$APPIMAGE_PATH" | tr -d '\n')
+          APPIMAGE_SIGNATURE=$(sign_and_get_signature "$APPIMAGE_PATH")
           APPIMAGE_FILE_NAME=$(basename "$APPIMAGE_PATH")
           APPIMAGE_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${APPIMAGE_FILE_NAME}"
           export APPIMAGE_SIGNATURE APPIMAGE_DOWNLOAD_URL
@@ -231,7 +253,7 @@ jobs:
             echo "MSI not found for version ${VERSION}"
             exit 1
           fi
-          MSI_SIGNATURE=$(pnpm tauri signer sign "$MSI_PATH" | tr -d '\n')
+          MSI_SIGNATURE=$(sign_and_get_signature "$MSI_PATH")
           MSI_FILE_NAME=$(basename "$MSI_PATH")
           MSI_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${MSI_FILE_NAME}"
           export MSI_SIGNATURE MSI_DOWNLOAD_URL
@@ -242,7 +264,7 @@ jobs:
             echo "EXE not found for version ${VERSION}"
             exit 1
           fi
-          EXE_SIGNATURE=$(pnpm tauri signer sign "$EXE_PATH" | tr -d '\n')
+          EXE_SIGNATURE=$(sign_and_get_signature "$EXE_PATH")
           EXE_FILE_NAME=$(basename "$EXE_PATH")
           EXE_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${EXE_FILE_NAME}"
           export EXE_SIGNATURE EXE_DOWNLOAD_URL
