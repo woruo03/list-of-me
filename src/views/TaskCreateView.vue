@@ -1,5 +1,5 @@
 <template>
-  <div class="task-create-view">
+  <div>
     <div
       class="mb-5 flex items-center justify-between rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl"
     >
@@ -75,9 +75,3 @@ onMounted(() => {
   projectStore.fetchProjects()
 })
 </script>
-
-<style scoped>
-.task-create-view {
-  width: 100%;
-}
-</style>

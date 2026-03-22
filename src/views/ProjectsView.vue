@@ -1,5 +1,5 @@
 <template>
-  <div class="projects-view">
+  <div>
     <div
       class="mb-5 flex flex-col items-end gap-3 rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl"
     >
@@ -53,7 +53,7 @@
         class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl mx-auto max-w-md p-8"
       >
         <div class="text-base-content/50 mb-4">
-          <AppIcon name="folder" class="h-14 w-14" />
+          <AppIcon name="folder" class="mx-auto h-14 w-14" />
         </div>
         <h3 class="text-xl font-medium mb-2">还没有项目</h3>
         <p class="text-base-content/70 mb-6">创建项目来更好地组织你的任务。</p>
@@ -168,9 +168,3 @@ onMounted(() => {
   taskStore.fetchAll()
 })
 </script>
-
-<style scoped>
-.projects-view {
-  width: 100%;
-}
-</style>

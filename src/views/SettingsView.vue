@@ -1,5 +1,5 @@
 <template>
-  <div class="settings-view">
+  <div>
     <div class="grid grid-cols-1 gap-6">
       <div
         class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl overflow-visible relative z-30"
@@ -246,9 +246,3 @@ onBeforeUnmount(() => {
   void releaseUpdateResource()
 })
 </script>
-
-<style scoped>
-.settings-view {
-  width: 100%;
-}
-</style>

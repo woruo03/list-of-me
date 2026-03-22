@@ -1,5 +1,5 @@
 <template>
-  <div class="task-edit-view">
+  <div>
     <div
       class="mb-5 flex items-center justify-between rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl"
     >
@@ -98,9 +98,3 @@ watch(
   },
 )
 </script>
-
-<style scoped>
-.task-edit-view {
-  width: 100%;
-}
-</style>

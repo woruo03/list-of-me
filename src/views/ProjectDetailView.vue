@@ -1,5 +1,5 @@
 <template>
-  <div class="project-detail-view">
+  <div>
     <div
       class="relative z-20 mb-5 flex flex-col gap-3 rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl"
     >
@@ -287,9 +287,3 @@ watch(
   },
 )
 </script>
-
-<style scoped>
-.project-detail-view {
-  width: 100%;
-}
-</style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="completed-view">
+  <div>
     <div
       class="relative z-20 mb-5 flex flex-col items-end gap-3 rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl"
     >
@@ -158,9 +158,3 @@ onMounted(() => {
   projectStore.fetchProjects()
 })
 </script>
-
-<style scoped>
-.completed-view {
-  width: 100%;
-}
-</style>
