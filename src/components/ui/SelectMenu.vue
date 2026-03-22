@@ -1,5 +1,8 @@
 <template>
-  <div ref="root" class="relative z-40 w-full">
+  <div
+    ref="root"
+    class="relative z-40 w-full"
+  >
     <button
       type="button"
       class="btn btn-outline w-full flex items-center justify-between gap-2 font-normal bg-base-100/55 border-base-content/25 hover:bg-base-100/75 hover:border-base-content/45"
@@ -7,7 +10,9 @@
       :disabled="disabled"
       @click="toggle"
     >
-      <span class="w-full text-left whitespace-nowrap overflow-hidden text-ellipsis">{{ selectedLabel }}</span>
+      <span class="w-full text-left whitespace-nowrap overflow-hidden text-ellipsis">{{
+        selectedLabel
+      }}</span>
     </button>
 
     <ul

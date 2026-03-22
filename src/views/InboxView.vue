@@ -1,16 +1,32 @@
 <template>
   <div class="inbox-view">
-    <div class="relative z-20 mb-5 flex flex-col items-end gap-3 rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl">
+    <div
+      class="relative z-20 mb-5 flex flex-col items-end gap-3 rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl"
+    >
       <div class="flex items-center justify-end gap-2 flex-wrap">
-        <button class="btn btn-ghost btn-outline" @click="toggleSelectionMode">
+        <button
+          class="btn btn-ghost btn-outline"
+          @click="toggleSelectionMode"
+        >
           {{ selectionMode ? '取消选择' : '选择' }}
         </button>
       </div>
-      <div v-if="selectionMode" class="flex items-center justify-end gap-2 w-full">
-        <button class="btn btn-ghost btn-outline" @click="toggleSelectAll">
+      <div
+        v-if="selectionMode"
+        class="flex items-center justify-end gap-2 w-full"
+      >
+        <button
+          class="btn btn-ghost btn-outline"
+          @click="toggleSelectAll"
+        >
           {{ allSelected ? '取消全选' : '全选' }}
         </button>
-        <button class="btn btn-ghost btn-outline" @click="toggleMoveMenu">移动</button>
+        <button
+          class="btn btn-ghost btn-outline"
+          @click="toggleMoveMenu"
+        >
+          移动
+        </button>
         <button
           class="btn btn-outline btn-error"
           :disabled="taskStore.selectedCount === 0"
@@ -19,11 +35,23 @@
           删除
         </button>
       </div>
-      <div v-if="selectionMode && showMoveMenu" class="flex items-center justify-end gap-2 w-full">
+      <div
+        v-if="selectionMode && showMoveMenu"
+        class="flex items-center justify-end gap-2 w-full"
+      >
         <div class="w-56">
-          <SelectMenu v-model="moveTargetId" :options="moveOptions" size="sm" />
+          <SelectMenu
+            v-model="moveTargetId"
+            :options="moveOptions"
+            size="sm"
+          />
         </div>
-        <button class="btn btn-primary btn-outline btn-sm" @click="confirmMove">确定</button>
+        <button
+          class="btn btn-primary btn-outline btn-sm"
+          @click="confirmMove"
+        >
+          确定
+        </button>
       </div>
     </div>
 

@@ -99,10 +99,13 @@ export const useProjectStore = defineStore('projects', {
 
   getters: {
     projectMap: (state) => {
-      return state.projects.reduce((map, project) => {
-        map[project.id] = project
-        return map
-      }, {} as Record<number, Project>)
+      return state.projects.reduce(
+        (map, project) => {
+          map[project.id] = project
+          return map
+        },
+        {} as Record<number, Project>,
+      )
     },
 
     projectNameById: (state) => {

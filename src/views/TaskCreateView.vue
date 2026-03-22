@@ -54,7 +54,7 @@ const forceInbox = computed(() => {
 
 const handleSubmit = async (data: TaskCreate | TaskUpdate) => {
   const payload: TaskCreate = {
-    title: 'title' in data ? data.title ?? '' : '',
+    title: 'title' in data ? (data.title ?? '') : '',
     description: data.description ?? null,
     project_id: data.project_id ?? null,
     status: data.status ?? Status.Todo,

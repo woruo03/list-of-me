@@ -86,11 +86,22 @@
         @search="taskStore.setSearchQuery"
         @sort="taskStore.setSort"
       >
-        <template v-if="selectionMode" #actions>
-          <button class="btn btn-ghost btn-outline" @click="toggleSelectAll">
+        <template
+          v-if="selectionMode"
+          #actions
+        >
+          <button
+            class="btn btn-ghost btn-outline"
+            @click="toggleSelectAll"
+          >
             {{ allSelected ? '取消全选' : '全选' }}
           </button>
-          <button class="btn btn-ghost btn-outline" @click="toggleMoveMenu">移动</button>
+          <button
+            class="btn btn-ghost btn-outline"
+            @click="toggleMoveMenu"
+          >
+            移动
+          </button>
           <button
             class="btn btn-outline btn-error"
             :disabled="taskStore.selectedCount === 0"
@@ -102,11 +113,23 @@
       </TaskFilter>
     </div>
 
-    <div v-if="selectionMode && showMoveMenu" class="mb-4 flex items-center justify-end gap-2">
+    <div
+      v-if="selectionMode && showMoveMenu"
+      class="mb-4 flex items-center justify-end gap-2"
+    >
       <div class="w-56">
-        <SelectMenu v-model="moveTargetId" :options="moveOptions" size="sm" />
+        <SelectMenu
+          v-model="moveTargetId"
+          :options="moveOptions"
+          size="sm"
+        />
       </div>
-      <button class="btn btn-primary btn-outline btn-sm" @click="confirmMove">确定</button>
+      <button
+        class="btn btn-primary btn-outline btn-sm"
+        @click="confirmMove"
+      >
+        确定
+      </button>
     </div>
 
     <TaskBoard

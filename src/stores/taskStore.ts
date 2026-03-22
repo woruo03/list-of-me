@@ -5,13 +5,20 @@ import { Status } from '@/types/task'
 import type { Summary } from '@/types/api'
 import { useUIStore } from './uiStore'
 
-export type TaskSort = 'created_desc' | 'created_asc' | 'due_asc' | 'due_desc' | 'title_asc' | 'title_desc'
+export type TaskSort =
+  | 'created_desc'
+  | 'created_asc'
+  | 'due_asc'
+  | 'due_desc'
+  | 'title_asc'
+  | 'title_desc'
 
 const applyFilter = (tasks: Task[], filter: TaskFilter) => {
   return tasks.filter((task) => {
     if (filter.project_id !== undefined) {
       if (filter.project_id === null && task.project_id !== null) return false
-      if (typeof filter.project_id === 'number' && task.project_id !== filter.project_id) return false
+      if (typeof filter.project_id === 'number' && task.project_id !== filter.project_id)
+        return false
     }
     if (filter.status !== undefined && task.status !== filter.status) return false
     return true
@@ -278,7 +285,8 @@ export const useTaskStore = defineStore('tasks', {
   },
 
   getters: {
-    inboxTasks: (state) => state.tasks.filter((t) => t.project_id === null && t.status !== Status.Done),
+    inboxTasks: (state) =>
+      state.tasks.filter((t) => t.project_id === null && t.status !== Status.Done),
 
     todayTasks: (state) => {
       const tomorrow = getTomorrowStart()

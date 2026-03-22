@@ -1,30 +1,50 @@
 <template>
   <div class="settings-view">
     <div class="grid grid-cols-1 gap-6">
-      <div class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl overflow-visible relative z-30">
+      <div
+        class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl overflow-visible relative z-30"
+      >
         <div class="card-body">
           <h2 class="card-title text-lg">主题</h2>
-          <SelectMenu class="min-w-[16rem]" v-model="themeValue" :options="themeOptions" preview-type="theme" />
+          <SelectMenu
+            class="min-w-[16rem]"
+            v-model="themeValue"
+            :options="themeOptions"
+            preview-type="theme"
+          />
         </div>
       </div>
 
-      <div class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl overflow-visible relative z-20 lg:col-span-1">
+      <div
+        class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl overflow-visible relative z-20 lg:col-span-1"
+      >
         <div class="card-body">
           <div class="flex items-center justify-between">
             <h2 class="card-title text-lg">字体大小</h2>
             <span class="badge badge-outline">{{ uiStore.fontSize }}px</span>
           </div>
-          <SelectMenu class="min-w-[16rem]" v-model="fontSizeValue" :options="fontSizeOptions" />
+          <SelectMenu
+            class="min-w-[16rem]"
+            v-model="fontSizeValue"
+            :options="fontSizeOptions"
+          />
         </div>
       </div>
 
-      <div class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl">
+      <div
+        class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl"
+      >
         <div class="card-body gap-4">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="space-y-1">
               <h2 class="card-title text-lg">应用更新</h2>
               <p class="text-sm text-base-content/70">{{ updateStatusText }}</p>
-              <p v-if="updateMetaText" class="text-xs text-base-content/60">{{ updateMetaText }}</p>
+              <p
+                v-if="updateMetaText"
+                class="text-xs text-base-content/60"
+              >
+                {{ updateMetaText }}
+              </p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button
@@ -40,28 +60,43 @@
                 :disabled="isCheckingUpdate || isInstallingUpdate"
                 @click="installUpdate"
               >
-                {{ isInstallingUpdate ? (downloadPercent !== null ? `下载中 ${downloadPercent}%` : '安装中...') : `更新到 v${updateInfo.version}` }}
+                {{
+                  isInstallingUpdate
+                    ? downloadPercent !== null
+                      ? `下载中 ${downloadPercent}%`
+                      : '安装中...'
+                    : `更新到 v${updateInfo.version}`
+                }}
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl">
+      <div
+        class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl"
+      >
         <div class="card-body">
           <h2 class="card-title text-lg">版本信息</h2>
           <div class="badge badge-primary badge-outline">v{{ appVersion }}</div>
         </div>
       </div>
 
-      <div class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl">
+      <div
+        class="card card-bordered bg-base-100/40 backdrop-blur-xl border border-white/10 shadow-2xl"
+      >
         <div class="card-body">
           <h2 class="card-title text-lg">更新日志</h2>
-          <div class="collapse collapse-arrow bg-base-100/45 backdrop-blur-xl border border-white/10">
+          <div
+            class="collapse collapse-arrow bg-base-100/45 backdrop-blur-xl border border-white/10"
+          >
             <input type="checkbox" />
             <div class="collapse-title text-sm font-medium">展开查看更新日志</div>
             <div class="collapse-content">
-              <pre class="max-h-72 overflow-y-auto whitespace-pre-wrap text-xs leading-6 text-base-content/75">{{ changelogContent }}</pre>
+              <pre
+                class="max-h-72 overflow-y-auto whitespace-pre-wrap text-xs leading-6 text-base-content/75"
+                >{{ changelogContent }}</pre
+              >
             </div>
           </div>
         </div>
@@ -116,7 +151,8 @@ const downloadPercent = computed(() => {
 const updateStatusText = computed(() => {
   if (!updaterAvailable) return '仅桌面客户端支持在线更新'
   if (updateError.value) return updateError.value
-  if (isInstallingUpdate.value && downloadPercent.value !== null) return `正在下载更新 ${downloadPercent.value}%`
+  if (isInstallingUpdate.value && downloadPercent.value !== null)
+    return `正在下载更新 ${downloadPercent.value}%`
   if (isInstallingUpdate.value) return '正在安装更新...'
   if (isCheckingUpdate.value) return '正在检查更新...'
   if (updateInfo.value) return `发现新版本 v${updateInfo.value.version}`
@@ -209,7 +245,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   void releaseUpdateResource()
 })
-
 </script>
 
 <style scoped>
