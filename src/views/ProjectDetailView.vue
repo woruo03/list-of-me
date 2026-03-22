@@ -136,6 +136,7 @@
       v-if="viewMode === 'board'"
       :tasks="tasks"
       :projects="projectStore.projects"
+      :selection-mode="selectionMode"
       @edit="openEditTaskModal"
       @delete="handleDeleteTask"
       @toggle-status="taskStore.toggleTaskStatus"

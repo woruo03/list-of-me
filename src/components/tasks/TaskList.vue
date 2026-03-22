@@ -7,7 +7,7 @@
     <div v-else-if="tasks.length === 0" class="text-center py-12">
       <div class="card card-bordered bg-base-100/40 backdrop-blur-xl mx-auto max-w-md p-9 border border-white/10 shadow-2xl">
         <div class="text-base-content/50 mb-4">
-          <AppIcon name="checklist" class="h-14 w-14" />
+          <AppIcon name="checklist" class="mx-auto h-14 w-14" />
         </div>
         <h3 class="text-xl font-medium mb-2">{{ emptyTitle }}</h3>
         <p class="text-base-content/70 mb-6">{{ emptyDescription }}</p>
@@ -18,7 +18,7 @@
     </div>
 
     <div v-else>
-      <div class="space-y-5">
+      <div class="task-list-stack">
         <TaskCard
           v-for="task in visibleTasks"
           :key="task.id"
@@ -58,8 +58,6 @@ interface Props {
   emptyTitle?: string
   emptyDescription?: string
   showAddButton?: boolean
-  showBulkActions?: boolean
-  enableSelection?: boolean
   selectionMode?: boolean
 }
 
@@ -68,8 +66,6 @@ const props = withDefaults(defineProps<Props>(), {
   emptyTitle: '没有任务',
   emptyDescription: '这里还没有任何任务',
   showAddButton: true,
-  showBulkActions: true,
-  enableSelection: true,
   selectionMode: false,
 })
 
@@ -86,7 +82,7 @@ const visibleCount = ref(20)
 
 const visibleTasks = computed(() => props.tasks.slice(0, visibleCount.value))
 
-const selectionMode = computed(() => props.enableSelection && props.selectionMode)
+const selectionMode = computed(() => props.selectionMode)
 
 const getProject = (projectId: number | null) => {
   if (!projectId) return null
@@ -111,5 +107,11 @@ watch(
   min-height: 200px;
   position: relative;
   z-index: 0;
+}
+
+.task-list-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 </style>
