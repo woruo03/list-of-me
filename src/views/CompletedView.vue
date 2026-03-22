@@ -86,9 +86,11 @@ import type { Task } from '@/types/task'
 import { Status } from '@/types/task'
 import { useTaskStore } from '@/stores/taskStore'
 import { useProjectStore } from '@/stores/projectStore'
+import { useUIStore } from '@/stores/uiStore'
 
 const taskStore = useTaskStore()
 const projectStore = useProjectStore()
+const uiStore = useUIStore()
 const router = useRouter()
 const selectionMode = ref(false)
 const showMoveMenu = ref(false)
@@ -117,7 +119,12 @@ const restoreTask = async (taskId: number) => {
 }
 
 const clearCompleted = async () => {
-  if (!confirm('确定要清空所有已完成的任务吗？此操作不可撤销。')) return
+  const confirmed = await uiStore.confirmDestructive({
+    title: '清空已完成任务',
+    message: '确定要清空所有已完成任务吗？\n此操作不可撤销。',
+    confirmText: '确认清空',
+  })
+  if (!confirmed) return
   const ids = tasks.value.map((task) => task.id)
   await taskStore.bulkDelete(ids)
 }
@@ -137,7 +144,11 @@ const toggleSelectAll = () => {
 }
 
 const deleteSelected = async () => {
-  if (!confirm('确定要删除所选任务吗？此操作不可撤销。')) return
+  const confirmed = await uiStore.confirmDestructive({
+    title: '删除已选任务',
+    message: '确定要删除所选任务吗？\n此操作不可撤销。',
+  })
+  if (!confirmed) return
   await taskStore.bulkDelete(taskStore.selectedIds)
 }
 

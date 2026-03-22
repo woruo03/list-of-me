@@ -133,6 +133,7 @@ import type { Task } from '@/types/task'
 import { Status } from '@/types/task'
 import type { Project } from '@/types/project'
 import AppIcon from '@/components/ui/AppIcon.vue'
+import { useUIStore } from '@/stores/uiStore'
 
 interface Props {
   task: Task
@@ -163,6 +164,7 @@ const emit = defineEmits<{
   dragstart: [id: number]
   dragend: [id: number]
 }>()
+const uiStore = useUIStore()
 
 const projectName = computed(() => props.project?.name || '未知项目')
 
@@ -245,10 +247,13 @@ const handleCardClick = () => {
   emit('focus', props.task.id)
 }
 
-const confirmDelete = () => {
-  if (confirm(`确定要删除任务 "${props.task.title}" 吗？`)) {
-    emit('delete', props.task.id)
-  }
+const confirmDelete = async () => {
+  const confirmed = await uiStore.confirmDestructive({
+    title: '删除任务',
+    message: `确定要删除任务“${props.task.title}”吗？\n此操作不可撤销。`,
+  })
+  if (!confirmed) return
+  emit('delete', props.task.id)
 }
 
 const handleDragStart = (event: DragEvent) => {

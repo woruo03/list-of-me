@@ -31,6 +31,7 @@
 <script setup lang="ts">
 import type { Project } from '@/types/project'
 import AppIcon from '@/components/ui/AppIcon.vue'
+import { useUIStore } from '@/stores/uiStore'
 
 interface Props {
   project: Project
@@ -51,6 +52,7 @@ const emit = defineEmits<{
   delete: [id: number]
   select: [id: number]
 }>()
+const uiStore = useUIStore()
 
 const handleClick = () => {
   if (props.selectable) {
@@ -60,9 +62,12 @@ const handleClick = () => {
   emit('click', props.project)
 }
 
-const confirmDelete = () => {
-  if (confirm(`确定要删除项目 "${props.project.name}" 吗？`)) {
-    emit('delete', props.project.id)
-  }
+const confirmDelete = async () => {
+  const confirmed = await uiStore.confirmDestructive({
+    title: '删除项目',
+    message: `确定要删除项目“${props.project.name}”吗？\n此操作不可撤销。`,
+  })
+  if (!confirmed) return
+  emit('delete', props.project.id)
 }
 </script>

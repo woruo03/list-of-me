@@ -156,7 +156,11 @@ const toggleSelectAll = () => {
 }
 
 const deleteSelected = async () => {
-  if (!confirm('确定要删除所选项目吗？此操作不可撤销。')) return
+  const confirmed = await uiStore.confirmDestructive({
+    title: '删除已选项目',
+    message: '确定要删除所选项目吗？\n此操作不可撤销。',
+  })
+  if (!confirmed) return
   for (const id of selectedIds.value) {
     await projectStore.deleteProject(id)
   }

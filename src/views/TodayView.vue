@@ -144,9 +144,11 @@ import SelectMenu from '@/components/ui/SelectMenu.vue'
 import type { Task } from '@/types/task'
 import { useTaskStore } from '@/stores/taskStore'
 import { useProjectStore } from '@/stores/projectStore'
+import { useUIStore } from '@/stores/uiStore'
 
 const taskStore = useTaskStore()
 const projectStore = useProjectStore()
+const uiStore = useUIStore()
 const router = useRouter()
 const viewMode = ref<'list' | 'board'>('list')
 const showFilters = ref(false)
@@ -199,7 +201,11 @@ const toggleSelectAll = () => {
 }
 
 const deleteSelected = async () => {
-  if (!confirm('确定要删除所选任务吗？此操作不可撤销。')) return
+  const confirmed = await uiStore.confirmDestructive({
+    title: '删除已选任务',
+    message: '确定要删除所选任务吗？\n此操作不可撤销。',
+  })
+  if (!confirmed) return
   await taskStore.bulkDelete(taskStore.selectedIds)
 }
 

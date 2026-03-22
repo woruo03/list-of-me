@@ -175,8 +175,14 @@ const handleKeydown = (event: KeyboardEvent) => {
 
   if (event.key === 'Delete') {
     if (taskStore.selectedIds.length === 0) return
-    if (!confirm('确定要删除所选任务吗？此操作不可撤销。')) return
-    taskStore.bulkDelete(taskStore.selectedIds)
+    void (async () => {
+      const confirmed = await uiStore.confirmDestructive({
+        title: '删除已选任务',
+        message: '确定要删除所选任务吗？\n此操作不可撤销。',
+      })
+      if (!confirmed) return
+      await taskStore.bulkDelete(taskStore.selectedIds)
+    })()
   }
 }
 
