@@ -42,6 +42,19 @@
               </h3>
               <span class="badge badge-sm border-white/20 bg-base-100/65">{{ statusText }}</span>
               <span
+                v-if="task.due_at"
+                class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-base-100/45 px-2.5 py-1 text-xs text-base-content/65 whitespace-nowrap"
+              >
+                <AppIcon name="calendar" class="h-3.5 w-3.5" />
+                {{ formattedDueDate }}
+              </span>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-base-100/45 px-2.5 py-1 text-xs text-base-content/65 whitespace-nowrap"
+              >
+                <AppIcon name="clock" class="h-3.5 w-3.5" />
+                {{ formattedCreatedAt }}
+              </span>
+              <span
                 v-if="isOverdue"
                 class="badge badge-error badge-outline badge-sm"
               >
@@ -57,7 +70,7 @@
 
             <div
               v-if="task.description"
-              class="mb-3"
+              class="mb-3 px-3"
             >
               <p
                 class="text-base-content/75 text-sm leading-6 whitespace-normal break-all"
@@ -74,36 +87,20 @@
               </button>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2.5 text-xs text-base-content/65">
-              <span
-                v-if="showProject && task.project_id && projectName"
-                class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-base-100/45 px-2.5 py-1"
-              >
-                <AppIcon name="folder" class="h-3.5 w-3.5" />
-                {{ projectName }}
-              </span>
-              <span
-                v-if="task.due_at"
-                class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-base-100/45 px-2.5 py-1"
-              >
-                <AppIcon name="calendar" class="h-3.5 w-3.5" />
-                {{ formattedDueDate }}
-              </span>
-              <span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-base-100/45 px-2.5 py-1">
-                <AppIcon name="clock" class="h-3.5 w-3.5" />
-                {{ formattedCreatedAt }}
-              </span>
-            </div>
+            <span
+              v-if="showProject && task.project_id && projectName"
+              class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-base-100/45 px-2.5 py-1 text-xs text-base-content/65"
+            >
+              <AppIcon name="folder" class="h-3.5 w-3.5" />
+              {{ projectName }}
+            </span>
 
             <div v-if="task.notes" class="mt-3 rounded-xl border border-white/10 bg-base-100/35 px-3 py-2.5">
               <p
                 class="text-base-content/80 text-sm break-all"
                 :class="{ 'line-clamp-2': !isNotesExpanded }"
               >
-                <span class="inline-flex items-start gap-1.5">
-                  <AppIcon name="note" class="h-3.5 w-3.5 mt-0.5" />
-                  <span>{{ task.notes }}</span>
-                </span>
+                {{ task.notes }}
               </p>
               <button
                 v-if="hasLongNotes"
