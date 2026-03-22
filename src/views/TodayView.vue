@@ -1,22 +1,44 @@
 <template>
-  <div class="today-view">
-    <div class="relative z-20 mb-5 flex flex-col items-end gap-3 rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl">
+  <div>
+    <div
+      class="relative z-20 mb-5 flex flex-col items-end gap-3 rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl"
+    >
       <div class="flex items-center justify-end gap-2 flex-wrap">
-        <button class="btn btn-ghost btn-outline" @click="toggleFilter">
+        <button
+          class="btn btn-ghost btn-outline"
+          @click="toggleFilter"
+        >
           {{ showFilters ? '隐藏筛选' : '筛选' }}
         </button>
-        <button class="btn btn-ghost btn-outline" @click="toggleViewMode">
+        <button
+          class="btn btn-ghost btn-outline"
+          @click="toggleViewMode"
+        >
           {{ viewMode === 'list' ? '看板视图' : '列表视图' }}
         </button>
-        <button class="btn btn-ghost btn-outline" @click="toggleSelectionMode">
+        <button
+          class="btn btn-ghost btn-outline"
+          @click="toggleSelectionMode"
+        >
           {{ selectionMode ? '取消选择' : '选择' }}
         </button>
       </div>
-      <div v-if="selectionMode && !showFilters" class="flex items-center justify-end gap-2 w-full">
-        <button class="btn btn-ghost btn-outline" @click="toggleSelectAll">
+      <div
+        v-if="selectionMode && !showFilters"
+        class="flex items-center justify-end gap-2 w-full"
+      >
+        <button
+          class="btn btn-ghost btn-outline"
+          @click="toggleSelectAll"
+        >
           {{ allSelected ? '取消全选' : '全选' }}
         </button>
-        <button class="btn btn-ghost btn-outline" @click="toggleMoveMenu">移动</button>
+        <button
+          class="btn btn-ghost btn-outline"
+          @click="toggleMoveMenu"
+        >
+          移动
+        </button>
         <button
           class="btn btn-outline btn-error"
           :disabled="taskStore.selectedCount === 0"
@@ -38,11 +60,22 @@
         @search="taskStore.setSearchQuery"
         @sort="taskStore.setSort"
       >
-        <template v-if="selectionMode" #actions>
-          <button class="btn btn-ghost btn-outline" @click="toggleSelectAll">
+        <template
+          v-if="selectionMode"
+          #actions
+        >
+          <button
+            class="btn btn-ghost btn-outline"
+            @click="toggleSelectAll"
+          >
             {{ allSelected ? '取消全选' : '全选' }}
           </button>
-          <button class="btn btn-ghost btn-outline" @click="toggleMoveMenu">移动</button>
+          <button
+            class="btn btn-ghost btn-outline"
+            @click="toggleMoveMenu"
+          >
+            移动
+          </button>
           <button
             class="btn btn-outline btn-error"
             :disabled="taskStore.selectedCount === 0"
@@ -54,17 +87,30 @@
       </TaskFilter>
     </div>
 
-    <div v-if="selectionMode && showMoveMenu" class="mb-4 flex items-center justify-end gap-2">
+    <div
+      v-if="selectionMode && showMoveMenu"
+      class="mb-4 flex items-center justify-end gap-2"
+    >
       <div class="w-56">
-        <SelectMenu v-model="moveTargetId" :options="moveOptions" size="sm" />
+        <SelectMenu
+          v-model="moveTargetId"
+          :options="moveOptions"
+          size="sm"
+        />
       </div>
-      <button class="btn btn-primary btn-outline btn-sm" @click="confirmMove">确定</button>
+      <button
+        class="btn btn-primary btn-outline btn-sm"
+        @click="confirmMove"
+      >
+        确定
+      </button>
     </div>
 
     <TaskBoard
       v-if="viewMode === 'board'"
       :tasks="tasks"
       :projects="projectStore.projects"
+      :selection-mode="selectionMode"
       @edit="openEditTaskModal"
       @delete="handleDeleteTask"
       @toggle-status="taskStore.toggleTaskStatus"
@@ -98,9 +144,11 @@ import SelectMenu from '@/components/ui/SelectMenu.vue'
 import type { Task } from '@/types/task'
 import { useTaskStore } from '@/stores/taskStore'
 import { useProjectStore } from '@/stores/projectStore'
+import { useUIStore } from '@/stores/uiStore'
 
 const taskStore = useTaskStore()
 const projectStore = useProjectStore()
+const uiStore = useUIStore()
 const router = useRouter()
 const viewMode = ref<'list' | 'board'>('list')
 const showFilters = ref(false)
@@ -153,7 +201,11 @@ const toggleSelectAll = () => {
 }
 
 const deleteSelected = async () => {
-  if (!confirm('确定要删除所选任务吗？此操作不可撤销。')) return
+  const confirmed = await uiStore.confirmDestructive({
+    title: '删除已选任务',
+    message: '确定要删除所选任务吗？\n此操作不可撤销。',
+  })
+  if (!confirmed) return
   await taskStore.bulkDelete(taskStore.selectedIds)
 }
 
@@ -174,9 +226,3 @@ onMounted(() => {
   projectStore.fetchProjects()
 })
 </script>
-
-<style scoped>
-.today-view {
-  width: 100%;
-}
-</style>

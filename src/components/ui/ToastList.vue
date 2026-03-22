@@ -7,13 +7,19 @@
       :class="alertClass(toast.type)"
     >
       <span>{{ toast.message }}</span>
-      <button class="btn btn-xs btn-ghost" @click="uiStore.removeNotification(toast.id)">✕</button>
+      <button
+        class="btn btn-xs btn-ghost"
+        @click="uiStore.removeNotification(toast.id)"
+      >
+        <AppIcon name="close" class="h-3.5 w-3.5" />
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useUIStore } from '@/stores/uiStore'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 const uiStore = useUIStore()
 

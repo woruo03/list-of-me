@@ -17,11 +17,22 @@
     <nav
       class="md:hidden fixed bottom-0 left-0 right-0 btm-nav btm-nav-sm bg-base-100/70 backdrop-blur-xl border-t border-white/10"
     >
-      <router-link class="text-base-content/60" to="/inbox">📥<span class="btm-nav-label">收集箱</span></router-link>
-      <router-link class="text-base-content/60" to="/today">📅<span class="btm-nav-label">今日</span></router-link>
-      <router-link class="text-base-content/60" to="/projects">📁<span class="btm-nav-label">项目</span></router-link>
-      <router-link class="text-base-content/60" to="/completed">✅<span class="btm-nav-label">完成</span></router-link>
-      <router-link class="text-base-content/60" to="/settings">⚙<span class="btm-nav-label">设置</span></router-link>
+      <router-link class="text-base-content/60" to="/inbox">
+        <AppIcon name="inbox" class="h-5 w-5" />
+        <span class="btm-nav-label">收集箱</span>
+      </router-link>
+      <router-link class="text-base-content/60" to="/today">
+        <AppIcon name="calendar" class="h-5 w-5" />
+        <span class="btm-nav-label">今日</span>
+      </router-link>
+      <router-link class="text-base-content/60" to="/projects">
+        <AppIcon name="folder" class="h-5 w-5" />
+        <span class="btm-nav-label">项目</span>
+      </router-link>
+      <router-link class="text-base-content/60" to="/settings">
+        <AppIcon name="settings" class="h-5 w-5" />
+        <span class="btm-nav-label">设置</span>
+      </router-link>
     </nav>
 
     <Modal
@@ -39,6 +50,43 @@
       />
     </Modal>
 
+    <Modal
+      :is-open="uiStore.confirmDialog.isOpen"
+      :title="uiStore.confirmDialog.title"
+      size="sm"
+      :show-actions="false"
+      @close="uiStore.resolveConfirmDialog(false)"
+    >
+      <div class="space-y-4">
+        <div class="flex items-start gap-3">
+          <div
+            class="mt-0.5 h-10 w-10 shrink-0 rounded-xl border border-error/35 bg-error/10 text-error flex items-center justify-center"
+          >
+            <AppIcon name="trash" class="h-5 w-5" />
+          </div>
+          <p class="text-sm leading-6 text-base-content/80 whitespace-pre-line">
+            {{ uiStore.confirmDialog.message }}
+          </p>
+        </div>
+
+        <div class="modal-action mt-1">
+          <button
+            class="btn btn-ghost btn-outline"
+            @click="uiStore.resolveConfirmDialog(false)"
+          >
+            {{ uiStore.confirmDialog.cancelText }}
+          </button>
+          <button
+            class="btn"
+            :class="confirmButtonClass"
+            @click="uiStore.resolveConfirmDialog(true)"
+          >
+            {{ uiStore.confirmDialog.confirmText }}
+          </button>
+        </div>
+      </div>
+    </Modal>
+
     <ToastList />
   </div>
 </template>
@@ -51,6 +99,7 @@ import Header from './Header.vue'
 import Modal from '@/components/ui/Modal.vue'
 import ProjectForm from '@/components/projects/ProjectForm.vue'
 import ToastList from '@/components/ui/ToastList.vue'
+import AppIcon from '@/components/ui/AppIcon.vue'
 import { useUIStore } from '@/stores/uiStore'
 import { useTaskStore } from '@/stores/taskStore'
 import { useProjectStore } from '@/stores/projectStore'
@@ -69,6 +118,11 @@ const modalProject = computed<Project | null>(() => {
 const modalTitle = computed(() => {
   if (uiStore.modal.type === 'project') return modalProject.value ? '编辑项目' : '新建项目'
   return ''
+})
+
+const confirmButtonClass = computed(() => {
+  if (uiStore.confirmDialog.intent === 'primary') return 'btn-primary'
+  return 'btn-error'
 })
 
 const handleProjectSubmit = async (data: { name: string }) => {
@@ -90,6 +144,7 @@ const isEditableTarget = (target: EventTarget | null) => {
 }
 
 const handleKeydown = (event: KeyboardEvent) => {
+  if (uiStore.confirmDialog.isOpen) return
   if (isEditableTarget(event.target)) return
 
   const key = event.key.toLowerCase()
@@ -116,8 +171,14 @@ const handleKeydown = (event: KeyboardEvent) => {
 
   if (event.key === 'Delete') {
     if (taskStore.selectedIds.length === 0) return
-    if (!confirm('确定要删除所选任务吗？此操作不可撤销。')) return
-    taskStore.bulkDelete(taskStore.selectedIds)
+    void (async () => {
+      const confirmed = await uiStore.confirmDestructive({
+        title: '删除已选任务',
+        message: '确定要删除所选任务吗？\n此操作不可撤销。',
+      })
+      if (!confirmed) return
+      await taskStore.bulkDelete(taskStore.selectedIds)
+    })()
   }
 }
 
@@ -131,7 +192,3 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 </script>
-
-<style scoped>
-/* 主布局样式 */
-</style>

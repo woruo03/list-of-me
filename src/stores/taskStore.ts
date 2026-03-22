@@ -5,13 +5,20 @@ import { Status } from '@/types/task'
 import type { Summary } from '@/types/api'
 import { useUIStore } from './uiStore'
 
-export type TaskSort = 'created_desc' | 'created_asc' | 'due_asc' | 'due_desc' | 'title_asc' | 'title_desc'
+export type TaskSort =
+  | 'created_desc'
+  | 'created_asc'
+  | 'due_asc'
+  | 'due_desc'
+  | 'title_asc'
+  | 'title_desc'
 
 const applyFilter = (tasks: Task[], filter: TaskFilter) => {
   return tasks.filter((task) => {
     if (filter.project_id !== undefined) {
       if (filter.project_id === null && task.project_id !== null) return false
-      if (typeof filter.project_id === 'number' && task.project_id !== filter.project_id) return false
+      if (typeof filter.project_id === 'number' && task.project_id !== filter.project_id)
+        return false
     }
     if (filter.status !== undefined && task.status !== filter.status) return false
     return true
@@ -32,6 +39,19 @@ const applySearch = (tasks: Task[], query: string) => {
 }
 
 const applySort = (tasks: Task[], sort: TaskSort) => {
+  if (tasks.length < 2) return tasks
+  // 数据源本身按 created_at DESC 返回，过滤和搜索会保持原顺序。
+  if (sort === 'created_desc') return tasks
+
+  const dateCache = new Map<string, number>()
+  const toTime = (value: string) => {
+    const cached = dateCache.get(value)
+    if (cached !== undefined) return cached
+    const next = Date.parse(value)
+    dateCache.set(value, next)
+    return next
+  }
+
   const sorted = [...tasks]
   sorted.sort((a, b) => {
     if (sort === 'title_asc') return a.title.localeCompare(b.title)
@@ -41,18 +61,18 @@ const applySort = (tasks: Task[], sort: TaskSort) => {
       if (!a.due_at && !b.due_at) return 0
       if (!a.due_at) return 1
       if (!b.due_at) return -1
-      return new Date(a.due_at).getTime() - new Date(b.due_at).getTime()
+      return toTime(a.due_at) - toTime(b.due_at)
     }
 
     if (sort === 'due_desc') {
       if (!a.due_at && !b.due_at) return 0
       if (!a.due_at) return 1
       if (!b.due_at) return -1
-      return new Date(b.due_at).getTime() - new Date(a.due_at).getTime()
+      return toTime(b.due_at) - toTime(a.due_at)
     }
 
-    const aCreated = new Date(a.created_at).getTime()
-    const bCreated = new Date(b.created_at).getTime()
+    const aCreated = toTime(a.created_at)
+    const bCreated = toTime(b.created_at)
     return sort === 'created_asc' ? aCreated - bCreated : bCreated - aCreated
   })
   return sorted
@@ -136,10 +156,15 @@ export const useTaskStore = defineStore('tasks', {
       }
     },
 
-    async updateTask(id: number, update: TaskUpdate, options?: { optimistic?: boolean }) {
+    async updateTask(
+      id: number,
+      update: TaskUpdate,
+      options?: { optimistic?: boolean; notify?: boolean },
+    ) {
       this.error = null
       const uiStore = useUIStore()
       const optimistic = options?.optimistic !== false
+      const notify = options?.notify !== false
 
       const index = this.tasks.findIndex((task) => task.id === id)
       if (index === -1) return
@@ -152,23 +177,24 @@ export const useTaskStore = defineStore('tasks', {
       try {
         const updated = await TaskService.updateTask(id, update)
         this.tasks[index] = updated
-        uiStore.addNotification({ type: 'success', message: '任务已更新' })
+        if (notify) uiStore.addNotification({ type: 'success', message: '任务已更新' })
         return updated
       } catch (error) {
         if (optimistic) {
           this.tasks[index] = previous
         }
         this.error = error instanceof Error ? error.message : '更新任务失败'
-        uiStore.addNotification({ type: 'error', message: this.error })
+        if (notify) uiStore.addNotification({ type: 'error', message: this.error })
         console.error('Failed to update task:', error)
         throw error
       }
     },
 
-    async deleteTask(id: number, options?: { optimistic?: boolean }) {
+    async deleteTask(id: number, options?: { optimistic?: boolean; notify?: boolean }) {
       this.error = null
       const uiStore = useUIStore()
       const optimistic = options?.optimistic !== false
+      const notify = options?.notify !== false
 
       const previous = [...this.tasks]
       if (optimistic) {
@@ -177,11 +203,11 @@ export const useTaskStore = defineStore('tasks', {
 
       try {
         await TaskService.deleteTask(id)
-        uiStore.addNotification({ type: 'success', message: '任务已删除' })
+        if (notify) uiStore.addNotification({ type: 'success', message: '任务已删除' })
       } catch (error) {
         if (optimistic) this.tasks = previous
         this.error = error instanceof Error ? error.message : '删除任务失败'
-        uiStore.addNotification({ type: 'error', message: this.error })
+        if (notify) uiStore.addNotification({ type: 'error', message: this.error })
         console.error('Failed to delete task:', error)
         throw error
       }
@@ -193,7 +219,6 @@ export const useTaskStore = defineStore('tasks', {
 
       let newStatus: Status
       if (task.status === Status.Todo) newStatus = Status.Doing
-      else if (task.status === Status.Doing) newStatus = Status.Done
       else newStatus = Status.Todo
 
       return this.updateTask(id, { status: newStatus }, { optimistic: true })
@@ -211,31 +236,46 @@ export const useTaskStore = defineStore('tasks', {
     },
 
     async bulkUpdateStatus(ids: number[], status: Status) {
+      if (ids.length === 0) return
+      const uiStore = useUIStore()
       for (const id of ids) {
-        await this.updateTask(id, { status }, { optimistic: true })
+        await this.updateTask(id, { status }, { optimistic: true, notify: false })
       }
       this.clearSelection()
+      uiStore.addNotification({ type: 'success', message: `已更新 ${ids.length} 个任务` })
     },
 
     async bulkMoveToToday(ids: number[]) {
+      if (ids.length === 0) return
+      const uiStore = useUIStore()
+      const today = new Date()
+      today.setHours(23, 59, 0, 0)
+      const dueAt = today.toISOString()
       for (const id of ids) {
-        await this.moveToToday(id)
+        await this.updateTask(id, { due_at: dueAt }, { optimistic: true, notify: false })
       }
       this.clearSelection()
+      uiStore.addNotification({ type: 'success', message: `已移动 ${ids.length} 个任务到今日` })
     },
 
     async bulkMoveToProject(ids: number[], projectId: number | null) {
+      if (ids.length === 0) return
+      const uiStore = useUIStore()
       for (const id of ids) {
-        await this.moveToProject(id, projectId)
+        await this.updateTask(id, { project_id: projectId }, { optimistic: true, notify: false })
       }
       this.clearSelection()
+      uiStore.addNotification({ type: 'success', message: `已移动 ${ids.length} 个任务` })
     },
 
     async bulkDelete(ids: number[]) {
+      if (ids.length === 0) return
+      const uiStore = useUIStore()
       for (const id of ids) {
-        await this.deleteTask(id, { optimistic: true })
+        await this.deleteTask(id, { optimistic: true, notify: false })
       }
       this.clearSelection()
+      uiStore.addNotification({ type: 'success', message: `已删除 ${ids.length} 个任务` })
     },
 
     setUserFilter(filter: TaskFilter) {
@@ -278,7 +318,8 @@ export const useTaskStore = defineStore('tasks', {
   },
 
   getters: {
-    inboxTasks: (state) => state.tasks.filter((t) => t.project_id === null && t.status !== Status.Done),
+    inboxTasks: (state) =>
+      state.tasks.filter((t) => t.project_id === null && t.status !== Status.Done),
 
     todayTasks: (state) => {
       const tomorrow = getTomorrowStart()
@@ -292,7 +333,8 @@ export const useTaskStore = defineStore('tasks', {
     completedTasks: (state) => state.tasks.filter((t) => t.status === Status.Done),
 
     tasksByProjectId: (state) => {
-      return (projectId: number) => state.tasks.filter((t) => t.project_id === projectId)
+      return (projectId: number) =>
+        state.tasks.filter((t) => t.project_id === projectId && t.status !== Status.Done)
     },
 
     selectedCount: (state) => state.selectedIds.length,

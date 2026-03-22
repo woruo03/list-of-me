@@ -18,7 +18,7 @@
           class="btn btn-sm btn-circle btn-ghost"
           @click="closeModal"
         >
-          ✕
+          <AppIcon name="close" class="h-4 w-4" />
         </button>
       </div>
 
@@ -58,6 +58,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 interface Props {
   isOpen: boolean

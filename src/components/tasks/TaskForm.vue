@@ -60,7 +60,7 @@
             <span class="text-base-content/80">
               {{ dueDisplay || '未设置截止时间' }}
             </span>
-            <span class="text-base-content/40">📅</span>
+            <AppIcon name="calendar" class="h-4 w-4 text-base-content/40" />
           </button>
 
           <div
@@ -69,9 +69,13 @@
           >
             <div class="modal-box max-w-2xl bg-base-100/95 backdrop-blur-lg border border-base-content/10 shadow-xl shadow-base-content/10">
               <div class="flex items-center justify-between mb-3">
-                <button type="button" class="btn btn-ghost btn-xs" @click="prevMonth">‹</button>
+                <button type="button" class="btn btn-ghost btn-xs" @click="prevMonth">
+                  <AppIcon name="chevron-left" class="h-4 w-4" />
+                </button>
                 <div class="font-medium">{{ monthLabel }}</div>
-                <button type="button" class="btn btn-ghost btn-xs" @click="nextMonth">›</button>
+                <button type="button" class="btn btn-ghost btn-xs" @click="nextMonth">
+                  <AppIcon name="chevron-right" class="h-4 w-4" />
+                </button>
               </div>
 
               <div class="grid grid-cols-7 text-xs text-base-content/60 mb-2">
@@ -184,6 +188,7 @@ import type { Project } from '@/types/project'
 import { validateTaskTitle, validateDescription, validateDueDate } from '@/utils/validation'
 import { useProjectStore } from '@/stores/projectStore'
 import SelectMenu from '@/components/ui/SelectMenu.vue'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 interface Props {
   initialTask?: Task | null
@@ -221,7 +226,6 @@ const projectSelectOptions = computed(() => {
 const statusOptions = [
   { label: '待办', value: Status.Todo },
   { label: '进行中', value: Status.Doing },
-  { label: '已完成', value: Status.Done },
 ]
 
 const errors = ref<{ title?: string; description?: string; due_at?: string }>({})

@@ -1,7 +1,15 @@
 <template>
-  <div class="task-create-view">
-    <div class="mb-5 flex items-center justify-between rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl">
-      <button class="btn btn-ghost btn-outline btn-sm" @click="router.back()">← 返回</button>
+  <div>
+    <div
+      class="mb-5 flex items-center justify-between rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl"
+    >
+      <button
+        class="btn btn-ghost btn-outline btn-sm"
+        @click="router.back()"
+      >
+        <AppIcon name="arrow-left" class="mr-1 h-4 w-4" />
+        返回
+      </button>
     </div>
 
     <TaskForm
@@ -22,6 +30,7 @@ import { useTaskStore } from '@/stores/taskStore'
 import { useProjectStore } from '@/stores/projectStore'
 import type { TaskCreate, TaskUpdate } from '@/types/task'
 import { Status } from '@/types/task'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -45,7 +54,7 @@ const forceInbox = computed(() => {
 
 const handleSubmit = async (data: TaskCreate | TaskUpdate) => {
   const payload: TaskCreate = {
-    title: 'title' in data ? data.title ?? '' : '',
+    title: 'title' in data ? (data.title ?? '') : '',
     description: data.description ?? null,
     project_id: data.project_id ?? null,
     status: data.status ?? Status.Todo,
@@ -66,9 +75,3 @@ onMounted(() => {
   projectStore.fetchProjects()
 })
 </script>
-
-<style scoped>
-.task-create-view {
-  width: 100%;
-}
-</style>

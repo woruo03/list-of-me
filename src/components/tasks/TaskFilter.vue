@@ -46,7 +46,7 @@
               class="input input-bordered input-sm w-56 pl-8 bg-base-100/55 border-base-content/25"
               @input="handleSearch"
             />
-            <span class="absolute left-2 top-1/2 transform -translate-y-1/2 text-base-content/50">🔍</span>
+            <AppIcon name="search" class="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-base-content/50" />
           </div>
         </div>
 
@@ -66,11 +66,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onBeforeUnmount } from 'vue'
 import type { TaskFilter } from '@/types/task'
 import type { Project } from '@/types/project'
 import type { TaskSort } from '@/stores/taskStore'
 import SelectMenu from '@/components/ui/SelectMenu.vue'
+import AppIcon from '@/components/ui/AppIcon.vue'
+import { debounce } from '@/utils/debounce'
 
 interface Props {
   projects: Project[]
@@ -96,6 +98,9 @@ const emit = defineEmits<{
 const localFilter = ref<TaskFilter>({ ...props.initialFilter })
 const localSort = ref<TaskSort>(props.initialSort)
 const searchQuery = ref(props.initialSearch)
+const debouncedEmitSearch = debounce((query: string) => {
+  emit('search', query)
+}, 140)
 
 const projectOptions = computed(() => {
   return [
@@ -109,7 +114,6 @@ const statusOptions = [
   { label: '所有状态', value: undefined },
   { label: '待办', value: 'todo' },
   { label: '进行中', value: 'doing' },
-  { label: '已完成', value: 'done' },
 ]
 
 const sortOptions = [
@@ -130,13 +134,14 @@ const updateSort = () => {
 }
 
 const handleSearch = () => {
-  emit('search', searchQuery.value)
+  debouncedEmitSearch(searchQuery.value)
 }
 
 const resetFilters = () => {
   localFilter.value = {}
   searchQuery.value = ''
   localSort.value = 'created_desc'
+  debouncedEmitSearch.cancel()
   emit('filter', {})
   emit('search', '')
   emit('sort', localSort.value)
@@ -163,6 +168,10 @@ watch(
     searchQuery.value = newSearch || ''
   },
 )
+
+onBeforeUnmount(() => {
+  debouncedEmitSearch.cancel()
+})
 </script>
 
 <style scoped>

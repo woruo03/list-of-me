@@ -1,16 +1,35 @@
 <template>
-  <div class="task-edit-view">
-    <div class="mb-5 flex items-center justify-between rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl">
-      <button class="btn btn-ghost btn-outline btn-sm" @click="router.back()">← 返回</button>
+  <div>
+    <div
+      class="mb-5 flex items-center justify-between rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl"
+    >
+      <button
+        class="btn btn-ghost btn-outline btn-sm"
+        @click="router.back()"
+      >
+        <AppIcon name="arrow-left" class="mr-1 h-4 w-4" />
+        返回
+      </button>
     </div>
 
-    <div v-if="isLoading" class="flex justify-center py-12">
+    <div
+      v-if="isLoading"
+      class="flex justify-center py-12"
+    >
       <span class="loading loading-spinner loading-lg"></span>
     </div>
 
-    <div v-else-if="error" class="text-center py-12">
+    <div
+      v-else-if="error"
+      class="text-center py-12"
+    >
       <p class="text-base-content/70 mb-4">{{ error }}</p>
-      <button class="btn btn-ghost btn-outline" @click="router.back()">返回</button>
+      <button
+        class="btn btn-ghost btn-outline"
+        @click="router.back()"
+      >
+        返回
+      </button>
     </div>
 
     <TaskForm
@@ -31,6 +50,7 @@ import TaskForm from '@/components/tasks/TaskForm.vue'
 import { useTaskStore } from '@/stores/taskStore'
 import { useProjectStore } from '@/stores/projectStore'
 import type { TaskUpdate } from '@/types/task'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -78,9 +98,3 @@ watch(
   },
 )
 </script>
-
-<style scoped>
-.task-edit-view {
-  width: 100%;
-}
-</style>

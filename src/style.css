@@ -1,10 +1,10 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @plugin "daisyui" {
   themes: all;
 }
 
 :root {
-  --app-font: "Space Grotesk", "Noto Sans SC", sans-serif;
+  --app-font: 'Space Grotesk', 'Noto Sans SC', sans-serif;
   --app-font-size: 16px;
   font-family: var(--app-font);
   font-size: var(--app-font-size);
@@ -27,28 +27,34 @@ body {
 }
 
 .btn {
-  transition: all 300ms ease;
-}
-
-.btn:hover {
-  transform: scale(1.03);
+  transition:
+    background-color 240ms ease,
+    border-color 240ms ease,
+    box-shadow 240ms ease,
+    color 240ms ease;
 }
 
 .card,
 .alert,
 .modal-box {
-  transition: all 300ms ease;
+  transition:
+    background-color 300ms ease,
+    border-color 300ms ease,
+    box-shadow 300ms ease;
 }
 
-.card:hover {
-  transform: translateY(-2px);
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .card,
+  .alert,
+  .modal-box {
+    transition: none !important;
+  }
 }
 
-.glass-panel {
-  background-color: hsl(var(--b1) / 0.4);
-  border: 1px solid hsl(var(--bc) / 0.1);
-  backdrop-filter: blur(24px);
-  box-shadow: 0 24px 48px hsl(var(--bc) / 0.15);
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* 全局下拉框美化 */
@@ -56,7 +62,10 @@ body {
   border-radius: 12px;
   background-color: hsl(var(--b1));
   border-color: hsl(var(--b3));
-  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
 }
 
 .select:focus,
