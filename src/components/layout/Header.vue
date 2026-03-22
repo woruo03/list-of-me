@@ -11,7 +11,7 @@
           <input
             ref="searchInput"
             type="text"
-            :value="taskStore.searchQuery"
+            v-model="searchDraft"
             placeholder="搜索任务..."
             class="input input-bordered w-full pl-10 bg-base-100/50 border-white/10 focus:outline-none focus:border-primary/50"
             @input="handleSearch"
@@ -29,17 +29,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTaskStore } from '@/stores/taskStore'
 import { useUIStore } from '@/stores/uiStore'
 import AppIcon from '@/components/ui/AppIcon.vue'
+import { debounce } from '@/utils/debounce'
 
 const route = useRoute()
 const router = useRouter()
 const taskStore = useTaskStore()
 const uiStore = useUIStore()
 const searchInput = ref<HTMLInputElement | null>(null)
+const searchDraft = ref(taskStore.searchQuery)
+const debouncedSetSearchQuery = debounce((query: string) => {
+  taskStore.setSearchQuery(query)
+}, 140)
 
 const pageTitle = computed(() => (route.meta.title as string) || 'List-of-Me')
 
@@ -54,15 +59,13 @@ const pageDescription = computed(() => {
   return descriptions[route.name as string] || '高效管理你的任务'
 })
 
-const handleSearch = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  taskStore.setSearchQuery(target.value)
+const handleSearch = () => {
+  debouncedSetSearchQuery(searchDraft.value)
 }
 
 const openAddTaskModal = () => {
   router.push('/tasks/new')
 }
-
 
 watch(
   () => uiStore.searchFocusToken,
@@ -71,8 +74,16 @@ watch(
     searchInput.value?.select()
   },
 )
-</script>
 
-<style scoped>
-/* 头部样式 */
-</style>
+watch(
+  () => taskStore.searchQuery,
+  (query) => {
+    if (query === searchDraft.value) return
+    searchDraft.value = query
+  },
+)
+
+onBeforeUnmount(() => {
+  debouncedSetSearchQuery.cancel()
+})
+</script>

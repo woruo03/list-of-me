@@ -66,12 +66,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onBeforeUnmount } from 'vue'
 import type { TaskFilter } from '@/types/task'
 import type { Project } from '@/types/project'
 import type { TaskSort } from '@/stores/taskStore'
 import SelectMenu from '@/components/ui/SelectMenu.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
+import { debounce } from '@/utils/debounce'
 
 interface Props {
   projects: Project[]
@@ -97,6 +98,9 @@ const emit = defineEmits<{
 const localFilter = ref<TaskFilter>({ ...props.initialFilter })
 const localSort = ref<TaskSort>(props.initialSort)
 const searchQuery = ref(props.initialSearch)
+const debouncedEmitSearch = debounce((query: string) => {
+  emit('search', query)
+}, 140)
 
 const projectOptions = computed(() => {
   return [
@@ -131,13 +135,14 @@ const updateSort = () => {
 }
 
 const handleSearch = () => {
-  emit('search', searchQuery.value)
+  debouncedEmitSearch(searchQuery.value)
 }
 
 const resetFilters = () => {
   localFilter.value = {}
   searchQuery.value = ''
   localSort.value = 'created_desc'
+  debouncedEmitSearch.cancel()
   emit('filter', {})
   emit('search', '')
   emit('sort', localSort.value)
@@ -164,6 +169,10 @@ watch(
     searchQuery.value = newSearch || ''
   },
 )
+
+onBeforeUnmount(() => {
+  debouncedEmitSearch.cancel()
+})
 </script>
 
 <style scoped>
