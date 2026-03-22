@@ -2,10 +2,13 @@
   <li class="w-full">
     <router-link
       :to="to"
-      class="flex w-full items-center justify-between px-3 py-2 rounded-xl bg-base-100/20 border border-transparent hover:bg-base-100/50 hover:border-white/10 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
-      :class="{ 'bg-base-100/60 border-white/10 shadow-lg': isActive }"
+      class="flex w-full items-center rounded-xl bg-base-100/20 border border-transparent hover:bg-base-100/50 hover:border-white/10 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+      :class="[
+        collapsed ? 'justify-center px-2 py-2' : 'justify-between px-3 py-2',
+        { 'bg-base-100/60 border-white/10 shadow-lg': isActive },
+      ]"
     >
-      <div class="flex items-center gap-3">
+      <div class="flex items-center" :class="collapsed ? 'justify-center' : 'gap-3'">
         <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-base-100/60 border border-white/10">
           <AppIcon :name="icon" class="h-5 w-5" />
         </div>
