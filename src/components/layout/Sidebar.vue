@@ -26,7 +26,6 @@
         <NavItem icon="inbox" label="收集箱" to="/inbox" :collapsed="uiStore.sidebarCollapsed" />
         <NavItem icon="calendar" label="今日" to="/today" :collapsed="uiStore.sidebarCollapsed" />
         <NavItem icon="folder" label="项目" to="/projects" :collapsed="uiStore.sidebarCollapsed" />
-        <NavItem icon="check-circle" label="已完成" to="/completed" :collapsed="uiStore.sidebarCollapsed" />
         <NavItem icon="settings" label="设置" to="/settings" :collapsed="uiStore.sidebarCollapsed" />
       </ul>
     </nav>

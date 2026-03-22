@@ -32,9 +32,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/completed',
-    name: 'Completed',
-    component: () => import('@/views/CompletedView.vue'),
-    meta: { title: '已完成' },
+    redirect: '/today',
   },
   {
     path: '/tasks/new',

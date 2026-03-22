@@ -226,7 +226,6 @@ const projectSelectOptions = computed(() => {
 const statusOptions = [
   { label: '待办', value: Status.Todo },
   { label: '进行中', value: Status.Doing },
-  { label: '已完成', value: Status.Done },
 ]
 
 const errors = ref<{ title?: string; description?: string; due_at?: string }>({})

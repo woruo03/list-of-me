@@ -114,7 +114,6 @@ const statusOptions = [
   { label: '所有状态', value: undefined },
   { label: '待办', value: 'todo' },
   { label: '进行中', value: 'doing' },
-  { label: '已完成', value: 'done' },
 ]
 
 const sortOptions = [

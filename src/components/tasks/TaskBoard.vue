@@ -1,6 +1,6 @@
 <template>
   <div class="task-board">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div
         class="board-column board-column-todo rounded-2xl bg-base-100/42 backdrop-blur-xl border border-white/10 p-4 md:p-5 shadow-2xl"
         @dragover.prevent
@@ -70,41 +70,6 @@
           <p v-if="doingTasks.length === 0" class="board-empty">开始推进第一个任务</p>
         </div>
       </div>
-
-      <div
-        class="board-column board-column-done rounded-2xl bg-base-100/42 backdrop-blur-xl border border-white/10 p-4 md:p-5 shadow-2xl"
-        @dragover.prevent
-        @drop="handleDrop(Status.Done)"
-      >
-        <div class="board-header">
-          <div class="inline-flex items-center gap-2">
-            <span class="board-dot bg-success/80"></span>
-            <span>已完成</span>
-          </div>
-          <span class="badge badge-success badge-outline badge-sm">{{ doneTasks.length }}</span>
-        </div>
-        <div class="board-list">
-          <TaskCard
-            v-for="task in doneTasks"
-            :key="task.id"
-            :task="task"
-            :project="getProject(task.project_id)"
-            :selected="taskStore.isSelected(task.id)"
-            :focused="taskStore.focusedTaskId === task.id"
-            :selectable="selectionMode"
-            :draggable="true"
-            @dragstart="handleDragStart"
-            @dragend="handleDragEnd"
-            @edit="emit('edit', task)"
-            @delete="emit('delete', task.id)"
-            @toggle-status="emit('toggle-status', task.id)"
-            @move-to-today="emit('move-to-today', task.id)"
-            @select="taskStore.toggleSelect"
-            @focus="taskStore.setFocusedTask"
-          />
-          <p v-if="doneTasks.length === 0" class="board-empty">完成任务会显示在这里</p>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -139,7 +104,6 @@ const draggingId = ref<number | null>(null)
 
 const todoTasks = computed(() => props.tasks.filter((t) => t.status === Status.Todo))
 const doingTasks = computed(() => props.tasks.filter((t) => t.status === Status.Doing))
-const doneTasks = computed(() => props.tasks.filter((t) => t.status === Status.Done))
 
 const getProject = (projectId: number | null) => {
   if (!projectId) return null

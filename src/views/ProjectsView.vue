@@ -95,6 +95,7 @@ import { useProjectStore } from '@/stores/projectStore'
 import { useTaskStore } from '@/stores/taskStore'
 import { useUIStore } from '@/stores/uiStore'
 import AppIcon from '@/components/ui/AppIcon.vue'
+import { Status } from '@/types/task'
 
 const router = useRouter()
 const projectStore = useProjectStore()
@@ -106,6 +107,7 @@ const selectedIds = ref<number[]>([])
 const projectStats = computed(() => {
   const stats: Record<number, number> = {}
   for (const task of taskStore.tasks) {
+    if (task.status === Status.Done) continue
     if (task.project_id) {
       stats[task.project_id] = (stats[task.project_id] || 0) + 1
     }

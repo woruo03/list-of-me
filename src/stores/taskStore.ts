@@ -219,7 +219,6 @@ export const useTaskStore = defineStore('tasks', {
 
       let newStatus: Status
       if (task.status === Status.Todo) newStatus = Status.Doing
-      else if (task.status === Status.Doing) newStatus = Status.Done
       else newStatus = Status.Todo
 
       return this.updateTask(id, { status: newStatus }, { optimistic: true })
@@ -334,7 +333,8 @@ export const useTaskStore = defineStore('tasks', {
     completedTasks: (state) => state.tasks.filter((t) => t.status === Status.Done),
 
     tasksByProjectId: (state) => {
-      return (projectId: number) => state.tasks.filter((t) => t.project_id === projectId)
+      return (projectId: number) =>
+        state.tasks.filter((t) => t.project_id === projectId && t.status !== Status.Done)
     },
 
     selectedCount: (state) => state.selectedIds.length,

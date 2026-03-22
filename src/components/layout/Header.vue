@@ -54,7 +54,6 @@ const pageDescription = computed(() => {
     Today: '专注于今日需要完成的任务',
     Projects: '按项目组织和管理任务',
     ProjectDetail: '项目内任务管理',
-    Completed: '查看已完成的任务历史',
   }
   return descriptions[route.name as string] || '高效管理你的任务'
 })

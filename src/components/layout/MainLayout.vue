@@ -29,10 +29,6 @@
         <AppIcon name="folder" class="h-5 w-5" />
         <span class="btm-nav-label">项目</span>
       </router-link>
-      <router-link class="text-base-content/60" to="/completed">
-        <AppIcon name="check-circle" class="h-5 w-5" />
-        <span class="btm-nav-label">完成</span>
-      </router-link>
       <router-link class="text-base-content/60" to="/settings">
         <AppIcon name="settings" class="h-5 w-5" />
         <span class="btm-nav-label">设置</span>
