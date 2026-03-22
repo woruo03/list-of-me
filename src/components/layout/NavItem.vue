@@ -7,7 +7,7 @@
     >
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-base-100/60 border border-white/10">
-          <span class="text-lg">{{ icon }}</span>
+          <AppIcon :name="icon" class="h-5 w-5" />
         </div>
         <span v-if="!collapsed" class="font-medium">{{ label }}</span>
       </div>
@@ -22,6 +22,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 interface Props {
   icon: string

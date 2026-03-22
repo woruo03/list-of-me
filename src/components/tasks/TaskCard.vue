@@ -26,7 +26,7 @@
             }"
             @click.stop="toggleStatus"
           >
-            <span v-if="task.status === Status.Done" class="text-success text-sm">✓</span>
+            <AppIcon v-if="task.status === Status.Done" name="check" class="h-3.5 w-3.5 text-success" />
           </button>
 
           <h3
@@ -57,9 +57,18 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/55 ml-7">
-          <span v-if="showProject && task.project_id && projectName"> 📁 {{ projectName }} </span>
-          <span v-if="task.due_at"> 📅 {{ formattedDueDate }} </span>
-          <span> 🕐 {{ formattedCreatedAt }} </span>
+          <span v-if="showProject && task.project_id && projectName" class="inline-flex items-center gap-1.5">
+            <AppIcon name="folder" class="h-3.5 w-3.5" />
+            {{ projectName }}
+          </span>
+          <span v-if="task.due_at" class="inline-flex items-center gap-1.5">
+            <AppIcon name="calendar" class="h-3.5 w-3.5" />
+            {{ formattedDueDate }}
+          </span>
+          <span class="inline-flex items-center gap-1.5">
+            <AppIcon name="clock" class="h-3.5 w-3.5" />
+            {{ formattedCreatedAt }}
+          </span>
         </div>
       </div>
 
@@ -70,7 +79,7 @@
           @click.stop="moveToToday"
           title="移动到今日"
         >
-          📅
+          <AppIcon name="calendar" class="h-4 w-4" />
         </button>
 
         <button
@@ -79,7 +88,7 @@
           @click.stop="emit('edit', task)"
           title="编辑任务"
         >
-          ✏️
+          <AppIcon name="pencil" class="h-4 w-4" />
         </button>
 
         <button
@@ -88,10 +97,12 @@
           @click.stop="confirmDelete"
           title="删除任务"
         >
-          🗑️
+          <AppIcon name="trash" class="h-4 w-4" />
         </button>
 
-        <span v-if="draggable" class="badge badge-ghost cursor-grab text-base-content/50">⋮⋮</span>
+        <span v-if="draggable" class="badge badge-ghost cursor-grab text-base-content/50">
+          <AppIcon name="grip" class="h-4 w-4" />
+        </span>
       </div>
     </div>
 
@@ -100,7 +111,10 @@
         class="text-base-content/80 text-sm break-all"
         :class="{ 'line-clamp-2': !isNotesExpanded }"
       >
-        📝 {{ task.notes }}
+        <span class="inline-flex items-center gap-1.5">
+          <AppIcon name="note" class="h-3.5 w-3.5" />
+          {{ task.notes }}
+        </span>
       </p>
       <button
         v-if="hasLongNotes"
@@ -118,6 +132,7 @@ import { computed, ref } from 'vue'
 import type { Task } from '@/types/task'
 import { Status } from '@/types/task'
 import type { Project } from '@/types/project'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 interface Props {
   task: Task

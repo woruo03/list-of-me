@@ -16,16 +16,18 @@
           <p class="text-xs text-base-content/60 whitespace-nowrap">把今天安排得更聪明</p>
         </div>
       </div>
-      <button class="btn btn-ghost btn-sm btn-circle flex-shrink-0" @click="uiStore.toggleSidebar">☰</button>
+      <button class="btn btn-ghost btn-sm btn-circle flex-shrink-0" @click="uiStore.toggleSidebar">
+        <AppIcon name="menu" class="h-4 w-4" />
+      </button>
     </div>
 
     <nav class="flex-1 p-4">
       <ul class="menu menu-md gap-1 w-full">
-        <NavItem icon="📥" label="收集箱" to="/inbox" :collapsed="uiStore.sidebarCollapsed" />
-        <NavItem icon="📅" label="今日" to="/today" :collapsed="uiStore.sidebarCollapsed" />
-        <NavItem icon="📁" label="项目" to="/projects" :collapsed="uiStore.sidebarCollapsed" />
-        <NavItem icon="✅" label="已完成" to="/completed" :collapsed="uiStore.sidebarCollapsed" />
-        <NavItem icon="⚙" label="设置" to="/settings" :collapsed="uiStore.sidebarCollapsed" />
+        <NavItem icon="inbox" label="收集箱" to="/inbox" :collapsed="uiStore.sidebarCollapsed" />
+        <NavItem icon="calendar" label="今日" to="/today" :collapsed="uiStore.sidebarCollapsed" />
+        <NavItem icon="folder" label="项目" to="/projects" :collapsed="uiStore.sidebarCollapsed" />
+        <NavItem icon="check-circle" label="已完成" to="/completed" :collapsed="uiStore.sidebarCollapsed" />
+        <NavItem icon="settings" label="设置" to="/settings" :collapsed="uiStore.sidebarCollapsed" />
       </ul>
     </nav>
 
@@ -36,6 +38,7 @@
 import { computed } from 'vue'
 import NavItem from './NavItem.vue'
 import { useUIStore } from '@/stores/uiStore'
+import AppIcon from '@/components/ui/AppIcon.vue'
 const uiStore = useUIStore()
 
 const sidebarClass = computed(() => {

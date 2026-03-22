@@ -17,11 +17,26 @@
     <nav
       class="md:hidden fixed bottom-0 left-0 right-0 btm-nav btm-nav-sm bg-base-100/70 backdrop-blur-xl border-t border-white/10"
     >
-      <router-link class="text-base-content/60" to="/inbox">📥<span class="btm-nav-label">收集箱</span></router-link>
-      <router-link class="text-base-content/60" to="/today">📅<span class="btm-nav-label">今日</span></router-link>
-      <router-link class="text-base-content/60" to="/projects">📁<span class="btm-nav-label">项目</span></router-link>
-      <router-link class="text-base-content/60" to="/completed">✅<span class="btm-nav-label">完成</span></router-link>
-      <router-link class="text-base-content/60" to="/settings">⚙<span class="btm-nav-label">设置</span></router-link>
+      <router-link class="text-base-content/60" to="/inbox">
+        <AppIcon name="inbox" class="h-5 w-5" />
+        <span class="btm-nav-label">收集箱</span>
+      </router-link>
+      <router-link class="text-base-content/60" to="/today">
+        <AppIcon name="calendar" class="h-5 w-5" />
+        <span class="btm-nav-label">今日</span>
+      </router-link>
+      <router-link class="text-base-content/60" to="/projects">
+        <AppIcon name="folder" class="h-5 w-5" />
+        <span class="btm-nav-label">项目</span>
+      </router-link>
+      <router-link class="text-base-content/60" to="/completed">
+        <AppIcon name="check-circle" class="h-5 w-5" />
+        <span class="btm-nav-label">完成</span>
+      </router-link>
+      <router-link class="text-base-content/60" to="/settings">
+        <AppIcon name="settings" class="h-5 w-5" />
+        <span class="btm-nav-label">设置</span>
+      </router-link>
     </nav>
 
     <Modal
@@ -51,6 +66,7 @@ import Header from './Header.vue'
 import Modal from '@/components/ui/Modal.vue'
 import ProjectForm from '@/components/projects/ProjectForm.vue'
 import ToastList from '@/components/ui/ToastList.vue'
+import AppIcon from '@/components/ui/AppIcon.vue'
 import { useUIStore } from '@/stores/uiStore'
 import { useTaskStore } from '@/stores/taskStore'
 import { useProjectStore } from '@/stores/projectStore'

@@ -16,11 +16,11 @@
             class="input input-bordered w-full pl-10 bg-base-100/50 border-white/10 focus:outline-none focus:border-primary/50"
             @input="handleSearch"
           />
-          <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50">🔍</span>
+          <AppIcon name="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/50" />
         </div>
 
         <button class="btn btn-primary btn-outline shadow-lg" @click="openAddTaskModal">
-          <span class="mr-2">+</span>
+          <AppIcon name="plus" class="mr-2 h-4 w-4" />
           添加任务
         </button>
       </div>
@@ -33,6 +33,7 @@ import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTaskStore } from '@/stores/taskStore'
 import { useUIStore } from '@/stores/uiStore'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 const route = useRoute()
 const router = useRouter()

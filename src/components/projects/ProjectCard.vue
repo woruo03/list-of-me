@@ -7,7 +7,7 @@
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-11 h-11 bg-primary/15 rounded-xl flex items-center justify-center border border-primary/25">
-          <span class="text-primary text-lg">📁</span>
+          <AppIcon name="folder" class="h-5 w-5 text-primary" />
         </div>
 
         <div>
@@ -18,10 +18,10 @@
 
       <div v-if="!selectable" class="flex items-center gap-2">
         <button class="btn btn-ghost btn-sm btn-circle" @click.stop="emit('edit', project)" title="编辑项目">
-          ✏️
+          <AppIcon name="pencil" class="h-4 w-4" />
         </button>
         <button class="btn btn-ghost btn-sm btn-circle text-error" @click.stop="confirmDelete" title="删除项目">
-          🗑️
+          <AppIcon name="trash" class="h-4 w-4" />
         </button>
       </div>
     </div>
@@ -30,6 +30,7 @@
 
 <script setup lang="ts">
 import type { Project } from '@/types/project'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 interface Props {
   project: Project

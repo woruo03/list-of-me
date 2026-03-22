@@ -7,7 +7,7 @@
     <div v-else-if="tasks.length === 0" class="text-center py-12">
       <div class="card card-bordered bg-base-100/40 backdrop-blur-xl mx-auto max-w-md p-9 border border-white/10 shadow-2xl">
         <div class="text-base-content/50 mb-4">
-          <span class="text-6xl">📋</span>
+          <AppIcon name="checklist" class="h-14 w-14" />
         </div>
         <h3 class="text-xl font-medium mb-2">{{ emptyTitle }}</h3>
         <p class="text-base-content/70 mb-6">{{ emptyDescription }}</p>
@@ -49,6 +49,7 @@ import TaskCard from './TaskCard.vue'
 import type { Task } from '@/types/task'
 import type { Project } from '@/types/project'
 import { useTaskStore } from '@/stores/taskStore'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 interface Props {
   tasks: Task[]

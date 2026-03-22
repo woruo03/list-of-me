@@ -36,7 +36,7 @@
             ></span>
             <span class="whitespace-nowrap">{{ option.label }}</span>
           </div>
-          <span v-if="isSelected(option.value)">✓</span>
+          <AppIcon v-if="isSelected(option.value)" name="check" class="h-4 w-4" />
         </button>
       </li>
     </ul>
@@ -45,6 +45,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 interface OptionItem {
   label: string

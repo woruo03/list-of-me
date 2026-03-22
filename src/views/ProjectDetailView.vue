@@ -1,34 +1,70 @@
 <template>
   <div class="project-detail-view">
-    <div class="relative z-20 mb-5 flex flex-col gap-3 rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl">
+    <div
+      class="relative z-20 mb-5 flex flex-col gap-3 rounded-2xl bg-base-100/35 backdrop-blur-xl border border-white/10 p-4 shadow-2xl"
+    >
       <div class="w-full flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-2">
-          <button class="btn btn-ghost btn-outline btn-sm" @click="router.back()">← 返回</button>
-          <button class="btn btn-primary btn-outline" @click="openAddTaskModal">
-            <span class="mr-2">+</span>
+          <button
+            class="btn btn-ghost btn-outline btn-sm"
+            @click="router.back()"
+          >
+            <AppIcon name="arrow-left" class="mr-1 h-4 w-4" />
+            返回
+          </button>
+          <button
+            class="btn btn-primary btn-outline"
+            @click="openAddTaskModal"
+          >
+            <AppIcon name="plus" class="mr-2 h-4 w-4" />
             添加任务
           </button>
-          <button class="btn btn-ghost btn-outline" @click="openEditProjectModal">编辑项目</button>
+          <button
+            class="btn btn-ghost btn-outline"
+            @click="openEditProjectModal"
+          >
+            编辑项目
+          </button>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap justify-end">
-          <button class="btn btn-ghost btn-outline" @click="toggleFilter">
+          <button
+            class="btn btn-ghost btn-outline"
+            @click="toggleFilter"
+          >
             {{ showFilters ? '隐藏筛选' : '筛选' }}
           </button>
-          <button class="btn btn-ghost btn-outline" @click="toggleViewMode">
+          <button
+            class="btn btn-ghost btn-outline"
+            @click="toggleViewMode"
+          >
             {{ viewMode === 'list' ? '看板视图' : '列表视图' }}
           </button>
-          <button class="btn btn-ghost btn-outline" @click="toggleSelectionMode">
+          <button
+            class="btn btn-ghost btn-outline"
+            @click="toggleSelectionMode"
+          >
             {{ selectionMode ? '取消选择' : '选择' }}
           </button>
         </div>
       </div>
 
-      <div v-if="selectionMode && !showFilters" class="flex items-center gap-2 w-full justify-end">
-        <button class="btn btn-ghost btn-outline" @click="toggleSelectAll">
+      <div
+        v-if="selectionMode && !showFilters"
+        class="flex items-center gap-2 w-full justify-end"
+      >
+        <button
+          class="btn btn-ghost btn-outline"
+          @click="toggleSelectAll"
+        >
           {{ allSelected ? '取消全选' : '全选' }}
         </button>
-        <button class="btn btn-ghost btn-outline" @click="toggleMoveMenu">移动</button>
+        <button
+          class="btn btn-ghost btn-outline"
+          @click="toggleMoveMenu"
+        >
+          移动
+        </button>
         <button
           class="btn btn-outline btn-error"
           :disabled="taskStore.selectedCount === 0"
@@ -112,6 +148,7 @@ import type { Project } from '@/types/project'
 import { useTaskStore } from '@/stores/taskStore'
 import { useProjectStore } from '@/stores/projectStore'
 import { useUIStore } from '@/stores/uiStore'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
