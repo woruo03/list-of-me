@@ -1,6 +1,6 @@
 <template>
   <div
-    class="card card-bordered bg-base-100/40 backdrop-blur-xl p-6 shadow-2xl border border-white/10 hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+    class="card card-bordered bg-base-100/40 backdrop-blur-xl p-6 shadow-2xl border border-white/10 transition-[box-shadow,border-color,background-color] duration-200 cursor-pointer"
     :class="{ 'border-error/60 bg-error/10 ring-2 ring-error/40': selected }"
     @click="handleClick"
   >
@@ -66,7 +66,3 @@ const confirmDelete = () => {
   }
 }
 </script>
-
-<style scoped>
-/* 项目卡片样式 */
-</style>

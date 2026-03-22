@@ -1,6 +1,6 @@
 <template>
   <div
-    class="card card-bordered bg-base-100/40 backdrop-blur-xl p-5 mb-4 shadow-2xl border border-white/10 hover:scale-[1.02] transition-all duration-300"
+    class="task-card-root card card-bordered bg-base-100/40 backdrop-blur-xl p-5 mb-4 shadow-2xl border border-white/10"
     :class="{
       'border-l-4 border-l-primary': task.status === Status.Todo,
       'border-l-4 border-l-warning': task.status === Status.Doing,
@@ -260,7 +260,12 @@ const handleDragStart = (event: DragEvent) => {
 </script>
 
 <style scoped>
-/* 任务卡片样式 */
+.task-card-root,
+.task-card-root:hover {
+  transform: none !important;
+  transition: none !important;
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;

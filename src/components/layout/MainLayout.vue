@@ -147,7 +147,3 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 </script>
-
-<style scoped>
-/* 主布局样式 */
-</style>

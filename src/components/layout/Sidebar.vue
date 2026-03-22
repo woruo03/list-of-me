@@ -30,7 +30,6 @@
         <NavItem icon="settings" label="设置" to="/settings" :collapsed="uiStore.sidebarCollapsed" />
       </ul>
     </nav>
-
   </aside>
 </template>
 
@@ -44,9 +43,4 @@ const uiStore = useUIStore()
 const sidebarClass = computed(() => {
   return uiStore.sidebarCollapsed ? 'w-24 min-w-[6rem]' : 'w-64 min-w-[16rem]'
 })
-
 </script>
-
-<style scoped>
-/* 侧边栏样式 */
-</style>
