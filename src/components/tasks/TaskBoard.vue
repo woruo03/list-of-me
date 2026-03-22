@@ -2,11 +2,17 @@
   <div class="task-board">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
       <div
-        class="board-column rounded-2xl bg-base-100/40 backdrop-blur-xl border border-white/10 p-5 shadow-2xl"
+        class="board-column board-column-todo rounded-2xl bg-base-100/42 backdrop-blur-xl border border-white/10 p-4 md:p-5 shadow-2xl"
         @dragover.prevent
         @drop="handleDrop(Status.Todo)"
       >
-        <div class="board-header">待办</div>
+        <div class="board-header">
+          <div class="inline-flex items-center gap-2">
+            <span class="board-dot bg-primary/80"></span>
+            <span>待办</span>
+          </div>
+          <span class="badge badge-primary badge-outline badge-sm">{{ todoTasks.length }}</span>
+        </div>
         <div class="board-list">
           <TaskCard
             v-for="task in todoTasks"
@@ -26,63 +32,78 @@
             @select="taskStore.toggleSelect"
             @focus="taskStore.setFocusedTask"
           />
+          <p v-if="todoTasks.length === 0" class="board-empty">暂无待办任务</p>
         </div>
-    </div>
+      </div>
 
       <div
-        class="board-column rounded-2xl bg-base-100/40 backdrop-blur-xl border border-white/10 p-5 shadow-2xl"
+        class="board-column board-column-doing rounded-2xl bg-base-100/42 backdrop-blur-xl border border-white/10 p-4 md:p-5 shadow-2xl"
         @dragover.prevent
         @drop="handleDrop(Status.Doing)"
       >
-        <div class="board-header">进行中</div>
-      <div class="board-list">
-        <TaskCard
-          v-for="task in doingTasks"
-          :key="task.id"
-          :task="task"
-          :project="getProject(task.project_id)"
-          :selected="taskStore.isSelected(task.id)"
-          :focused="taskStore.focusedTaskId === task.id"
-          :selectable="selectionMode"
-          :draggable="true"
-          @dragstart="handleDragStart"
-          @dragend="handleDragEnd"
-          @edit="emit('edit', task)"
-          @delete="emit('delete', task.id)"
-          @toggle-status="emit('toggle-status', task.id)"
-          @move-to-today="emit('move-to-today', task.id)"
-          @select="taskStore.toggleSelect"
-          @focus="taskStore.setFocusedTask"
-        />
+        <div class="board-header">
+          <div class="inline-flex items-center gap-2">
+            <span class="board-dot bg-warning/80"></span>
+            <span>进行中</span>
+          </div>
+          <span class="badge badge-warning badge-outline badge-sm">{{ doingTasks.length }}</span>
+        </div>
+        <div class="board-list">
+          <TaskCard
+            v-for="task in doingTasks"
+            :key="task.id"
+            :task="task"
+            :project="getProject(task.project_id)"
+            :selected="taskStore.isSelected(task.id)"
+            :focused="taskStore.focusedTaskId === task.id"
+            :selectable="selectionMode"
+            :draggable="true"
+            @dragstart="handleDragStart"
+            @dragend="handleDragEnd"
+            @edit="emit('edit', task)"
+            @delete="emit('delete', task.id)"
+            @toggle-status="emit('toggle-status', task.id)"
+            @move-to-today="emit('move-to-today', task.id)"
+            @select="taskStore.toggleSelect"
+            @focus="taskStore.setFocusedTask"
+          />
+          <p v-if="doingTasks.length === 0" class="board-empty">开始推进第一个任务</p>
+        </div>
       </div>
-    </div>
 
       <div
-        class="board-column rounded-2xl bg-base-100/40 backdrop-blur-xl border border-white/10 p-5 shadow-2xl"
+        class="board-column board-column-done rounded-2xl bg-base-100/42 backdrop-blur-xl border border-white/10 p-4 md:p-5 shadow-2xl"
         @dragover.prevent
         @drop="handleDrop(Status.Done)"
       >
-        <div class="board-header">已完成</div>
-      <div class="board-list">
-        <TaskCard
-          v-for="task in doneTasks"
-          :key="task.id"
-          :task="task"
-          :project="getProject(task.project_id)"
-          :selected="taskStore.isSelected(task.id)"
-          :focused="taskStore.focusedTaskId === task.id"
-          :selectable="selectionMode"
-          :draggable="true"
-          @dragstart="handleDragStart"
-          @dragend="handleDragEnd"
-          @edit="emit('edit', task)"
-          @delete="emit('delete', task.id)"
-          @toggle-status="emit('toggle-status', task.id)"
-          @move-to-today="emit('move-to-today', task.id)"
-          @select="taskStore.toggleSelect"
-          @focus="taskStore.setFocusedTask"
-        />
-      </div>
+        <div class="board-header">
+          <div class="inline-flex items-center gap-2">
+            <span class="board-dot bg-success/80"></span>
+            <span>已完成</span>
+          </div>
+          <span class="badge badge-success badge-outline badge-sm">{{ doneTasks.length }}</span>
+        </div>
+        <div class="board-list">
+          <TaskCard
+            v-for="task in doneTasks"
+            :key="task.id"
+            :task="task"
+            :project="getProject(task.project_id)"
+            :selected="taskStore.isSelected(task.id)"
+            :focused="taskStore.focusedTaskId === task.id"
+            :selectable="selectionMode"
+            :draggable="true"
+            @dragstart="handleDragStart"
+            @dragend="handleDragEnd"
+            @edit="emit('edit', task)"
+            @delete="emit('delete', task.id)"
+            @toggle-status="emit('toggle-status', task.id)"
+            @move-to-today="emit('move-to-today', task.id)"
+            @select="taskStore.toggleSelect"
+            @focus="taskStore.setFocusedTask"
+          />
+          <p v-if="doneTasks.length === 0" class="board-empty">完成任务会显示在这里</p>
+        </div>
       </div>
     </div>
   </div>
@@ -148,17 +169,37 @@ const handleDrop = (status: Status) => async () => {
 }
 
 .board-header {
+  justify-content: space-between;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid hsl(var(--bc) / 0.08);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
+.board-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+}
+
 .board-list {
-  min-height: 120px;
+  min-height: 160px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.board-empty {
+  border: 1px dashed hsl(var(--bc) / 0.2);
+  background: hsl(var(--b1) / 0.25);
+  border-radius: 0.9rem;
+  color: hsl(var(--bc) / 0.58);
+  text-align: center;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  padding: 1rem 0.75rem;
 }
 </style>
