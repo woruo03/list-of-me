@@ -1,11 +1,8 @@
 <template>
   <div
-    class="task-card-root card card-bordered bg-base-100/40 backdrop-blur-xl p-5 mb-4 shadow-2xl border border-white/10"
+    class="task-card-root card card-bordered relative overflow-hidden rounded-2xl bg-base-100/45 backdrop-blur-xl p-4 md:p-5 shadow-xl border border-white/15"
     :class="{
-      'border-l-4 border-l-primary': task.status === Status.Todo,
-      'border-l-4 border-l-warning': task.status === Status.Doing,
-      'border-l-4 border-l-success': task.status === Status.Done,
-      'opacity-70': task.status === Status.Done,
+      'opacity-80': task.status === Status.Done,
       'border-error/60 bg-error/10 ring-2 ring-error/40': selected,
       'ring-2 ring-primary/30': focused,
     }"
@@ -14,68 +11,116 @@
     @dragend="emit('dragend', task.id)"
     @click="handleCardClick"
   >
-    <div class="flex items-start justify-between">
-      <div class="flex-1 min-w-0 pr-4">
-        <div class="flex items-center gap-2 mb-2">
+    <div class="pointer-events-none absolute inset-y-0 left-0 w-1.5 rounded-r-full" :class="statusStripeClass"></div>
+
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0 flex-1 pr-1">
+        <div class="flex items-start gap-3">
           <button
-            class="btn btn-circle btn-xs border"
+            class="btn btn-circle btn-sm border mt-0.5"
             :class="{
-              'border-base-300': task.status === Status.Todo,
-              'border-warning bg-warning/20 text-warning-content': task.status === Status.Doing,
-              'border-success bg-success/20 text-success-content': task.status === Status.Done,
+              'border-base-300 bg-base-100/80': task.status === Status.Todo,
+              'border-warning/60 bg-warning/20 text-warning-content': task.status === Status.Doing,
+              'border-success/60 bg-success/20 text-success-content': task.status === Status.Done,
             }"
             @click.stop="toggleStatus"
           >
-            <AppIcon v-if="task.status === Status.Done" name="check" class="h-3.5 w-3.5 text-success" />
+            <AppIcon
+              v-if="task.status === Status.Done"
+              name="check"
+              class="h-3.5 w-3.5 text-success"
+            />
           </button>
 
-          <h3
-            class="font-medium text-lg break-all"
-            :class="{ 'line-through text-base-content/50': task.status === Status.Done }"
-          >
-            {{ task.title }}
-          </h3>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <h3
+                class="font-semibold text-[1.03rem] leading-6 break-all text-base-content"
+                :class="{ 'line-through text-base-content/50': task.status === Status.Done }"
+              >
+                {{ task.title }}
+              </h3>
+              <span class="badge badge-sm border-white/20 bg-base-100/65">{{ statusText }}</span>
+              <span
+                v-if="isOverdue"
+                class="badge badge-error badge-outline badge-sm"
+              >
+                已逾期
+              </span>
+              <span
+                v-else-if="isDueSoon"
+                class="badge badge-warning badge-outline badge-sm"
+              >
+                即将到期
+              </span>
+            </div>
 
-          <span v-if="isOverdue" class="badge badge-error badge-outline badge-sm">已逾期</span>
-          <span v-else-if="isDueSoon" class="badge badge-warning badge-outline badge-sm">即将到期</span>
-        </div>
+            <div
+              v-if="task.description"
+              class="mb-3"
+            >
+              <p
+                class="text-base-content/75 text-sm leading-6 whitespace-normal break-all"
+                :class="{ 'line-clamp-2': !isDescriptionExpanded }"
+              >
+                {{ task.description }}
+              </p>
+              <button
+                v-if="hasLongDescription"
+                class="btn btn-ghost btn-xs mt-1"
+                @click.stop="toggleDescription"
+              >
+                {{ isDescriptionExpanded ? '收起' : '展开' }}
+              </button>
+            </div>
 
-        <div v-if="task.description" class="mb-3 ml-7">
-          <p
-            class="text-base-content/70 whitespace-normal break-all"
-            :class="{ 'line-clamp-2': !isDescriptionExpanded }"
-          >
-            {{ task.description }}
-          </p>
-          <button
-            v-if="hasLongDescription"
-            class="btn btn-ghost btn-xs mt-1"
-            @click.stop="toggleDescription"
-          >
-            {{ isDescriptionExpanded ? '收起' : '展开' }}
-          </button>
-        </div>
+            <div class="flex flex-wrap items-center gap-2.5 text-xs text-base-content/65">
+              <span
+                v-if="showProject && task.project_id && projectName"
+                class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-base-100/45 px-2.5 py-1"
+              >
+                <AppIcon name="folder" class="h-3.5 w-3.5" />
+                {{ projectName }}
+              </span>
+              <span
+                v-if="task.due_at"
+                class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-base-100/45 px-2.5 py-1"
+              >
+                <AppIcon name="calendar" class="h-3.5 w-3.5" />
+                {{ formattedDueDate }}
+              </span>
+              <span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-base-100/45 px-2.5 py-1">
+                <AppIcon name="clock" class="h-3.5 w-3.5" />
+                {{ formattedCreatedAt }}
+              </span>
+            </div>
 
-        <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/55 ml-7">
-          <span v-if="showProject && task.project_id && projectName" class="inline-flex items-center gap-1.5">
-            <AppIcon name="folder" class="h-3.5 w-3.5" />
-            {{ projectName }}
-          </span>
-          <span v-if="task.due_at" class="inline-flex items-center gap-1.5">
-            <AppIcon name="calendar" class="h-3.5 w-3.5" />
-            {{ formattedDueDate }}
-          </span>
-          <span class="inline-flex items-center gap-1.5">
-            <AppIcon name="clock" class="h-3.5 w-3.5" />
-            {{ formattedCreatedAt }}
-          </span>
+            <div v-if="task.notes" class="mt-3 rounded-xl border border-white/10 bg-base-100/35 px-3 py-2.5">
+              <p
+                class="text-base-content/80 text-sm break-all"
+                :class="{ 'line-clamp-2': !isNotesExpanded }"
+              >
+                <span class="inline-flex items-start gap-1.5">
+                  <AppIcon name="note" class="h-3.5 w-3.5 mt-0.5" />
+                  <span>{{ task.notes }}</span>
+                </span>
+              </p>
+              <button
+                v-if="hasLongNotes"
+                class="btn btn-ghost btn-xs mt-1"
+                @click.stop="toggleNotes"
+              >
+                {{ isNotesExpanded ? '收起' : '展开' }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 flex-shrink-0">
+      <div class="flex items-center gap-1.5 flex-shrink-0">
         <button
           v-if="task.status !== Status.Done && !isTodayTask"
-          class="btn btn-ghost btn-sm btn-circle"
+          class="btn btn-ghost btn-sm btn-circle border border-transparent bg-base-100/35 hover:border-white/15"
           @click.stop="moveToToday"
           title="移动到今日"
         >
@@ -84,7 +129,7 @@
 
         <button
           v-if="!selectable"
-          class="btn btn-ghost btn-sm btn-circle"
+          class="btn btn-ghost btn-sm btn-circle border border-transparent bg-base-100/35 hover:border-white/15"
           @click.stop="emit('edit', task)"
           title="编辑任务"
         >
@@ -93,36 +138,20 @@
 
         <button
           v-if="!selectable"
-          class="btn btn-ghost btn-sm btn-circle text-error"
+          class="btn btn-ghost btn-sm btn-circle border border-transparent bg-base-100/35 text-error hover:border-error/35"
           @click.stop="confirmDelete"
           title="删除任务"
         >
           <AppIcon name="trash" class="h-4 w-4" />
         </button>
 
-        <span v-if="draggable" class="badge badge-ghost cursor-grab text-base-content/50">
+        <span
+          v-if="draggable"
+          class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-base-100/35 text-base-content/50 cursor-grab"
+        >
           <AppIcon name="grip" class="h-4 w-4" />
         </span>
       </div>
-    </div>
-
-    <div v-if="task.notes" class="mt-3 pt-3 border-t border-white/10 ml-7">
-      <p
-        class="text-base-content/80 text-sm break-all"
-        :class="{ 'line-clamp-2': !isNotesExpanded }"
-      >
-        <span class="inline-flex items-center gap-1.5">
-          <AppIcon name="note" class="h-3.5 w-3.5" />
-          {{ task.notes }}
-        </span>
-      </p>
-      <button
-        v-if="hasLongNotes"
-        class="btn btn-ghost btn-xs mt-1"
-        @click.stop="toggleNotes"
-      >
-        {{ isNotesExpanded ? '收起' : '展开' }}
-      </button>
     </div>
   </div>
 </template>
@@ -167,6 +196,16 @@ const emit = defineEmits<{
 const uiStore = useUIStore()
 
 const projectName = computed(() => props.project?.name || '未知项目')
+const statusText = computed(() => {
+  if (props.task.status === Status.Doing) return '进行中'
+  if (props.task.status === Status.Done) return '已完成'
+  return '待办'
+})
+const statusStripeClass = computed(() => {
+  if (props.task.status === Status.Doing) return 'bg-warning/80'
+  if (props.task.status === Status.Done) return 'bg-success/80'
+  return 'bg-primary/80'
+})
 
 const formattedDueDate = computed(() => {
   if (!props.task.due_at) return ''
