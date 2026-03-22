@@ -4,14 +4,20 @@
       <span class="loading loading-spinner loading-lg"></span>
     </div>
 
-    <div v-else-if="tasks.length === 0" class="text-center py-12">
-      <div class="card card-bordered bg-base-100/40 backdrop-blur-xl mx-auto max-w-md p-9 border border-white/10 shadow-2xl">
-        <div class="text-base-content/50 mb-4">
-          <AppIcon name="checklist" class="mx-auto h-14 w-14" />
+    <div v-else-if="tasks.length === 0" class="text-center py-12 md:py-16">
+      <div
+        class="empty-task-card card card-bordered bg-base-100/45 backdrop-blur-xl mx-auto max-w-md p-8 md:p-9 border border-white/10 shadow-2xl"
+      >
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/15 bg-base-100/55 text-base-content/60">
+          <AppIcon name="checklist" class="h-9 w-9" />
         </div>
-        <h3 class="text-xl font-medium mb-2">{{ emptyTitle }}</h3>
-        <p class="text-base-content/70 mb-6">{{ emptyDescription }}</p>
-        <button v-if="showAddButton" class="btn btn-primary btn-outline" @click="emit('add')">
+        <h3 class="text-xl font-semibold mb-2 tracking-tight">{{ emptyTitle }}</h3>
+        <p class="text-base-content/70 mb-6 leading-7">{{ emptyDescription }}</p>
+        <button
+          v-if="showAddButton"
+          class="btn btn-primary btn-outline px-5"
+          @click="emit('add')"
+        >
           添加任务
         </button>
       </div>
@@ -37,7 +43,12 @@
       </div>
 
       <div v-if="visibleTasks.length < tasks.length" class="flex justify-center mt-6">
-        <button class="btn btn-outline btn-sm shadow-md" @click="loadMore">加载更多</button>
+        <button
+          class="btn btn-outline btn-sm rounded-xl border-white/20 bg-base-100/50 px-5 shadow-md"
+          @click="loadMore"
+        >
+          加载更多任务
+        </button>
       </div>
     </div>
   </div>
@@ -112,6 +123,19 @@ watch(
 .task-list-stack {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
+}
+
+.empty-task-card {
+  position: relative;
+}
+
+.empty-task-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  pointer-events: none;
+  background: linear-gradient(145deg, hsl(var(--p) / 0.08), transparent 45%);
 }
 </style>
