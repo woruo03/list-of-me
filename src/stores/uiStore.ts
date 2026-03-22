@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { DAISYUI_THEMES, FONT_SIZES, STORAGE_KEYS } from '@/utils/constants'
 
+type ConfirmIntent = 'danger' | 'primary'
+
 interface UIState {
   sidebarCollapsed: boolean
   theme: string
@@ -11,6 +13,14 @@ interface UIState {
     type: 'project' | null
     data: any
   }
+  confirmDialog: {
+    isOpen: boolean
+    title: string
+    message: string
+    confirmText: string
+    cancelText: string
+    intent: ConfirmIntent
+  }
   notifications: {
     id: string
     type: 'success' | 'error' | 'info' | 'warning'
@@ -19,6 +29,8 @@ interface UIState {
   }[]
   searchFocusToken: number
 }
+
+let pendingConfirmResolver: ((confirmed: boolean) => void) | null = null
 
 export const useUIStore = defineStore('ui', {
   state: (): UIState => ({
@@ -30,6 +42,14 @@ export const useUIStore = defineStore('ui', {
       isOpen: false,
       type: null,
       data: null,
+    },
+    confirmDialog: {
+      isOpen: false,
+      title: '',
+      message: '',
+      confirmText: '确认',
+      cancelText: '取消',
+      intent: 'danger',
     },
     notifications: [],
     searchFocusToken: 0,
@@ -109,6 +129,47 @@ export const useUIStore = defineStore('ui', {
         isOpen: false,
         type: null,
         data: null,
+      }
+    },
+
+    confirmDestructive(options?: {
+      title?: string
+      message?: string
+      confirmText?: string
+      cancelText?: string
+      intent?: ConfirmIntent
+    }) {
+      if (pendingConfirmResolver) {
+        pendingConfirmResolver(false)
+        pendingConfirmResolver = null
+      }
+
+      this.confirmDialog = {
+        isOpen: true,
+        title: options?.title || '确认删除',
+        message: options?.message || '此操作不可撤销，确定继续吗？',
+        confirmText: options?.confirmText || '确认删除',
+        cancelText: options?.cancelText || '取消',
+        intent: options?.intent || 'danger',
+      }
+
+      return new Promise<boolean>((resolve) => {
+        pendingConfirmResolver = resolve
+      })
+    },
+
+    resolveConfirmDialog(confirmed: boolean) {
+      if (pendingConfirmResolver) {
+        pendingConfirmResolver(confirmed)
+        pendingConfirmResolver = null
+      }
+      this.confirmDialog = {
+        isOpen: false,
+        title: '',
+        message: '',
+        confirmText: '确认',
+        cancelText: '取消',
+        intent: 'danger',
       }
     },
 

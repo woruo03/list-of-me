@@ -54,6 +54,43 @@
       />
     </Modal>
 
+    <Modal
+      :is-open="uiStore.confirmDialog.isOpen"
+      :title="uiStore.confirmDialog.title"
+      size="sm"
+      :show-actions="false"
+      @close="uiStore.resolveConfirmDialog(false)"
+    >
+      <div class="space-y-4">
+        <div class="flex items-start gap-3">
+          <div
+            class="mt-0.5 h-10 w-10 shrink-0 rounded-xl border border-error/35 bg-error/10 text-error flex items-center justify-center"
+          >
+            <AppIcon name="trash" class="h-5 w-5" />
+          </div>
+          <p class="text-sm leading-6 text-base-content/80 whitespace-pre-line">
+            {{ uiStore.confirmDialog.message }}
+          </p>
+        </div>
+
+        <div class="modal-action mt-1">
+          <button
+            class="btn btn-ghost btn-outline"
+            @click="uiStore.resolveConfirmDialog(false)"
+          >
+            {{ uiStore.confirmDialog.cancelText }}
+          </button>
+          <button
+            class="btn"
+            :class="confirmButtonClass"
+            @click="uiStore.resolveConfirmDialog(true)"
+          >
+            {{ uiStore.confirmDialog.confirmText }}
+          </button>
+        </div>
+      </div>
+    </Modal>
+
     <ToastList />
   </div>
 </template>
@@ -87,6 +124,11 @@ const modalTitle = computed(() => {
   return ''
 })
 
+const confirmButtonClass = computed(() => {
+  if (uiStore.confirmDialog.intent === 'primary') return 'btn-primary'
+  return 'btn-error'
+})
+
 const handleProjectSubmit = async (data: { name: string }) => {
   if (uiStore.modal.type !== 'project') return
 
@@ -106,6 +148,7 @@ const isEditableTarget = (target: EventTarget | null) => {
 }
 
 const handleKeydown = (event: KeyboardEvent) => {
+  if (uiStore.confirmDialog.isOpen) return
   if (isEditableTarget(event.target)) return
 
   const key = event.key.toLowerCase()
